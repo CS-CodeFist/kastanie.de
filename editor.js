@@ -270,6 +270,17 @@ function createImageSelector(imageData, onChange) {
 function render() {
 	const editor = document.getElementById("editor");
 
+	// Rückwärtskompatibilität: zusatzstoffetitel für bestehende Gerichte setzen
+	window.data.content.forEach(menu => {
+		if (menu.gerichte) {
+			menu.gerichte.forEach(gericht => {
+				if (!gericht.zusatzstoffetitel) {
+					gericht.zusatzstoffetitel = "Inhaltsstoffe";
+				}
+			});
+		}
+	});
+
 	const isInitial = !window.__renderedOnce;
 	window.__renderedOnce = true;
 
@@ -436,6 +447,11 @@ function setupGerichtEventListeners(menuElement, menu) {
 			beilagentitelInput.oninput = (e) => gericht.beilagentitel = e.target.value;
 		}
 
+		const zusatzstoffetitelInput = gerichtElement.querySelector('input[data-field="zusatzstoffetitel"]');
+		if (zusatzstoffetitelInput) {
+			zusatzstoffetitelInput.oninput = (e) => gericht.zusatzstoffetitel = e.target.value;
+		}
+
 		// Preis-Event-Listeners
 		setupPreisEventListeners(gerichtElement, gericht);
 
@@ -474,6 +490,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				zusatzstoffe: [],
 				tag: "",
 				beilagentitel: "",
+				zusatzstoffetitel: "Inhaltsstoffe",
 				preisliste: [],
 				beilagen: [],
 				_collapsed: false

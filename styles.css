@@ -213,7 +213,7 @@ html {
     padding-bottom: 1em;
     border: 3px solid var(--light-gray);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     text-align: center;
@@ -374,5 +374,36 @@ html {
 
     .gerichte-container {
         padding-bottom: max(130vh, 50vw);
+    }
+}
+
+/* === Kastanie SVG Hintergrund === */
+.kastanie-background {
+    position: fixed;
+    bottom: 0;
+    right: 5%;
+    width: 40vw;
+    height: 40vw;
+    max-width: 600px;
+    max-height: 600px;
+    min-width: 300px;
+    min-height: 300px;
+    opacity: 1;
+    z-index: -1;
+    transform: rotate(-35deg);
+    pointer-events: none;
+}
+
+.kastanie-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media (max-width: 600px) {
+    .kastanie-background {
+        width: 60vw;
+        height: 60vw;
+        right: 0%;
     }
 }

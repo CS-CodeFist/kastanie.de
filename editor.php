@@ -156,7 +156,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 							</div>
 						</div>
 						<label>Beschreibung<textarea rows="3" data-field="beschreibung">{{beschreibung}}</textarea></label>
-						<label>Zusatzstoffe (Komma)<input type="text" value="{{join zusatzstoffe ', '}}" data-field="zusatzstoffe" /></label>
+						<div style="display: flex; gap: 0.5em;">
+							<label style="flex: 1;">Zusatzstoffe-Titel<input type="text" value="{{zusatzstoffetitel}}" data-field="zusatzstoffetitel" placeholder="Titel" /></label>
+							<label style="flex: 2;">Zusatzstoffe (Komma)<input type="text" value="{{join zusatzstoffe ', '}}" data-field="zusatzstoffe" placeholder="Inhalt" /></label>
+						</div>
 						<label>Tag<input type="text" value="{{tag}}" data-field="tag" /></label>
 						{{#each preisliste}}
 							<div class="preis">

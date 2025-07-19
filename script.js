@@ -23,6 +23,12 @@ Handlebars.registerHelper('formatPreis', function(value) {
 	return formatPreis(value);
 });
 
+// Handlebars Helper für Zeilenumbrüche
+Handlebars.registerHelper('nl2br', function(text) {
+	if (!text) return '';
+	return new Handlebars.SafeString(text.replace(/\r?\n/g, '<br>'));
+});
+
 function formatPreis(value) {
 	const number = parseFloat(value);
 	if (isNaN(number)) return value;
@@ -45,7 +51,7 @@ fetch(`data.json?t=${timestamp}`)
         const html = renderTemplate("template-menu-item", {
             ...item,
             isLogo: isLogo,
-            link: isLogo ? "http://www.databyte.de" : "#"+item.menutitel.toLowerCase()
+            link: isLogo ? "http://www.kastanie-moltzow.de" : "#"+item.menutitel.toLowerCase()
         });
 
         const wrapper = document.createElement("div");

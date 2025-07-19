@@ -13,6 +13,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   </head>
   <body>
+    <!-- Kastanie SVG als Hintergrundelement -->
+    <div class="kastanie-background">
+      <img src="bilder/Kastanie.svg" alt="Kastanie" />
+    </div>
+
     <div id="loader">
 		<div class="spinner"></div>
 		<p>Speisekarte wird geladen…</p>
@@ -42,9 +47,9 @@
             {{#each gerichte}}
               <div class="gericht">
                 <div class="gericht-titel">{{titel}}</div>
-                <p>{{beschreibung}}</p>
+                <p>{{{nl2br beschreibung}}}</p>
                 {{#if zusatzstoffe}}
-                <p class="zusatz"><strong>Zusatzstoffe:</strong> {{zusatzstoffe}}</p>
+                <p class="zusatz">{{#if zusatzstoffetitel}}<strong>{{zusatzstoffetitel}}:</strong> {{/if}}{{zusatzstoffe}}</p>
                 {{/if}}
 
                 {{#if preisliste}}
