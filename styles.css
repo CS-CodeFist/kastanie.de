@@ -1,0 +1,282 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Noto Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-variation-settings:
+        "wdth" 100;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* === Loader === */
+#loader {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    color: #7ea12c;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #7ea12c;
+    border-top: 4px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1em;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #291d11;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    z-index: 1000;
+}
+
+.menu-container::-webkit-scrollbar {
+    display: none;
+}
+
+.menu {
+    display: flex;
+    padding: 10px;
+    width: max-content;
+    margin: auto;
+}
+
+.menu-item {
+    color: white;
+    min-width: 110px;
+    text-decoration: none;
+    padding: 10px 20px;
+    transition: background 0.3s;
+    flex-shrink: 0;
+    display: inline-block;
+    text-align: center;
+    border-radius: 6px;
+    font-family: "Handlee", cursive;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 1.4em;
+}
+
+.menu-item .menu-title {
+    padding-top: 5px;
+}
+
+.menu img {
+    width: 40px;
+    height: 40px;
+    display: block;
+    margin: auto;
+    border-radius: 5px;
+}
+
+.menu .logo img {
+    width: 65px;
+    height: 65px;
+    margin-top: 5px;
+}
+
+.menu a.active {
+    background: #7ea12c;
+}
+
+.container {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    perspective: 10px;
+}
+
+/* Inhalt wrapper */
+.section {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 2rem;
+    text-align: center;
+    padding: 50px 20px 20px;
+
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+    z-index: -1;
+}
+
+.section-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vw;
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    transform: translateZ(-7px) scale(1.7);
+}
+
+.section-title {
+    position: relative;
+    z-index: 8;
+    transform: translateZ(2px) scale(0.8);
+    margin-top: calc(100vw - 30%);
+
+    font-family: "Handlee", cursive;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 2em;
+    color: #7ea12c;
+    padding-top: 20px;
+    background-color: #fff;
+    padding: 0px 20px;
+    width: auto;
+    border-radius: 8px;
+    border: 3px solid #ccc;
+    -webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+}
+
+.section-content {
+    position: relative;
+    z-index: 2;
+    /*transform: translateZ(5px) scale(0.5);*/
+}
+
+.gerichte-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    z-index: 4;
+    padding-bottom: 50vw;
+}
+
+.gericht {
+    width: 100%;
+    margin: 10px 0;
+    padding: 15px;
+    padding-bottom: 1em;
+    border: 3px solid #ccc;
+    border-radius: 10px;
+    background: white;
+    text-align: center;
+    position: relative;
+    -webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+}
+
+.gericht-titel {
+    font-family: "Handlee", cursive;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.6em;
+}
+
+.gericht img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.gericht .preis {
+    position: absolute;
+    right: 13px;
+    bottom: -10px;
+    background-color: #7ea12c;
+    color: #fff;
+    padding: 4px 6px;
+    border-radius: 5px;
+    transform: rotate(0deg);
+    transform-origin: 100% 0;
+}
+
+.gericht .preis-liste {
+    display: flex;
+    justify-content: end;
+}
+
+.gericht .size {
+    position: relative;
+    min-width: 4em;
+    text-align: end;
+    padding-left: 25px;
+}
+
+.gericht .size .preis {
+    bottom: -1.4em;
+    right: 0;
+}
+
+.gericht .zusatz {
+    font-size: small;
+    color: #888;
+}
+
+.gericht .tag {
+    position: absolute;
+    left: -10px;
+    top: -15px;
+    background-color: #7ea12c;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 5px;
+    transform: rotate(-7deg);
+    transform-origin: 100% 0;
+    font-family: "Handlee", cursive;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.1em;
+}
+
+@media (max-width: 600px) {
+    .section {
+        font-size: 1rem;
+    }
+
+    .gericht .size .preis {
+        bottom: -1.6em;
+    }
+}
+
+@media (min-aspect-ratio: 1/1) {
+
+    /* Wenn der Bildschirm breiter als hoch ist */
+    .section-title {
+        margin-top: calc(100vh - 30%);
+    }
+}

@@ -1,0 +1,41 @@
+/* Container für die fallenden Elemente */
+.s-elements {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    pointer-events: none;
+    z-index: 9999;
+    /* Höher als alles andere auf der Seite */
+    perspective: 1000px;
+    /* 3D-Perspektive für Z-Effekte */
+    overflow: visible;
+}
+
+/* Einzelne fallende Elemente */
+.s-element {
+    position: absolute;
+    top: -10%;
+    pointer-events: none;
+    z-index: inherit;
+    transform-style: preserve-3d;
+}
+
+/* Inhalt im Element (z. B. für Rotation & Translation) */
+.s-element .inner {
+    transform-style: preserve-3d;
+}
+
+/* Bilder (z. B. Blätter, Konfetti etc.) */
+.s-element .inner img {
+    display: block;
+    transform-origin: bottom center;
+    /* Für Biegeeffekt */
+    transform-style: preserve-3d;
+    will-change: transform;
+    pointer-events: none;
+    /* 👉 einzelne Bilder sind wieder interaktiv */
+    cursor: pointer;
+}

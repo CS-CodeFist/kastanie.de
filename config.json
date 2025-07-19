@@ -1,0 +1,37 @@
+[
+    {
+        "id": "spring",
+        "aktiv": false,
+        "label": "Frühling 🌼",
+        "geschwindigkeit": "3",
+        "menge": "2"
+    },
+    {
+        "id": "summer",
+        "aktiv": true,
+        "label": "Sommer ☀️",
+        "geschwindigkeit": "2",
+        "menge": "2"
+    },
+    {
+        "id": "autumn",
+        "aktiv": false,
+        "label": "Herbst 🍂",
+        "geschwindigkeit": "2",
+        "menge": "3"
+    },
+    {
+        "id": "winter",
+        "aktiv": false,
+        "label": "Winter ❄️",
+        "geschwindigkeit": "1",
+        "menge": "3"
+    },
+    {
+        "id": "party",
+        "aktiv": false,
+        "label": "Party 🎉",
+        "geschwindigkeit": "3",
+        "menge": "3"
+    }
+]
