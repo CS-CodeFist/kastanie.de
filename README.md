@@ -20,6 +20,10 @@ Elegante, responsive Speisekarte mit Parallax-Effekten und saisonalen Animatione
   ```html
   <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
   ```
+- **SortableJS 1.15.0** - Drag & Drop Funktionalität im Editor
+  ```html
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  ```
 - **Google Fonts** - Handlee & Noto Sans
   ```html
   <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap">
