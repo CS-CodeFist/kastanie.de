@@ -120,11 +120,11 @@ switch ($action) {
         $ratio = $width / $height;
         if ($width > $maxSize || $height > $maxSize) {
             if ($ratio > 1) {
-                $newWidth = $maxSize;
-                $newHeight = $maxSize / $ratio;
+                $newWidth = intval($maxSize);
+                $newHeight = intval($maxSize / $ratio);
             } else {
-                $newWidth = $maxSize * $ratio;
-                $newHeight = $maxSize;
+                $newWidth = intval($maxSize * $ratio);
+                $newHeight = intval($maxSize);
             }
         } else {
             $newWidth = $width;
@@ -134,9 +134,9 @@ switch ($action) {
         $resized = imagecreatetruecolor($newWidth, $newHeight);
         imagecopyresampled($resized, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-        $side = min($newWidth, $newHeight);
-        $srcX = ($newWidth - $side) / 2;
-        $srcY = ($newHeight - $side) / 2;
+        $side = intval(min($newWidth, $newHeight));
+        $srcX = intval(($newWidth - $side) / 2);
+        $srcY = intval(($newHeight - $side) / 2);
         $square = imagecreatetruecolor($side, $side);
         imagecopyresampled($square, $resized, 0, 0, $srcX, $srcY, $side, $side, $side, $side);
 

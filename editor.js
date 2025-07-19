@@ -6,6 +6,43 @@ let collapseMap = new Map();
 
 let menuSortable = null;
 
+// Template-Rendering-System mit Handlebars
+const templateCache = new Map();
+
+function renderTemplate(templateId, values) {
+	// Template aus Cache laden oder kompilieren
+	if (!templateCache.has(templateId)) {
+		const templateElement = document.getElementById(templateId);
+		if (!templateElement) {
+			console.error(`Template ${templateId} nicht gefunden`);
+			return '';
+		}
+		const templateSource = templateElement.innerHTML;
+		const compiledTemplate = Handlebars.compile(templateSource);
+		templateCache.set(templateId, compiledTemplate);
+	}
+
+	const template = templateCache.get(templateId);
+	return template(values);
+}
+
+// Handlebars Helper für Preisformatierung
+Handlebars.registerHelper('formatPreis', function(value) {
+	return formatPreis(value);
+});
+
+// Handlebars Helper für Array-Join
+Handlebars.registerHelper('join', function(array, separator) {
+	if (!Array.isArray(array)) return '';
+	return array.join(separator || ', ');
+});
+
+function formatPreis(value) {
+	const number = parseFloat(value);
+	if (isNaN(number)) return value;
+	return number.toFixed(2).replace(".", ",");
+}
+
 window.onload = async function() {
 	try {
 		await loadTemplates();
@@ -39,15 +76,34 @@ async function loadTemplates() {
 	const select = document.getElementById("vorlagen");
 	const archivSelect = document.getElementById("archivSelect");
 
-	// Vorlagen-Dropdown aufbauen
-	select.innerHTML = '<option value="__current">Aktuelle Menükarte</option>';
-	select.innerHTML += '<option disabled>─────────</option>';
+	// Vorlagen-Dropdown mit Templates aufbauen
+	select.innerHTML = '';
+	
+	// Aktuelle Menükarte
+	const currentTemplate = renderTemplate("template-template-option", {
+		value: "__current",
+		text: "Aktuelle Menükarte"
+	});
+	select.insertAdjacentHTML('beforeend', currentTemplate);
+	
+	// Trennlinie
+	const dividerTemplate = renderTemplate("template-template-option", {
+		value: "",
+		text: "─────────"
+	});
+	const tempDiv = document.createElement('div');
+	tempDiv.innerHTML = dividerTemplate;
+	const dividerOption = tempDiv.firstElementChild;
+	dividerOption.disabled = true;
+	select.appendChild(dividerOption);
 
+	// Templates hinzufügen
 	templates.forEach(name => {
-		const opt = document.createElement("option");
-		opt.value = name;
-		opt.textContent = name;
-		select.appendChild(opt);
+		const templateOption = renderTemplate("template-template-option", {
+			value: name,
+			text: name
+		});
+		select.insertAdjacentHTML('beforeend', templateOption);
 	});
 
 	select.addEventListener("change", async () => {
@@ -114,16 +170,22 @@ async function loadArchives(templateName) {
 	archivSelect.innerHTML = "";
 
 	// Aktuelles Menü als erste Option
-	const currentOpt = document.createElement("option");
-	currentOpt.value = "__current";
-	currentOpt.textContent = "Aktueller Stand";
-	archivSelect.appendChild(currentOpt);
+	const currentArchive = renderTemplate("template-archive-option", {
+		value: "__current",
+		formattedDate: "Aktueller Stand"
+	});
+	archivSelect.insertAdjacentHTML('beforeend', currentArchive);
 
 	// Trennlinie
-	const divider = document.createElement("option");
-	divider.disabled = true;
-	divider.textContent = "─────────";
-	archivSelect.appendChild(divider);
+	const dividerArchive = renderTemplate("template-archive-option", {
+		value: "",
+		formattedDate: "─────────"
+	});
+	const tempDiv = document.createElement('div');
+	tempDiv.innerHTML = dividerArchive;
+	const dividerOption = tempDiv.firstElementChild;
+	dividerOption.disabled = true;
+	archivSelect.appendChild(dividerOption);
 
 	archivSelect.disabled = true;
 
@@ -140,19 +202,20 @@ async function loadArchives(templateName) {
 		if (!Array.isArray(list) || list.length === 0) return;
 
 		list.forEach(filename => {
-			const opt = document.createElement("option");
-			opt.value = filename;
-
-			// Formatierter Name: data_2025-03-29_18-34-48.json → 29.03.2025 – 18:34
 			const match = filename.match(/_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/);
+			let formattedDate;
 			if (match) {
 				const [, y, m, d, h, min] = match;
-				opt.textContent = `${d}.${m}.${y} – ${h}:${min}`;
+				formattedDate = `${d}.${m}.${y} – ${h}:${min}`;
 			} else {
-				opt.textContent = filename.replace(".json", "");
+				formattedDate = filename.replace(".json", "");
 			}
 
-			archivSelect.appendChild(opt);
+			const archiveOption = renderTemplate("template-archive-option", {
+				value: filename,
+				formattedDate: formattedDate
+			});
+			archivSelect.insertAdjacentHTML('beforeend', archiveOption);
 		});
 
 		archivSelect.disabled = false;
@@ -161,13 +224,15 @@ async function loadArchives(templateName) {
 	}
 }
 
-function formatArchivLabel(filename) {
-	const match = filename.match(/_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})\.json$/);
-	if (!match) return filename.replace(".json", "");
-
-	const [, year, month, day, hour, min, sec] = match;
-	return `${day}.${month}.${year} – ${hour}:${min}:${sec}`;
-}
+window.addMenu = function() {
+	window.data.content.push({
+		menutitel: "",
+		titel: "",
+		image: "",
+		gerichte: []
+	});
+	render();
+};
 
 function createInput(labelText, value, onChange) {
 	const label = document.createElement("label");
@@ -215,264 +280,39 @@ function render() {
 			!div.classList.contains("collapsed")
 		);
 
-	// Zustand der einzelnen Gerichte merken (für collapsed-gericht)
-	const collapseMap = new Map();
-	if (!isInitial) {
-		document.querySelectorAll(".gerichte-wrapper").forEach((wrapper, mIndex) => {
-			const gerichtStates = Array.from(wrapper.querySelectorAll(".gericht")).map(div =>
-				div.classList.contains("collapsed-gericht")
-			);
-			collapseMap.set(mIndex, gerichtStates);
-		});
-	}
-
 	editor.innerHTML = "";
 	console.log("Rendering data:", window.data);
 
 	window.data.content.forEach((menu, menuIndex) => {
-		const menuDiv = document.createElement("div");
-		menuDiv.className = "menu";
-
-		const header = document.createElement("div");
-		header.className = "menu-header";
-
-		const dragIconM = document.createElement("button");
-		dragIconM.textContent = "☰";
-		dragIconM.type = "button";
-		dragIconM.style.marginLeft = "0.5em";
-		dragIconM.style.marginRight = "0";
-		dragIconM.style.order = "2";
-		dragIconM.style.alignSelf = "center";
-		dragIconM.classList.add("drag-icon");
-
-		header.style.display = "flex";
-		header.style.alignItems = "center";
-		header.appendChild(dragIconM);
-
-		const menutitelInput = document.createElement("input");
-		menutitelInput.type = "text";
-		menutitelInput.value = menu.menutitel;
-		menutitelInput.oninput = (e) => menu.menutitel = e.target.value;
-		menutitelInput.placeholder = "Menütitel";
-		header.appendChild(menutitelInput);
-
-		menuDiv.appendChild(header);
-		const imageRow = document.createElement("div");
-		imageRow.className = "image-row";
-
-		const textFields = document.createElement("div");
-		textFields.className = "text-fields";
-		textFields.appendChild(createInput("Titel", menu.titel || "", val => menu.titel = val));
-
-		const imageThumb = createImageSelector(menu.image, (newSrc) => {
-			menu.image = newSrc;
-			render();
-		});
-
-		imageRow.appendChild(textFields);
-		imageRow.appendChild(imageThumb);
-		menuDiv.appendChild(imageRow);
-
-		const gerichteWrapper = document.createElement("div");
-		gerichteWrapper.className = "gerichte-wrapper";
-
-		// Sichtbarkeit wiederherstellen oder initial einklappen
-		if (!sichtbarkeit[menuIndex]) {
-			gerichteWrapper.classList.add("collapsed");
-		}
-		const toggleWrapper = document.createElement("div");
-		toggleWrapper.className = "topbuttons";
-		
-		const toggleBtn = document.createElement("button");
-		const toggleAllBtn = document.createElement("button");
-		
-		function updateToggleLabel() {
-			const isCollapsed = gerichteWrapper.classList.contains("collapsed");
-			toggleBtn.textContent = isCollapsed ? "▶️ Gerichte anzeigen" : "🔽 Gerichte ausblenden";
-		
-			if (isCollapsed) {
-				toggleAllBtn.style.display = "none";
-			} else {
-				toggleAllBtn.style.display = "inline-block";
-				const allCollapsed = menu.gerichte.every(g => g._collapsed);
-				toggleAllBtn.textContent = allCollapsed ? "▶️ Maximieren" : "🔽 Minimieren";
-			}
-		}
-		toggleBtn.onclick = () => {
-			gerichteWrapper.classList.toggle("collapsed");
-			updateToggleLabel();
-		};
-		toggleAllBtn.onclick = () => {
-			const allCollapsed = menu.gerichte.every(g => g._collapsed);
-			menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
-			render();
-		};
-		
-		updateToggleLabel();
-		
-		toggleWrapper.appendChild(toggleBtn);
-		toggleWrapper.appendChild(toggleAllBtn);
-		menuDiv.appendChild(toggleWrapper);
-
-		menu.gerichte = menu.gerichte || [];
-		menu.gerichte.forEach((gericht, gerichtIndex) => {
-			const gerichtDiv = document.createElement("div");
-			gerichtDiv.className = "gericht";
-			if (gericht._collapsed) gerichtDiv.classList.add("collapsed-gericht");
-
-			const gerichtHeader = document.createElement("div");
-			gerichtHeader.className = "gericht-header";
-			const dragIcon = document.createElement("span");
-			dragIcon.textContent = "☰";
-			dragIcon.style.marginRight = "0.5em";
-			dragIcon.style.cursor = "grab";
-			dragIcon.classList.add("drag-icon");
-			gerichtHeader.style.display = "flex";
-			gerichtHeader.style.justifyContent = "space-between";
-			gerichtHeader.style.alignItems = "center";
-			gerichtHeader.insertBefore(dragIcon, null);
-
-			const gerichttitelInput = document.createElement("input");
-			gerichttitelInput.type = "text";
-			gerichttitelInput.value = gericht.titel;
-			gerichttitelInput.oninput = (e) => gericht.titel = e.target.value;
-			gerichttitelInput.placeholder = "Gericht-Titel";
-
-			const gerichtHeaderWrapper = document.createElement("div");
-			gerichtHeaderWrapper.style.display = "flex";
-			gerichtHeaderWrapper.style.alignItems = "center";
-			gerichtHeaderWrapper.style.justifyContent = "space-between";
-			gerichtHeaderWrapper.style.width = "100%";
-			gerichtHeaderWrapper.appendChild(gerichttitelInput);
-			gerichtHeaderWrapper.appendChild(dragIcon);
-			gerichtHeader.appendChild(gerichtHeaderWrapper);
-			gerichtDiv.appendChild(gerichtHeader);
-
-			gerichtDiv.appendChild(createInput("Beschreibung", gericht.beschreibung, val => gericht.beschreibung = val));
-			gerichtDiv.appendChild(createInput("Zusatzstoffe (Komma)", gericht.zusatzstoffe?.join(", "), val => {
-				gericht.zusatzstoffe = val.split(",").map(x => x.trim()).filter(Boolean);
-			}));
-			gerichtDiv.appendChild(createInput("Tag", gericht.tag || "", val => gericht.tag = val));
-
-			gericht.preisliste = gericht.preisliste || [];
-			gericht.preisliste.forEach((eintrag, preisIndex) => {
-				const preisDiv = document.createElement("div");
-				preisDiv.className = "preis";
-
-				const innerDiv = document.createElement("div");
-				innerDiv.className = "preis-inner";
-
-				const sizeLabel = document.createElement("label");
-				sizeLabel.textContent = "Größe";
-				const sizeInput = document.createElement("input");
-				sizeInput.type = "text";
-				sizeInput.value = eintrag.size || "";
-				sizeInput.oninput = (e) => eintrag.size = e.target.value;
-				sizeInput.className = "size-input";
-				sizeLabel.appendChild(sizeInput);
-				innerDiv.appendChild(sizeLabel);
-
-				const preisLabel = document.createElement("label");
-				preisLabel.textContent = "Preis";
-				const preisInput = document.createElement("input");
-				preisInput.type = "number";
-				preisInput.step = "0.01";
-				preisInput.min = "0";
-				preisInput.inputMode = "decimal";
-				preisInput.value = eintrag.preis || "";
-				preisInput.placeholder = "z. B. 4.50";
-				preisInput.className = "preis-input";
-				preisInput.oninput = (e) => {
-					const val = e.target.value;
-					eintrag.preis = /^\d+(\.\d{0,2})?$/.test(val) ? val : "";
-				};
-				preisLabel.appendChild(preisInput);
-				innerDiv.appendChild(preisLabel);
-
-				const delPreisBtn = document.createElement("button");
-				delPreisBtn.textContent = "🗑️";
-				delPreisBtn.onclick = () => {
-					gericht.preisliste.splice(preisIndex, 1);
-					render();
-				};
-				innerDiv.appendChild(delPreisBtn);
-
-				preisDiv.appendChild(innerDiv);
-				gerichtDiv.appendChild(preisDiv);
-			});
-
-			if (gericht.preisliste.length < 3) {
-				const addPreisBtn = document.createElement("button");
-				addPreisBtn.textContent = "➕ Preis hinzufügen";
-				addPreisBtn.onclick = () => {
-					gericht.preisliste.push({ size: "", preis: "" });
-					render();
-				};
-				gerichtDiv.appendChild(addPreisBtn);
-			} else {
-				const limitHinweis = document.createElement("div");
-				limitHinweis.textContent = "⚠️ Maximal 3 Preise erlaubt";
-				limitHinweis.style.color = "gray";
-				gerichtDiv.appendChild(limitHinweis);
-			}
-
-			const delGericht = document.createElement("button");
-			delGericht.textContent = "🗑️ Gericht löschen";
-			delGericht.onclick = () => {
-				const confirmed = confirm("❌ Möchtest du dieses Gericht wirklich löschen?");
-				if (confirmed) {
-					menu.gerichte.splice(gerichtIndex, 1);
-					render();
-				}
-			};
-			gerichtDiv.appendChild(delGericht);
-
-			gerichteWrapper.appendChild(gerichtDiv);
-		});
-
-		const addGerichtBtn = document.createElement("button");
-		addGerichtBtn.textContent = "➕ Gericht hinzufügen";
-		addGerichtBtn.onclick = () => {
-			menu.gerichte.push({
-				titel: "",
-				beschreibung: "",
-				zusatzstoffe: [],
-				tag: "",
-				preisliste: [],
-				_collapsed: false
-			});
-			render();
-		};
-		gerichteWrapper.appendChild(addGerichtBtn);
-
-		menuDiv.appendChild(gerichteWrapper);
-
-		const delMenuWrapper = document.createElement("div");
-		delMenuWrapper.className = "button-right";
-
-		const delMenu = document.createElement("button");
-		delMenu.textContent = "🗑️ Menü löschen";
-		delMenu.onclick = () => {
-			if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
-				window.data.content.splice(menuIndex, 1);
-				render();
-			}
+		// Template-Daten für das Menü vorbereiten
+		const menuData = {
+			menutitel: menu.menutitel || "",
+			titel: menu.titel || "",
+			image: menu.image || "",
+			gerichteVisible: sichtbarkeit[menuIndex] || false,
+			gerichteToggleText: sichtbarkeit[menuIndex] ? "🔽 Gerichte ausblenden" : "▶️ Gerichte anzeigen",
+			allToggleText: menu.gerichte && menu.gerichte.every(g => g._collapsed) ? "▶️ Maximieren" : "🔽 Minimieren",
+			gerichte: (menu.gerichte || []).map(gericht => ({
+				...gericht,
+				zusatzstoffe: gericht.zusatzstoffe || [], // Direkt das Array verwenden, join wird im Template gemacht
+				preisliste: gericht.preisliste || [],
+				canAddPreis: (gericht.preisliste || []).length < 3,
+				beilagen: gericht.beilagen || [],
+				canAddBeilage: (gericht.beilagen || []).length < 4,
+				_collapsed: gericht._collapsed || false
+			}))
 		};
 
-		delMenuWrapper.appendChild(delMenu);
-		menuDiv.appendChild(delMenuWrapper);
+		// Template rendern
+		const menuHTML = renderTemplate("template-menu", menuData);
+		const tempDiv = document.createElement('div');
+		tempDiv.innerHTML = menuHTML;
+		const menuElement = tempDiv.firstElementChild;
 
-		editor.appendChild(menuDiv);
+		// Event Listeners hinzufügen
+		setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit);
 
-		Sortable.create(gerichteWrapper, {
-			animation: 150,
-			handle: ".gericht-header .drag-icon",
-			onEnd: function(evt) {
-				const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
-				menu.gerichte.splice(evt.newIndex, 0, moved);
-				render();
-			}
-		});
+		editor.appendChild(menuElement);
 	});
 
 	// Menü-Sortable zuerst ggf. zerstören
@@ -491,15 +331,230 @@ function render() {
 	});
 }
 
-window.addMenu = function() {
-	window.data.content.push({
-		menutitel: "",
-		titel: "",
-		image: "",
-		gerichte: []
+function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
+	// Input-Felder für Menü-Header
+	const menutitelInput = menuElement.querySelector('input[data-field="menutitel"]');
+	if (menutitelInput) {
+		menutitelInput.oninput = (e) => menu.menutitel = e.target.value;
+	}
+
+	const titelInput = menuElement.querySelector('input[data-field="titel"]');
+	if (titelInput) {
+		titelInput.oninput = (e) => menu.titel = e.target.value;
+	}
+
+	// Bild-Auswahl
+	const imageThumb = menuElement.querySelector('.image-thumb');
+	if (imageThumb) {
+		imageThumb.onclick = () => openImageOverlay((newSrc) => {
+			menu.image = newSrc;
+			render();
+		}, menu.image);
+	}
+
+	// Toggle-Buttons
+	const toggleBtn = menuElement.querySelector('.toggle-gerichte');
+	const toggleAllBtn = menuElement.querySelector('.toggle-all-gerichte');
+	const gerichteWrapper = menuElement.querySelector('.gerichte-wrapper');
+
+	if (toggleBtn) {
+		toggleBtn.onclick = () => {
+			gerichteWrapper.classList.toggle("collapsed");
+			sichtbarkeit[menuIndex] = !gerichteWrapper.classList.contains("collapsed");
+			render();
+		};
+	}
+
+	if (toggleAllBtn) {
+		toggleAllBtn.onclick = () => {
+			const allCollapsed = menu.gerichte.every(g => g._collapsed);
+			menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
+			render();
+		};
+	}
+
+	// Gericht-Event-Listeners
+	setupGerichtEventListeners(menuElement, menu);
+
+	// Menü löschen
+	const deleteMenuBtn = menuElement.querySelector('.delete-menu');
+	if (deleteMenuBtn) {
+		deleteMenuBtn.onclick = () => {
+			if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
+				window.data.content.splice(menuIndex, 1);
+				render();
+			}
+		};
+	}
+
+	// Gerichte-Sortable
+	const gerichteWrapperForSortable = menuElement.querySelector('.gerichte-wrapper');
+	if (gerichteWrapperForSortable) {
+		Sortable.create(gerichteWrapperForSortable, {
+			animation: 150,
+			handle: ".gericht-header .drag-icon",
+			onEnd: function(evt) {
+				const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
+				menu.gerichte.splice(evt.newIndex, 0, moved);
+				render();
+			}
+		});
+	}
+}
+
+function setupGerichtEventListeners(menuElement, menu) {
+	const gerichte = menuElement.querySelectorAll('.gericht');
+	
+	gerichte.forEach((gerichtElement, gerichtIndex) => {
+		const gericht = menu.gerichte[gerichtIndex];
+		
+		// Gericht-Felder
+		const titelInput = gerichtElement.querySelector('input[data-field="titel"]');
+		if (titelInput) {
+			titelInput.oninput = (e) => gericht.titel = e.target.value;
+		}
+
+		const beschreibungTextarea = gerichtElement.querySelector('textarea[data-field="beschreibung"]');
+		if (beschreibungTextarea) {
+			beschreibungTextarea.oninput = (e) => gericht.beschreibung = e.target.value;
+		}
+
+		const zusatzstoffeInput = gerichtElement.querySelector('input[data-field="zusatzstoffe"]');
+		if (zusatzstoffeInput) {
+			zusatzstoffeInput.oninput = (e) => {
+				gericht.zusatzstoffe = e.target.value.split(",").map(x => x.trim()).filter(Boolean);
+			};
+		}
+
+		const tagInput = gerichtElement.querySelector('input[data-field="tag"]');
+		if (tagInput) {
+			tagInput.oninput = (e) => gericht.tag = e.target.value;
+		}
+
+		// Preis-Event-Listeners
+		setupPreisEventListeners(gerichtElement, gericht);
+
+		// Beilagen-Event-Listeners
+		setupBeilagenEventListeners(gerichtElement, gericht);
+
+		// Gericht hinzufügen/löschen
+		const addGerichtBtn = gerichtElement.querySelector('.add-gericht');
+		if (addGerichtBtn) {
+			addGerichtBtn.onclick = () => {
+				gericht.preisliste.push({ size: "", preis: "" });
+				render();
+			};
+		}
+
+		const deleteGerichtBtn = gerichtElement.querySelector('.delete-gericht');
+		if (deleteGerichtBtn) {
+			deleteGerichtBtn.onclick = () => {
+				const confirmed = confirm("❌ Möchtest du dieses Gericht wirklich löschen?");
+				if (confirmed) {
+					menu.gerichte.splice(gerichtIndex, 1);
+					render();
+				}
+			};
+		}
 	});
-	render();
-};
+
+	// Gericht hinzufügen (außerhalb der Gericht-Loop)
+	const addGerichtBtn = menuElement.querySelector('.add-gericht');
+	if (addGerichtBtn) {
+		addGerichtBtn.onclick = () => {
+			menu.gerichte = menu.gerichte || [];
+			menu.gerichte.push({
+				titel: "",
+				beschreibung: "",
+				zusatzstoffe: [],
+				tag: "",
+				preisliste: [],
+				beilagen: [],
+				_collapsed: false
+			});
+			render();
+		};
+	}
+}
+
+function setupPreisEventListeners(gerichtElement, gericht) {
+	const preisElements = gerichtElement.querySelectorAll('.preis');
+	
+	preisElements.forEach((preisElement, preisIndex) => {
+		const preisEintrag = gericht.preisliste[preisIndex];
+		
+		const sizeInput = preisElement.querySelector('input[data-field="size"]');
+		if (sizeInput) {
+			sizeInput.oninput = (e) => preisEintrag.size = e.target.value;
+		}
+
+		const preisInput = preisElement.querySelector('input[data-field="preis"]');
+		if (preisInput) {
+			preisInput.oninput = (e) => {
+				const val = e.target.value;
+				preisEintrag.preis = /^\d+(\.\d{0,2})?$/.test(val) ? val : "";
+			};
+		}
+
+		const deletePreisBtn = preisElement.querySelector('.delete-preis');
+		if (deletePreisBtn) {
+			deletePreisBtn.onclick = () => {
+				gericht.preisliste.splice(preisIndex, 1);
+				render();
+			};
+		}
+	});
+
+	// Preis hinzufügen
+	const addPreisBtn = gerichtElement.querySelector('.add-preis');
+	if (addPreisBtn) {
+		addPreisBtn.onclick = () => {
+			gericht.preisliste.push({ size: "", preis: "" });
+			render();
+		};
+	}
+}
+
+function setupBeilagenEventListeners(gerichtElement, gericht) {
+	const beilagenElements = gerichtElement.querySelectorAll('.beilage');
+	
+	beilagenElements.forEach((beilageElement, beilageIndex) => {
+		const beilageEintrag = gericht.beilagen[beilageIndex];
+		
+		const nameInput = beilageElement.querySelector('input[data-field="name"]');
+		if (nameInput) {
+			nameInput.oninput = (e) => beilageEintrag.name = e.target.value;
+		}
+
+		const preisInput = beilageElement.querySelector('input[data-field="preis"]');
+		if (preisInput) {
+			preisInput.oninput = (e) => {
+				const val = e.target.value;
+				beilageEintrag.preis = /^\d+(\.\d{0,2})?$/.test(val) ? val : "";
+			};
+		}
+
+		const deleteBeilageBtn = beilageElement.querySelector('.delete-beilage');
+		if (deleteBeilageBtn) {
+			deleteBeilageBtn.onclick = () => {
+				gericht.beilagen.splice(beilageIndex, 1);
+				render();
+			};
+		}
+	});
+
+	// Beilage hinzufügen
+	const addBeilageBtn = gerichtElement.querySelector('.add-beilage');
+	if (addBeilageBtn) {
+		addBeilageBtn.onclick = () => {
+			if (!gericht.beilagen) {
+				gericht.beilagen = [];
+			}
+			gericht.beilagen.push({ name: "", preis: "" });
+			render();
+		};
+	}
+}
 
 function openImageOverlay(onSelect, currentSrc) {
 	currentImageTarget = onSelect;
@@ -593,48 +648,51 @@ function renderImageGrid(images) {
 	grid.innerHTML = "";
 
 	images.forEach(img => {
-		const thumb = document.createElement("img");
-		thumb.src = img.src;
-		thumb.className = "image-thumb";
-
-		const wrapper = document.createElement("div");
-		wrapper.className = "image-wrapper";
-		if (deleteMode) wrapper.classList.add("delete-mode");
-		wrapper.appendChild(thumb);
-
-		const delBtn = document.createElement("button");
-		delBtn.textContent = "🗑️";
-		delBtn.title = "Bild löschen";
-		delBtn.className = "delete-button";
-		delBtn.onclick = (ev) => {
-			ev.stopPropagation();
-			if (confirm("Möchtest du das Bild wirklich löschen?")) {
-				fetch("data_handler.php", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded"
-						},
-						body: "action=archive_image&filename=" + encodeURIComponent(img.name)
-					})
-					.then(res => res.json())
-					.then(result => {
-						if (result.success) {
-							cachedImageLibrary = cachedImageLibrary.filter(i => i.name !== img.name);
-							renderImageGrid(cachedImageLibrary);
-						} else {
-							alert("Fehler beim Löschen: " + (result.error || "Unbekannter Fehler"));
-						}
-					});
-			}
+		const imageData = {
+			src: img.src,
+			deleteMode: deleteMode
 		};
 
-		wrapper.appendChild(delBtn);
-		wrapper.onclick = () => {
-			if (typeof currentImageTarget === "function") {
-				currentImageTarget(img.src);
-				closeImageOverlay();
-			}
-		};
+		const imageHTML = renderTemplate("template-image-grid-item", imageData);
+		const tempDiv = document.createElement('div');
+		tempDiv.innerHTML = imageHTML;
+		const wrapper = tempDiv.firstElementChild;
+
+		// Event Listeners hinzufügen
+		const thumb = wrapper.querySelector('.image-thumb');
+		if (thumb) {
+			thumb.onclick = () => {
+				if (typeof currentImageTarget === "function") {
+					currentImageTarget(img.src);
+					closeImageOverlay();
+				}
+			};
+		}
+
+		const deleteBtn = wrapper.querySelector('.delete-image');
+		if (deleteBtn) {
+			deleteBtn.onclick = (ev) => {
+				ev.stopPropagation();
+				if (confirm("Möchtest du das Bild wirklich löschen?")) {
+					fetch("data_handler.php", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							body: "action=archive_image&filename=" + encodeURIComponent(img.name)
+						})
+						.then(res => res.json())
+						.then(result => {
+							if (result.success) {
+								cachedImageLibrary = cachedImageLibrary.filter(i => i.name !== img.name);
+								renderImageGrid(cachedImageLibrary);
+							} else {
+								alert("Fehler beim Löschen: " + (result.error || "Unbekannter Fehler"));
+							}
+						});
+				}
+			};
+		}
 
 		grid.appendChild(wrapper);
 	});
@@ -646,13 +704,31 @@ function openSaveOverlay(existingTemplates = []) {
 	document.getElementById("saveOverlay").style.display = "flex";
 	const select = document.getElementById("saveTargetSelect");
 
-	select.innerHTML = '<option value="data.json">Aktuelle Menükarte</option><option disabled>─────────</option>';
+	// Aktuelle Menükarte
+	const currentOption = renderTemplate("template-template-option", {
+		value: "data.json",
+		text: "Aktuelle Menükarte"
+	});
+	select.innerHTML = currentOption;
 
+	// Trennlinie
+	const dividerOption = renderTemplate("template-template-option", {
+		value: "",
+		text: "─────────"
+	});
+	const tempDiv = document.createElement('div');
+	tempDiv.innerHTML = dividerOption;
+	const divider = tempDiv.firstElementChild;
+	divider.disabled = true;
+	select.appendChild(divider);
+
+	// Templates hinzufügen
 	existingTemplates.forEach(name => {
-		const opt = document.createElement("option");
-		opt.value = name + ".json";
-		opt.textContent = name;
-		select.appendChild(opt);
+		const templateOption = renderTemplate("template-template-option", {
+			value: name + ".json",
+			text: name
+		});
+		select.insertAdjacentHTML('beforeend', templateOption);
 	});
 
 	// Auswahl zurücksetzen
@@ -709,11 +785,12 @@ document.getElementById("addTemplateBtn").addEventListener("click", function() {
 		}
 	}
 
-	// Neue Option einfügen
-	const newOption = document.createElement("option");
-	newOption.value = fullValue;
-	newOption.textContent = nameRaw;
-	select.appendChild(newOption);
+	// Neue Option mit Template einfügen
+	const newOptionHTML = renderTemplate("template-template-option", {
+		value: fullValue,
+		text: nameRaw
+	});
+	select.insertAdjacentHTML('beforeend', newOptionHTML);
 	select.value = fullValue;
 
 	input.value = "";

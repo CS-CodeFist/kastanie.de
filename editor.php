@@ -129,7 +129,93 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 		</div>
 	</div>
 
+	<!-- TEMPLATE DEFINITIONS -->
+	<script type="text/template" id="template-menu">
+		<div class="menu">
+			<div class="menu-header" style="display: flex; align-items: center;">
+				<button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>
+				<input type="text" value="{{menutitel}}" placeholder="Menütitel" data-field="menutitel" />
+			</div>
+			<div class="image-row">
+				<div class="text-fields">
+					<label>Titel<input type="text" value="{{titel}}" data-field="titel" /></label>
+				</div>
+				<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
+			</div>
+			<div class="topbuttons">
+				<button class="toggle-gerichte">{{gerichteToggleText}}</button>
+				<button class="toggle-all-gerichte" {{#unless gerichteVisible}}style="display: none;"{{/unless}}>{{allToggleText}}</button>
+			</div>
+			<div class="gerichte-wrapper {{#unless gerichteVisible}}collapsed{{/unless}}">
+				{{#each gerichte}}
+					<div class="gericht {{#if _collapsed}}collapsed-gericht{{/if}}">
+						<div class="gericht-header" style="display: flex; justify-content: space-between; align-items: center;">
+							<div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+								<input type="text" value="{{titel}}" placeholder="Gericht-Titel" data-field="titel" />
+								<span class="drag-icon" style="margin-right: 0.5em; cursor: grab;">☰</span>
+							</div>
+						</div>
+						<label>Beschreibung<textarea rows="3" data-field="beschreibung">{{beschreibung}}</textarea></label>
+						<label>Zusatzstoffe (Komma)<input type="text" value="{{join zusatzstoffe ', '}}" data-field="zusatzstoffe" /></label>
+						<label>Tag<input type="text" value="{{tag}}" data-field="tag" /></label>
+						{{#each preisliste}}
+							<div class="preis">
+								<div class="preis-inner">
+									<label>Größe<input type="text" class="size-input" value="{{size}}" data-field="size" /></label>
+									<label>Preis<input type="number" class="preis-input" step="0.01" min="0" inputmode="decimal" value="{{preis}}" placeholder="z. B. 4.50" data-field="preis" /></label>
+									<button type="button" class="delete-preis">🗑️</button>
+								</div>
+							</div>
+						{{/each}}
+						{{#if canAddPreis}}
+							<button type="button" class="add-preis">➕ Preis hinzufügen</button>
+						{{else}}
+							<div style="color: gray;">⚠️ Maximal 3 Preise erlaubt</div>
+						{{/if}}
+						{{#each beilagen}}
+							<div class="beilage">
+								<div class="beilage-inner">
+									<label>Beilage<input type="text" class="beilage-input" value="{{name}}" data-field="name" placeholder="z. B. Kartoffeln" /></label>
+									<label>Preis<input type="number" class="beilage-preis-input" step="0.01" min="0" inputmode="decimal" value="{{preis}}" placeholder="z. B. 2.50" data-field="preis" /></label>
+									<button type="button" class="delete-beilage">🗑️</button>
+								</div>
+							</div>
+						{{/each}}
+						{{#if canAddBeilage}}
+							<button type="button" class="add-beilage">➕ Beilage hinzufügen</button>
+						{{else}}
+							<div style="color: gray;">⚠️ Maximal 4 Beilagen erlaubt</div>
+						{{/if}}
+						<button type="button" class="delete-gericht">🗑️ Gericht löschen</button>
+					</div>
+				{{/each}}
+				<button type="button" class="add-gericht">➕ Gericht hinzufügen</button>
+			</div>
+			<div class="button-right">
+				<button type="button" class="delete-menu">🗑️ Menü löschen</button>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/template" id="template-image-grid-item">
+		<div class="image-grid-item {{#if deleteMode}}delete-mode{{/if}}">
+			<img src="{{src}}" class="image-thumb" />
+			{{#if deleteMode}}
+				<button type="button" class="delete-image">🗑️</button>
+			{{/if}}
+		</div>
+	</script>
+
+	<script type="text/template" id="template-template-option">
+		<option value="{{value}}">{{text}}</option>
+	</script>
+
+	<script type="text/template" id="template-archive-option">
+		<option value="{{value}}">{{formattedDate}}</option>
+	</script>
+
 	<!-- SCRIPTS -->
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 	<script src="editor_data.js"></script>
 	<script src="editor.js?20250401"></script>

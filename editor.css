@@ -219,7 +219,8 @@ label {
 }
 
 /* === Preisbox === */
-.preis {
+.preis,
+.beilage {
     background-color: var(--white);
     border: 1px solid var(--border);
     padding: 0.75em;
@@ -227,16 +228,24 @@ label {
     border-radius: 6px;
 }
 
-.preis-inner {
+.preis-inner,
+.beilage-inner {
     display: flex;
     gap: 1em;
     align-items: flex-end;
     flex-wrap: nowrap;
 }
 
-.preis-inner label {
+.preis-inner label,
+.beilage-inner label {
     flex: 1;
     min-width: 100px;
+}
+
+/* Beilagen haben eine andere Farbe zur Unterscheidung */
+.beilage {
+    border-left: 3px solid var(--primary-light);
+    background-color: #fafbf7;
 }
 
 /* === Bildzeile === */
@@ -355,17 +364,18 @@ label {
     -webkit-overflow-scrolling: touch;
 }
 
-.image-wrapper {
+.image-grid-item {
     position: relative;
 }
 
-.image-wrapper img.image-thumb {
+.image-grid-item img.image-thumb {
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border: 2px solid var(--primary);
     border-radius: 6px;
     background-color: var(--white);
     display: block;
+    width: 100%;
 }
 
 .button-right {
@@ -378,7 +388,7 @@ label {
     margin: 0px;
 }
 
-.delete-button {
+.delete-image {
     display: none;
     position: absolute;
     top: 50%;
@@ -388,14 +398,17 @@ label {
     border: 2px solid var(--primary);
     border-radius: 4px;
     font-size: 1em;
-    padding: 0.4em 0.8em;
+    padding: 0.4em 0.6em;
     color: var(--primary-dark);
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     z-index: 10;
+    line-height: 1;
+    min-height: auto;
+    margin: 0;
 }
 
-.delete-button:hover {
+.delete-image:hover {
     background-color: var(--primary-light);
 }
 
@@ -403,7 +416,7 @@ label {
     opacity: 0.4;
 }
 
-.delete-mode .delete-button {
+.delete-mode .delete-image {
     display: block;
 }
 
@@ -443,6 +456,10 @@ select:focus {
     border-color: var(--primary-dark);
     box-shadow: 0 0 4px rgba(94, 130, 24, 0.4);
     outline: none;
+}
+
+#uploadFeedback {
+    margin-top: 5px;
 }
 
 /* === Media Queries === */

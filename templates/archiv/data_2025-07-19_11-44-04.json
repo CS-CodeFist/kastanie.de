@@ -19,15 +19,13 @@
                         {
                             "size": "",
                             "preis": "7.80"
+                        },
+                        {
+                            "size": "mit Hähnchen",
+                            "preis": "11.80"
                         }
                     ],
-                    "_collapsed": false,
-                    "beilagen": [
-                        {
-                            "name": "Hähnchen",
-                            "preis": "4"
-                        }
-                    ]
+                    "_collapsed": false
                 },
                 {
                     "titel": "Cocos-Curry-Suppe",
@@ -123,19 +121,17 @@
                         {
                             "size": "",
                             "preis": "7.50"
-                        }
-                    ],
-                    "_collapsed": false,
-                    "beilagen": [
-                        {
-                            "name": "Matjes",
-                            "preis": "7"
                         },
                         {
-                            "name": "Lachs",
-                            "preis": "8"
+                            "size": "mit Lachs",
+                            "preis": "15.50"
+                        },
+                        {
+                            "size": "mit Matjes",
+                            "preis": "14.50"
                         }
-                    ]
+                    ],
+                    "_collapsed": false
                 }
             ]
         }
