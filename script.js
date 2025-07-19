@@ -1,3 +1,34 @@
+// Template-Cache für Handlebars
+const templateCache = new Map();
+
+function renderTemplate(templateId, values) {
+	// Template aus Cache laden oder kompilieren
+	if (!templateCache.has(templateId)) {
+		const templateElement = document.getElementById(templateId);
+		if (!templateElement) {
+			console.error(`Template ${templateId} nicht gefunden`);
+			return '';
+		}
+		const templateSource = templateElement.innerHTML;
+		const compiledTemplate = Handlebars.compile(templateSource);
+		templateCache.set(templateId, compiledTemplate);
+	}
+
+	const template = templateCache.get(templateId);
+	return template(values);
+}
+
+// Handlebars Helper für Preisformatierung
+Handlebars.registerHelper('formatPreis', function(value) {
+	return formatPreis(value);
+});
+
+function formatPreis(value) {
+	const number = parseFloat(value);
+	if (isNaN(number)) return value;
+	return number.toFixed(2).replace(".", ",");
+}
+
 const timestamp = new Date().getTime();
 fetch(`data.json?t=${timestamp}`)
   .then(response => response.json())
@@ -5,63 +36,9 @@ fetch(`data.json?t=${timestamp}`)
     console.log("Daten geladen:", data);
     document.getElementById("loader").style.display = "none";
 
-    function renderTemplate(templateId, values) {
-        let template = document.getElementById(templateId).innerHTML;
-    
-        // IF: {{#if key}}...{{else}}...{{/if}}
-        template = template.replace(/{{#if (\w+)}}([\s\S]*?)({{else}}([\s\S]*?))?{{\/if}}/g, (match, key, ifContent, _, elseContent) => {
-        const value = values[key];
-        const showIf = Array.isArray(value) ? value.length > 0 : !!value;
-        return showIf ? ifContent : (elseContent || '');
-        });
-    
-        // UNLESS: {{#unless key}}...{{/unless}}
-        template = template.replace(/{{#unless (\w+)}}([\s\S]*?){{\/unless}}/g, (match, key, content) => {
-        const value = values[key];
-        const showUnless = Array.isArray(value) ? value.length === 0 : !value;
-        return showUnless ? content : '';
-        });
-    
-        // Wiederholung {{#each key}}...{{/each}}
-        template = template.replace(
-        /{{#each (\w+)}}([\s\S]*?){{\/each}}/g,
-        (match, key, content) => {
-            const items = values[key];
-            if (!Array.isArray(items)) return "";
-    
-            return items
-            .map((item) => {
-                let part = content;
-                for (const k in item) {
-                const val = k === "preis" ? formatPreis(item[k]) : item[k];
-                part = part.replaceAll(`{{${k}}}`, val);
-                }
-                return part;
-            })
-            .join("");
-        }
-        );
-    
-        // Einfache Platzhalter {{key}}
-        for (const key in values) {
-        if (typeof values[key] !== "object") {
-            const val = key === "preis" ? formatPreis(values[key]) : values[key];
-            template = template.replaceAll(`{{${key}}}`, val);
-        }
-        }
-    
-        return template;
-    }
-    
-    function formatPreis(value) {
-        const number = parseFloat(value);
-        if (isNaN(number)) return value;
-        return number.toFixed(2).replace(".", ",");
-    }
-    
     const menuContainer = document.getElementById("menu");
     const contentContainer = document.getElementById("content");
-    
+
     data.content.forEach((item) => {
         const isLogo = item.menutitel.toLowerCase() === "logo";
        
@@ -70,32 +47,35 @@ fetch(`data.json?t=${timestamp}`)
             isLogo: isLogo,
             link: isLogo ? "http://www.databyte.de" : "#"+item.menutitel.toLowerCase()
         });
-    
+
         const wrapper = document.createElement("div");
         wrapper.innerHTML = html.trim();
         const linkElement = wrapper.firstChild;
-    
+
         menuContainer.appendChild(linkElement);
-    
+
         if (Array.isArray(item.gerichte) && item.gerichte.length > 0) {
-            const gerichteHTML = item.gerichte
-                .map((gericht) => {
-                return renderTemplate("template-gericht", {
-                    ...gericht,
-                    zusatzstoffe: gericht.zusatzstoffe.join(", "),
-                });
-                })
-                .join("");
-        
+            // Gerichte-Daten für Handlebars vorbereiten
+            const processedGerichte = item.gerichte.map(gericht => ({
+                ...gericht,
+                zusatzstoffe: Array.isArray(gericht.zusatzstoffe) ? gericht.zusatzstoffe.join(", ") : gericht.zusatzstoffe
+            }));
         
             const sectionHTML = renderTemplate("template-section", {
-                link:  item.menutitel.toLowerCase(),
+                link: item.menutitel.toLowerCase(),
                 image: item.image,
                 titel: item.titel,
-                gerichte: gerichteHTML,
+                gerichte: processedGerichte
             });
         
             contentContainer.insertAdjacentHTML("beforeend", sectionHTML);
+            
+            // Debug: DOM-Struktur überprüfen
+            console.log("Section hinzugefügt:", item.menutitel);
+            console.log("HTML:", sectionHTML);
+            const lastSection = contentContainer.lastElementChild;
+            console.log("Section DOM:", lastSection);
+            console.log("Gerichte Container:", lastSection ? lastSection.querySelector('.gerichte-container') : null);
         }
     });
       

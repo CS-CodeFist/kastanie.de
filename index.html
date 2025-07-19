@@ -39,44 +39,56 @@
         <div class="section-title">{{titel}}</div>
         <div class="section-content">
           <div class="gerichte-container">
-            {{gerichte}}
+            {{#each gerichte}}
+              <div class="gericht">
+                <div class="gericht-titel">{{titel}}</div>
+                <p>{{beschreibung}}</p>
+                {{#if zusatzstoffe}}
+                <p class="zusatz"><strong>Zusatzstoffe:</strong> {{zusatzstoffe}}</p>
+                {{/if}}
+
+                {{#if preisliste}}
+                  <div class="preis-liste">
+                    {{#each preisliste}}
+                      <div class="size">
+                        {{size}}
+                        <div class="preis">{{formatPreis preis}} €</div>
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/if}}
+
+                {{#if preis}}
+                  <div class="preis">{{formatPreis preis}} €</div>
+                {{/if}}
+
+                {{#if beilagen}}
+                <div class="beilagen">
+                  {{#if beilagentitel}}<div>{{beilagentitel}}</div>{{/if}}
+                  <ul class="beilage-liste">
+                    {{#each beilagen}}
+                    <li class="beilage-item">
+                      {{name}}{{#if preis}} +{{formatPreis preis}} €{{/if}}
+                    </li>
+                    {{/each}}
+                  </ul>
+                </div>
+                {{/if}}
+
+                {{#if tag}}
+                <div class="tag">{{tag}}</div>
+                {{/if}}
+              </div>
+            {{/each}}
           </div>
         </div>
       </section>
     </script>
 
-    <!-- Gericht-Template -->
-    <script id="template-gericht" type="text/template">
-      <div class="gericht">
-        <div class="gericht-titel">{{titel}}</div>
-        <p>{{beschreibung}}</p>
-        {{#if zusatzstoffe}}
-        <p class="zusatz"><strong>Zusatzstoffe:</strong> {{zusatzstoffe}}</p>
-        {{/if}}
-
-        {{#if preisliste}}
-          <div class="preis-liste">
-            {{#each preisliste}}
-              <div class="size">
-                {{size}}
-                <div class="preis">{{preis}} €</div>
-              </div>
-            {{/each}}
-          </div>
-        {{/if}}
-
-        {{#if preis}}
-          <div class="preis">{{preis}} €</div>
-        {{/if}}
-
-        {{#if tag}}
-        <div class="tag">{{tag}}</div>
-        {{/if}}
-      </div>
-    </script>
-
     <div class="s-elements" aria-hidden="true"></div>
 
+    <!-- Handlebars.js -->
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
     <script type="text/javascript" src="seasons.js?202503300"></script>
 

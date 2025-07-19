@@ -172,6 +172,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 						{{else}}
 							<div style="color: gray;">⚠️ Maximal 3 Preise erlaubt</div>
 						{{/if}}
+						<label>Beilagentitel<input type="text" value="{{beilagentitel}}" data-field="beilagentitel" placeholder="z. B. Beilagen oder Als Beilage wählbar" /></label>
 						{{#each beilagen}}
 							<div class="beilage">
 								<div class="beilage-inner">

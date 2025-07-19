@@ -431,6 +431,11 @@ function setupGerichtEventListeners(menuElement, menu) {
 			tagInput.oninput = (e) => gericht.tag = e.target.value;
 		}
 
+		const beilagentitelInput = gerichtElement.querySelector('input[data-field="beilagentitel"]');
+		if (beilagentitelInput) {
+			beilagentitelInput.oninput = (e) => gericht.beilagentitel = e.target.value;
+		}
+
 		// Preis-Event-Listeners
 		setupPreisEventListeners(gerichtElement, gericht);
 
@@ -468,6 +473,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				beschreibung: "",
 				zusatzstoffe: [],
 				tag: "",
+				beilagentitel: "",
 				preisliste: [],
 				beilagen: [],
 				_collapsed: false
