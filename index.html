@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kastanie Moltzow</title>
+
+    <link rel="stylesheet" href="styles.css?20250409" />
+    <link rel="stylesheet" href="seasons.css?20250402a" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="loader">
+		<div class="spinner"></div>
+		<p>Speisekarte wird geladen…</p>
+	</div>
+    <div class="menu-container">
+      <nav class="menu" id="menu"></nav>
+    </div>
+    <div class="container" id="content"></div>
+
+    <!-- Menü-Template -->
+    <script id="template-menu-item" type="text/template">
+      <a href="{{link}}" target="_self" class="menu-item {{#if isLogo}}logo{{/if}}">
+        <img src="{{image}}" alt="{{menutitel}}">
+        {{#unless isLogo}}
+        <div class="menu-title">{{menutitel}}</div>
+        {{/unless}}
+      </a>
+    </script>
+
+    <!-- Abschnitt-Template -->
+    <script id="template-section" type="text/template">
+      <section id="{{link}}" class="section">
+        <div class="section-image" style="background-image: url('{{image}}');"></div>
+        <div class="section-title">{{titel}}</div>
+        <div class="section-content">
+          <div class="gerichte-container">
+            {{gerichte}}
+          </div>
+        </div>
+      </section>
+    </script>
+
+    <!-- Gericht-Template -->
+    <script id="template-gericht" type="text/template">
+      <div class="gericht">
+        <div class="gericht-titel">{{titel}}</div>
+        <p>{{beschreibung}}</p>
+        {{#if zusatzstoffe}}
+        <p class="zusatz"><strong>Zusatzstoffe:</strong> {{zusatzstoffe}}</p>
+        {{/if}}
+
+        {{#if preisliste}}
+          <div class="preis-liste">
+            {{#each preisliste}}
+              <div class="size">
+                {{size}}
+                <div class="preis">{{preis}} €</div>
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+
+        {{#if preis}}
+          <div class="preis">{{preis}} €</div>
+        {{/if}}
+
+        {{#if tag}}
+        <div class="tag">{{tag}}</div>
+        {{/if}}
+      </div>
+    </script>
+
+    <div class="s-elements" aria-hidden="true"></div>
+
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="seasons.js?202503300"></script>
+
+
+  </body>
+</html>
