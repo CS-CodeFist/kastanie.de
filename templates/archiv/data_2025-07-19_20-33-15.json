@@ -28,8 +28,7 @@
                             "preis": "4"
                         }
                     ],
-                    "beilagentitel": "pimp it",
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "beilagentitel": "pimp it"
                 },
                 {
                     "titel": "Cocos-Curry-Suppe",
@@ -42,8 +41,7 @@
                             "preis": "6.50"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Gulaschsuppe",
@@ -56,8 +54,7 @@
                             "preis": "6.50"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Carpaccio Rind",
@@ -70,8 +67,7 @@
                             "preis": "13.80"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 }
             ]
         },
@@ -91,16 +87,12 @@
                             "preis": "8.50"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Bratwurst",
                     "beschreibung": "Kartoffelstampf, Schmorzwiebeln",
-                    "zusatzstoffe": [
-                        "Kartoffelstampf",
-                        "Schmorzwiebeln"
-                    ],
+                    "zusatzstoffe": [],
                     "tag": "",
                     "preisliste": [
                         {
@@ -108,8 +100,7 @@
                             "preis": "11.80"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Currywurst",
@@ -122,8 +113,7 @@
                             "preis": "12.50"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Meersalzkartoffeln",
@@ -147,8 +137,7 @@
                             "preis": "8"
                         }
                     ],
-                    "beilagentitel": "Mach Meer draus!",
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "beilagentitel": "Mach Meer draus!"
                 },
                 {
                     "titel": "Wokgemüse",
@@ -176,8 +165,7 @@
                             "preis": "6"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Bowl",
@@ -209,8 +197,7 @@
                             "preis": "6"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 }
             ]
         },
@@ -232,8 +219,7 @@
                         }
                     ],
                     "beilagen": [],
-                    "_collapsed": true,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": true
                 },
                 {
                     "titel": "Pasta Bolognese",
@@ -248,8 +234,7 @@
                         }
                     ],
                     "beilagen": [],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Pasta Piccata milanese",
@@ -264,8 +249,7 @@
                         }
                     ],
                     "beilagen": [],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Pasta Gemüse, Sahne",
@@ -293,8 +277,7 @@
                             "preis": "8"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 }
             ]
         },
@@ -321,8 +304,7 @@
                             "preis": "4"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Peitz Burger",
@@ -342,8 +324,7 @@
                             "preis": "4"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Bacon-Cheese Burger",
@@ -363,8 +344,7 @@
                             "preis": "4"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 },
                 {
                     "titel": "Chicken Burger",
@@ -384,8 +364,7 @@
                             "preis": "4"
                         }
                     ],
-                    "_collapsed": false,
-                    "zusatzstoffetitel": "Inhaltsstoffe"
+                    "_collapsed": false
                 }
             ]
         }
