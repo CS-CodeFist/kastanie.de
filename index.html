@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kastanie Moltzow</title>
 
-    <link rel="stylesheet" href="styles.css?20250409" />
+    <link rel="stylesheet" href="styles.css?20250709" />
     <link rel="stylesheet" href="seasons.css?20250402a" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,13 +39,12 @@
 
     <!-- Abschnitt-Template -->
     <script id="template-section" type="text/template">
-      <section id="{{link}}" class="section">
-        <div class="section-image" style="background-image: url('{{image}}');"></div>
-        <div class="section-title">{{titel}}</div>
-        <div class="section-content">
-          <div class="gerichte-container">
-            {{#each gerichte}}
-              <div class="gericht">
+      <div class="section-image" style="background-image: url('{{image}}');"></div>
+      <div class="section-title">{{titel}}</div>
+      <div class="section-content" id="{{link}}">
+        <div class="gerichte-container">
+          {{#each gerichte}}
+            <div class="gericht">
                 <div class="gericht-titel">{{titel}}</div>
                 <p>{{{nl2br beschreibung}}}</p>
                 {{#if zusatzstoffe}}
@@ -87,14 +86,13 @@
             {{/each}}
           </div>
         </div>
-      </section>
     </script>
 
     <div class="s-elements" aria-hidden="true"></div>
 
     <!-- Handlebars.js -->
     <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="script.js?20250720"></script>
     <script type="text/javascript" src="seasons.js?202503300"></script>
 
   </body>

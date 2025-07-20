@@ -132,69 +132,60 @@ html {
     overflow-y: auto;
     overflow-x: hidden;
     perspective: 10px;
-}
-
-/* Inhalt wrapper */
-.section {
-    width: 100vw;
-    min-height: max(100vw, 200vh);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: 2rem;
-    text-align: center;
-    padding: 50px 20px;
-
-    position: relative;
     transform-style: preserve-3d;
-    z-index: -1;
 }
+
+/* Section entfernt - Elemente direkt im Container */
 
 .section-image {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100vw;
-    height: max(100vw, 200vh);
+    height: 100vw;
     background-size: cover;
     background-position: center;
-    z-index: -1;
-    transform: translateZ(-7px) scale(1.7);
+    transform: translateZ(-14px) scale(2.4);
+    margin-top: calc(40vh - 1.1 * max(0px, 100vh - 100vw));
+    z-index: 1;
 }
 
 .section-title {
     position: relative;
-    z-index: 8;
-    transform: translateZ(2px) scale(0.8);
-    margin-top: calc(100vw - 30%);
+    transform: translateZ(4px) scale(0.5);
+    margin-top: calc(-55vw + 0.9 * max(0px, 100vh - 100vw));
+    margin-left: auto;
+    margin-right: auto;
 
     font-family: "Handlee", cursive;
     font-weight: 400;
     font-style: normal;
     font-size: 2em;
     color: var(--black);
-    padding-top: 20px;
     background-color: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(15px);
     padding: 0px 20px;
-    width: auto;
+    width: fit-content;
     border-radius: 8px;
     border: 3px solid var(--light-gray);
     -webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     -moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    z-index: 20;
 }
 
 .section-content {
     position: relative;
-    z-index: 2;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    margin-top: 20px;
-    /*transform: translateZ(5px) scale(0.5);*/
+    margin-top: calc(65px - 0.15 * max(0px, 100vh - 100vw));
+    margin-bottom: 100%;
+    padding: 0px 20px;
+    transform: translateZ(1px) scale(0.9);
+    padding: 0px 0px;
+    text-align: center;
+    z-index: 10;
 }
 
 .gerichte-container {
@@ -202,8 +193,10 @@ html {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    z-index: 4;
-    padding-bottom: max(70vh, 50vw);
+    padding: 0px 20px;
+    /*
+    padding-bottom: calc(100% - 0.03 * max(0px, 100vh - 100vw));
+    */
 }
 
 .gericht {
@@ -289,7 +282,7 @@ html {
 }
 
 .gericht .beilagen {
-    margin: 20px -5px -20px -5px;
+    margin: 20px -5px -5px -5px;
     padding: 8px;
     background-color: var(--background-gray);
     font-size: 0.9em;
@@ -316,65 +309,26 @@ html {
 }
 
 @media (max-width: 600px) {
-    .section {
-        font-size: 1rem;
-        min-height: 100vw;
-    }
-
-    .section-content {
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        margin-top: 10px;
-    }
-
-    .section-image {
-        height: 100vw;
-    }
-
-    .gerichte-container {
-        padding-bottom: max(50vh, 60vw);
-    }
 
     .gericht .size .preis {
         bottom: -1.6em;
     }
-
-    .gericht .beilagen {
-        margin: 20px -5px -5px -5px;
-    }
 }
 
-@media (min-width: 601px) and (max-width: 1024px) {
-    .section-content {
-        max-width: 600px;
-    }
+@media (min-width: 601px) and (max-width: 1024px) {}
 
-    .gerichte-container {
-        padding-bottom: max(60vh, 55vw);
-    }
-}
-
-@media (min-width: 1025px) {
-    .section-content {
-        max-width: 800px;
-    }
-
-    .gerichte-container {
-        padding-bottom: max(120vh, 60vw);
-    }
-}
+@media (min-width: 1025px) {}
 
 @media (min-aspect-ratio: 1/1) {
 
-    /* Bei breiten Bildschirmen (Landscape) */
+    /* Bei breiten Bildschirmen (Landscape) 
     .section-title {
         margin-top: calc(100vh - 30%);
     }
 
     .gerichte-container {
         padding-bottom: max(130vh, 50vw);
-    }
+    }*/
 }
 
 /* === Kastanie SVG Hintergrund === */

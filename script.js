@@ -85,7 +85,7 @@ fetch(`data.json?t=${timestamp}`)
         }
     });
       
-    const sections = document.querySelectorAll(".section");
+    const sections = document.querySelectorAll(".section-content");
     const menuLinks = document.querySelectorAll(".menu a");
     
     const scrollContainer = document.querySelector(".container");
@@ -103,7 +103,7 @@ fetch(`data.json?t=${timestamp}`)
     
     function setActiveByScroll() {
         const fromTop =
-        scrollContainer.scrollTop + scrollContainer.clientHeight / 2;
+        scrollContainer.scrollTop + scrollContainer.clientHeight;
         let currentSectionId = null;
     
         sections.forEach((section) => {
@@ -141,14 +141,16 @@ fetch(`data.json?t=${timestamp}`)
 
                 if (targetSection) {
                     scrollEnabled = false;
+                    // Etwas oberhalb der Section scrollen für bessere Sichtbarkeit
+                    const offset = 500;
                     scrollContainer.scrollTo({
-                    top: targetSection.offsetTop,
-                    behavior: "smooth",
+                        top: Math.max(0, targetSection.offsetTop - offset),
+                        behavior: "smooth",
                     });
             
                     setTimeout(() => {
-                    scrollEnabled = true;
-                    setActiveByScroll();
+                        scrollEnabled = true;
+                        setActiveByScroll();
                     }, 800); // Wartezeit anpassen bei Bedarf
                 }
             
