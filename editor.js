@@ -147,7 +147,6 @@ async function loadTemplates() {
 			if (!res.ok) throw new Error("❌ Archiv konnte nicht geladen werden.");
 
 			const json = await res.json();
-			console.log(json)
 			window.data = json;
 
 			if (typeof render === "function") {
@@ -292,7 +291,6 @@ function render() {
 		);
 
 	editor.innerHTML = "";
-	console.log("Rendering data:", window.data);
 
 	window.data.content.forEach((menu, menuIndex) => {
 		// Template-Daten für das Menü vorbereiten

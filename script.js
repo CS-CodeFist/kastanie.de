@@ -39,7 +39,6 @@ const timestamp = new Date().getTime();
 fetch(`data.json?t=${timestamp}`)
   .then(response => response.json())
   .then(data => {
-    console.log("Daten geladen:", data);
     document.getElementById("loader").style.display = "none";
 
     const menuContainer = document.getElementById("menu");
@@ -75,13 +74,6 @@ fetch(`data.json?t=${timestamp}`)
             });
         
             contentContainer.insertAdjacentHTML("beforeend", sectionHTML);
-            
-            // Debug: DOM-Struktur überprüfen
-            console.log("Section hinzugefügt:", item.menutitel);
-            console.log("HTML:", sectionHTML);
-            const lastSection = contentContainer.lastElementChild;
-            console.log("Section DOM:", lastSection);
-            console.log("Gerichte Container:", lastSection ? lastSection.querySelector('.gerichte-container') : null);
         }
     });
       
