@@ -1,3 +1,4 @@
+/* === Farbvariablen === */
 :root {
     --primary-green: #7ea12c;
     --warm-beige: #DFCB97;
@@ -16,19 +17,18 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+    font-size: clamp(18px, 2.5vw, 28px);
+}
+
 body {
-    margin: 0;
     font-family: "Noto Sans", sans-serif;
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
-    font-variation-settings:
-        "wdth" 100;
+    font-variation-settings: "wdth" 100;
     background-color: var(--warm-beige);
-}
-
-html {
-    scroll-behavior: smooth;
 }
 
 /* === Loader === */
@@ -41,7 +41,6 @@ html {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 1.2em;
     color: var(--primary-green);
 }
 
@@ -92,7 +91,7 @@ html {
     color: var(--dark-brown);
     min-width: 110px;
     text-decoration: none;
-    padding: 10px 20px;
+    padding: 10px 20px 6px 20px;
     transition: background 0.3s;
     flex-shrink: 0;
     display: inline-block;
@@ -101,7 +100,17 @@ html {
     font-family: "Handlee", cursive;
     font-weight: 300;
     font-style: normal;
-    font-size: 1.4em;
+    font-size: 1.2em;
+}
+
+.menu-item:focus {
+    outline: 2px solid var(--primary-green);
+    outline-offset: -4px;
+}
+
+.menu-item.active:focus {
+    outline: 2px solid var(--warm-beige);
+    outline-offset: -4px;
 }
 
 .menu-item .menu-title {
@@ -109,8 +118,8 @@ html {
 }
 
 .menu img {
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
     display: block;
     margin: auto;
     border-radius: 5px;
@@ -135,7 +144,20 @@ html {
     transform-style: preserve-3d;
 }
 
-/* Section entfernt - Elemente direkt im Container */
+/* Reduce motion respektieren */
+@media (prefers-reduced-motion: reduce) {
+    .container {
+        scroll-behavior: auto;
+    }
+
+    .menu-item {
+        transition: none;
+    }
+
+    .kastanie-background {
+        transform: none;
+    }
+}
 
 .section-image {
     position: relative;
@@ -146,19 +168,20 @@ html {
     transform: translateZ(-14px) scale(2.4);
     margin-top: calc(40vh - 1.1 * max(0px, 100vh - 100vw));
     z-index: 1;
+    will-change: transform;
+    /* für 3D transforms */
 }
 
 .section-title {
     position: relative;
-    transform: translateZ(4px) scale(0.5);
+    transform: translateZ(4px) scale(0.6);
     margin-top: calc(-55vw + 0.9 * max(0px, 100vh - 100vw));
     margin-left: auto;
     margin-right: auto;
-
     font-family: "Handlee", cursive;
     font-weight: 400;
     font-style: normal;
-    font-size: 2em;
+    font-size: 1.9em;
     color: var(--black);
     background-color: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(5px);
@@ -167,8 +190,6 @@ html {
     width: fit-content;
     border-radius: 8px;
     border: 3px solid var(--light-gray);
-    -webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     text-align: center;
     z-index: 20;
@@ -177,15 +198,16 @@ html {
 .section-content {
     position: relative;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     margin-top: calc(65px - 0.15 * max(0px, 100vh - 100vw));
     margin-bottom: 100%;
-    padding: 0px 20px;
+    padding: 0px 10px;
     transform: translateZ(1px) scale(0.9);
-    padding: 0px 0px;
     text-align: center;
     z-index: 10;
+    will-change: transform;
+    /* für 3D transforms */
 }
 
 .gerichte-container {
@@ -193,10 +215,7 @@ html {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding: 0px 20px;
-    /*
-    padding-bottom: calc(100% - 0.03 * max(0px, 100vh - 100vw));
-    */
+    padding: 0px 5px;
 }
 
 .gericht {
@@ -211,8 +230,6 @@ html {
     -webkit-backdrop-filter: blur(10px);
     text-align: center;
     position: relative;
-    -webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
 }
 
@@ -237,9 +254,6 @@ html {
     color: var(--white);
     padding: 0px 6px;
     border-radius: 5px;
-    transform: rotate(0deg);
-    transform-origin: 100% 0;
-    white-space: nowrap;
 }
 
 .gericht .preis-liste {
@@ -261,14 +275,14 @@ html {
 }
 
 .gericht .zusatz {
-    font-size: small;
+    font-size: 0.8em;
     color: var(--medium-gray);
 }
 
 .gericht .tag {
+    inset-inline-start: -10px;
+    inset-block-start: -15px;
     position: absolute;
-    left: -10px;
-    top: -15px;
     background-color: var(--primary-green);
     color: var(--white);
     padding: 2px 6px;
@@ -278,14 +292,12 @@ html {
     font-family: "Handlee", cursive;
     font-weight: 400;
     font-style: normal;
-    font-size: 1.1em;
 }
 
 .gericht .beilagen {
     margin: 20px -5px -5px -5px;
     padding: 8px;
     background-color: var(--background-gray);
-    font-size: 0.9em;
     text-align: end;
     border-radius: 5px;
 }
@@ -309,25 +321,17 @@ html {
 }
 
 @media (max-width: 600px) {
-
     .gericht .size .preis {
         bottom: -1.6em;
     }
-}
 
-@media (min-width: 601px) and (max-width: 1024px) {}
-
-@media (min-width: 1025px) {
-    .section-title {
-        font-size: 2.5em;
-    }
-
-    .gericht-titel {
-        font-size: 1.8em;
+    .kastanie-background {
+        width: 60vw;
+        height: 60vw;
+        right: 0%;
     }
 }
 
-/* === Kastanie SVG Hintergrund === */
 .kastanie-background {
     position: fixed;
     bottom: 0;
@@ -342,18 +346,12 @@ html {
     z-index: -1;
     transform: rotate(-35deg);
     pointer-events: none;
+    will-change: transform;
+    /* für rotation */
 }
 
 .kastanie-background img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-}
-
-@media (max-width: 600px) {
-    .kastanie-background {
-        width: 60vw;
-        height: 60vw;
-        right: 0%;
-    }
 }
