@@ -1,14 +1,88 @@
 /* === Farbvariablen === */
-:root {
+:root,
+[data-theme="light"] {
+    /* Light Mode (Standard und manuell) */
+
+    /* === Grundfarben === */
     --primary-green: #7ea12c;
     --warm-beige: #DFCB97;
     --dark-brown: #291d11;
     --white: #ffffff;
     --black: #000000;
-    --light-gray: #ccc;
+
+    /* === Grautöne === */
     --medium-gray: #888;
     --dark-gray: #555;
-    --background-gray: #e9e9e9;
+    --gericht-border: #ccc;
+
+    /* === Komponenten-Hintergründe === */
+    --body-background: #DFCB97;
+    --menu-background: rgba(223, 203, 151, 0.9);
+    --section-title-background: rgba(255, 255, 255, 0.65);
+    --gericht-background: rgba(255, 255, 255, 0.75);
+    --beilagen-background: rgba(233, 233, 233, 0.01);
+
+    /* === Textfarben === */
+    --section-title-color: #000000;
+    --gericht-text-color: #000000;
+}
+
+/* Dark Mode Werte - nur hier definiert! */
+:root {
+    --dark-primary-green: #9bc53d;
+    --dark-warm-beige: #2d2922;
+    --dark-brown-color: #e8d4a6;
+    --dark-white: #1a1a1a;
+    --dark-black: #ffffff;
+    --dark-medium-gray: #999;
+    --dark-dark-gray: #bbb;
+    --dark-gericht-border: #292929;
+    --dark-body-background: #2d2922;
+    --dark-menu-background: rgba(45, 41, 34, 0.9);
+    --dark-section-title-background: rgba(0, 0, 0, 0.65);
+    --dark-gericht-background: rgba(26, 26, 26, 0.75);
+    --dark-beilagen-background: rgba(51, 51, 51, 0.3);
+    --dark-section-title-color: #DFCB97;
+    --dark-gericht-text-color: #DFCB97;
+}
+
+/* Dark Mode - System und manuell verwenden gleiche Werte */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --primary-green: var(--dark-primary-green);
+        --warm-beige: var(--dark-warm-beige);
+        --dark-brown: var(--dark-brown-color);
+        --white: var(--dark-white);
+        --black: var(--dark-black);
+        --medium-gray: var(--dark-medium-gray);
+        --dark-gray: var(--dark-dark-gray);
+        --gericht-border: var(--dark-gericht-border);
+        --body-background: var(--dark-body-background);
+        --menu-background: var(--dark-menu-background);
+        --section-title-background: var(--dark-section-title-background);
+        --gericht-background: var(--dark-gericht-background);
+        --beilagen-background: var(--dark-beilagen-background);
+        --section-title-color: var(--dark-section-title-color);
+        --gericht-text-color: var(--dark-gericht-text-color);
+    }
+}
+
+[data-theme="dark"] {
+    --primary-green: var(--dark-primary-green);
+    --warm-beige: var(--dark-warm-beige);
+    --dark-brown: var(--dark-brown-color);
+    --white: var(--dark-white);
+    --black: var(--dark-black);
+    --medium-gray: var(--dark-medium-gray);
+    --dark-gray: var(--dark-dark-gray);
+    --gericht-border: var(--dark-gericht-border);
+    --body-background: var(--dark-body-background);
+    --menu-background: var(--dark-menu-background);
+    --section-title-background: var(--dark-section-title-background);
+    --gericht-background: var(--dark-gericht-background);
+    --beilagen-background: var(--dark-beilagen-background);
+    --section-title-color: var(--dark-section-title-color);
+    --gericht-text-color: var(--dark-gericht-text-color);
 }
 
 * {
@@ -28,7 +102,7 @@ body {
     font-weight: 300;
     font-style: normal;
     font-variation-settings: "wdth" 100;
-    background-color: var(--warm-beige);
+    background-color: var(--body-background);
 }
 
 /* === Loader === */
@@ -65,9 +139,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    background: rgba(223, 203, 151, 0.9);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--menu-background);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     overflow-x: auto;
     white-space: nowrap;
     scrollbar-width: none;
@@ -182,14 +256,14 @@ body {
     font-weight: 400;
     font-style: normal;
     font-size: 1.9em;
-    color: var(--black);
-    background-color: rgba(255, 255, 255, 0.65);
+    color: var(--section-title-color);
+    background-color: var(--section-title-background);
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(5px);
     padding: 0px 20px;
     width: fit-content;
     border-radius: 8px;
-    border: 3px solid var(--light-gray);
+    border: 3px solid var(--gericht-border);
     box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
     text-align: center;
     z-index: 20;
@@ -223,14 +297,15 @@ body {
     margin: 10px 0;
     padding: 15px;
     padding-bottom: 1em;
-    border: 3px solid var(--light-gray);
+    border: 3px solid var(--gericht-border);
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.75);
+    background: var(--gericht-background);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     text-align: center;
     position: relative;
     box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    color: var(--gericht-text-color);
 }
 
 .gericht-titel {
@@ -238,6 +313,7 @@ body {
     font-weight: 400;
     font-style: normal;
     font-size: 1.6em;
+    color: var(--gericht-text-color);
 }
 
 .gericht img {
@@ -259,6 +335,8 @@ body {
 .gericht .preis-liste {
     display: flex;
     justify-content: end;
+    position: relative;
+    z-index: 10;
 }
 
 .gericht .size {
@@ -297,15 +375,20 @@ body {
 .gericht .beilagen {
     margin: 20px -5px -5px -5px;
     padding: 8px;
-    background-color: var(--background-gray);
+    background-color: var(--beilagen-background);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     text-align: end;
     border-radius: 5px;
+    max-width: 500px;
+    margin-left: auto;
 }
 
 .gericht .beilagen>div {
     text-align: left;
     font-family: "Handlee", cursive;
     font-weight: 400;
+    color: var(--gericht-text-color);
 }
 
 .gericht .beilage-liste {
@@ -354,4 +437,100 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+
+/* === Dark Mode Toggle Button === */
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px solid var(--gericht-border);
+    background: var(--section-title-background);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-toggle:focus {
+    outline: 2px solid var(--primary-green);
+    outline-offset: 4px;
+}
+
+.dark-mode-toggle .sun-icon,
+.dark-mode-toggle .moon-icon {
+    transition: all 0.3s ease;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode-toggle .sun-icon {
+    font-size: 36px;
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.dark-mode-toggle .moon-icon {
+    font-size: 28px;
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
+    position: absolute;
+}
+
+/* Dark Mode Button States - nur wenn kein manueller Modus gesetzt ist */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .dark-mode-toggle .sun-icon {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0.5);
+    }
+
+    :root:not([data-theme]) .dark-mode-toggle .moon-icon {
+        opacity: 1;
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+[data-theme="dark"] .dark-mode-toggle .sun-icon {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+}
+
+[data-theme="dark"] .dark-mode-toggle .moon-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.dark-mode-toggle[data-mode="dark"] .sun-icon {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.5);
+}
+
+.dark-mode-toggle[data-mode="dark"] .moon-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.dark-mode-toggle[data-mode="light"] .sun-icon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.dark-mode-toggle[data-mode="light"] .moon-icon {
+    opacity: 0;
+    transform: rotate(180deg) scale(0.5);
 }

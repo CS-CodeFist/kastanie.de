@@ -167,3 +167,60 @@ fetch(`data.json?t=${timestamp}`)
   .catch(error => {
     console.error("Fehler beim Laden der Daten:", error);
   });
+
+// Dark Mode Toggle direkt initialisieren, sobald das DOM geladen ist
+document.addEventListener('DOMContentLoaded', () => {
+    initDarkModeToggle();
+});
+
+// Zusätzliche Initialisierung bei window.load
+window.addEventListener('load', () => {
+    initDarkModeToggle();
+});
+
+// Dark Mode Toggle Funktionalität
+function initDarkModeToggle() {
+    const toggleButton = document.getElementById('darkModeToggle');
+    if (!toggleButton) return;
+
+    // Aktuellen Modus vom System oder localStorage laden
+    const savedMode = localStorage.getItem('darkMode');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let currentMode;
+    if (savedMode) {
+        currentMode = savedMode;
+    } else {
+        currentMode = systemPrefersDark ? 'dark' : 'light';
+    }
+    
+    updateDarkMode(currentMode);
+    toggleButton.setAttribute('data-mode', currentMode);
+    
+    // Click Handler
+    toggleButton.addEventListener('click', () => {
+        const newMode = currentMode === 'dark' ? 'light' : 'dark';
+        currentMode = newMode;
+        updateDarkMode(newMode);
+        toggleButton.setAttribute('data-mode', newMode);
+        localStorage.setItem('darkMode', newMode);
+    });
+    
+    // System-Präferenz-Änderungen überwachen (falls kein manueller Modus gesetzt)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('darkMode')) {
+            const newMode = e.matches ? 'dark' : 'light';
+            currentMode = newMode;
+            updateDarkMode(newMode);
+            toggleButton.setAttribute('data-mode', newMode);
+        }
+    });
+}
+
+function updateDarkMode(mode) {
+    if (mode === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
