@@ -1,17 +1,19 @@
 # Kastanie.de - Digitale Speisekarte
 
-Elegante, responsive Speisekarte mit Parallax-Effekten und saisonalen Animationen.
+Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen Animationen.
 
 ## ✨ Features
 
 - **Parallax-Scrolling** mit 3D-Transformationen
 - **Glasmorphismus** mit backdrop-filter Effekten
+- **Dark/Light Mode** - Automatische Systemerkennung + manueller Toggle
 - **Responsive Design** für alle Geräte
 - **Saisonale Animationen** (Frühling, Sommer, Herbst, Winter, Party)
 - **Editor-Interface** zur Speisekarten-Verwaltung
 - **Intelligente Bildverarbeitung** mit automatischer Optimierung
 - **Flexible Preisstruktur** mit verschiedenen Größen
 - **Kastanie-SVG Hintergrund** als Branding-Element
+- **Konfigurierbare Zusatzstoffe-Titel** für individuelle Beschriftungen
 
 ## 🔧 Tech Stack & Externe Dependencies
 
@@ -52,8 +54,31 @@ Elegante, responsive Speisekarte mit Parallax-Effekten und saisonalen Animatione
 
 ### Bilddarstellung
 - **Responsive Images**: `max-width: 100%` mit Media Query Anpassungen
-- **Lazy Loading**: Optimierte Performance durch bedarfsgerechtes Laden
-- **Format-Optimierung**: WebP für moderne Browser, Fallbacks für ältere
+- **Optimierte Performance**: WebP-Format für moderne Browser
+- **Cross-Browser Kompatibilität**: WebP wird von 95%+ der Browser unterstützt
+- **SVG-Integration**: Kastanie-Hintergrundbild als skalierbare Vektorgrafik
+
+## 🎯 Editor Features
+
+### Content Management
+- **Drag & Drop Sortierung** für Menüs und Gerichte
+- **Live-Vorschau** während der Bearbeitung
+- **Template-System** für wiederverwendbare Speisekarten-Layouts
+- **Archiv-Funktionalität** mit Versionsverwaltung
+- **Bulk-Operations** für effiziente Content-Verwaltung
+
+### Erweiterte Funktionen
+- **Konfigurierbare Zusatzstoffe-Titel** (z.B. "Inhaltsstoffe", "Allergene", "Zusätze")
+- **Mehrsprachige Unterstützung** durch Template-basierte Struktur
+- **Preislisten-Management** mit bis zu 3 Größenvarianten pro Gericht
+- **Beilagen-System** mit individuellen Aufpreisen
+- **Tag-System** für besondere Kennzeichnungen (Neu, Empfehlung, etc.)
+
+### Benutzerfreundlichkeit
+- **Kollabierbare Sektionen** für bessere Übersicht bei großen Menüs
+- **Sticky Headers** in langen Listen
+- **Tastatur-Navigation** und Accessibility-Features
+- **Auto-Save Funktionalität** verhindert Datenverlust
 
 ## 📁 Struktur
 
@@ -82,14 +107,16 @@ Elegante, responsive Speisekarte mit Parallax-Effekten und saisonalen Animatione
 
 ## 🎨 Design
 
-### Farben
-- Primary Green: `#7ea12c`
-- Warm Beige: `#DFCB97`
-- Dark Brown: `#291d11`
+### Farben - Light Mode
+- **Primary Green**: `#7ea12c` - Hauptakzentfarbe
+- **Warm Beige**: `#DFCB97` - Hintergrundfarbe 
+- **Dark Brown**: `#291d11` - Textfarbe
 
-### Fonts
-- **Handlee** - Überschriften (Google Fonts)
-- **Noto Sans** - Text (Google Fonts)
+### Farben - Dark Mode
+- **Primary Green**: `#9bc53d` - Hellerer Akzent für besseren Kontrast
+- **Dark Background**: `#2d2922` - Warmer dunkler Hintergrund
+- **Light Text**: `#DFCB97` - Warmer Beige-Ton für Text
+
 
 ## 🚀 Setup
 
@@ -110,13 +137,4 @@ Elegante, responsive Speisekarte mit Parallax-Effekten und saisonalen Animatione
    - `editor.php` - Admin-Interface
    - Login-Credentials in `login.php`
 
-## ⚠️ Browser-Support
-
-- **Chrome/Safari**: Vollständig (backdrop-filter + 3D transforms)
-- **Firefox/Edge**: Vollständig  
-- **Ältere Browser**: `backdrop-filter` Fallback auf Transparenz
-- **Mobile**: Optimiert für Touch-Interfaces
-
----
-
-*Entwickelt für die digitale Gastronomie* 🌰
+*Entwickelt für die digitale Gastronomie mit Fokus auf moderne Web-Standards und optimale User Experience* 🌰
