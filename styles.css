@@ -374,14 +374,12 @@ body {
 
 .gericht .beilagen {
     margin: 20px -5px -5px -5px;
-    padding: 8px;
+    padding: 10px 8px 8px 8px;
     background-color: var(--beilagen-background);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     text-align: end;
     border-radius: 5px;
-    max-width: 500px;
-    margin-left: auto;
 }
 
 .gericht .beilagen>div {
@@ -403,15 +401,9 @@ body {
     white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-    .gericht .size .preis {
-        bottom: -1.6em;
-    }
-
-    .kastanie-background {
-        width: 60vw;
-        height: 60vw;
-        right: 0%;
+@media (min-width: 980px) {
+    .gericht .beilagen>div {
+        padding: 15px 8px 8px 8px;
     }
 }
 
