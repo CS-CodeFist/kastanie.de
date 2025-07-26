@@ -44,6 +44,12 @@ fetch(`data.json?t=${timestamp}`)
     const menuContainer = document.getElementById("menu");
     const contentContainer = document.getElementById("content");
 
+    // Logo-Beschreibung finden
+    const logoItem = data.content.find(item => item.menutitel.toLowerCase() === "logo");
+    const logoBeschreibung = logoItem?.beschreibung || null;
+    
+    let isFirstNormalMenu = true; // Tracker für das erste normale Menü
+
     data.content.forEach((item) => {
         const isLogo = item.menutitel.toLowerCase() === "logo";
         const isInfotext = item.menutitel.toLowerCase() === "infotext";
@@ -72,27 +78,22 @@ fetch(`data.json?t=${timestamp}`)
                 link: item.menutitel.toLowerCase(),
                 image: item.image,
                 titel: item.titel,
-                gerichte: processedGerichte
+                gerichte: processedGerichte,
+                isLogo: isFirstNormalMenu, // Logo-Beschreibung nur beim ersten normalen Menü
+                beschreibung: isFirstNormalMenu ? logoBeschreibung : null
             });
         
             contentContainer.insertAdjacentHTML("beforeend", sectionHTML);
-        } else if (isInfotext && item.titel) {
+            isFirstNormalMenu = false; // Nach dem ersten normalen Menü auf false setzen
+        } else if (isInfotext && item.beschreibung) {
             // Infotext als speziellen Bereich rendern
             const infotextHTML = renderTemplate("template-infotext", {
-                infotext: item.titel,
+                beschreibung: item.beschreibung,
                 image: item.image
             });
             contentContainer.insertAdjacentHTML("beforeend", infotextHTML);
         }
     });
-
-    // Infotext am Ende hinzufügen, falls vorhanden
-    if (data.infotext) {
-        const infotextHTML = renderTemplate("template-infotext", {
-            infotext: data.infotext
-        });
-        contentContainer.insertAdjacentHTML("beforeend", infotextHTML);
-    }
       
     const sections = document.querySelectorAll(".section-content");
     const menuLinks = document.querySelectorAll(".menu a");

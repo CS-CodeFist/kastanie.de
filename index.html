@@ -38,12 +38,18 @@
 
 	<!-- Abschnitt-Template -->
 	<script id="template-section" type="text/template">
+		{{#if isLogo}}{{#if beschreibung}}
+		<div class="logo-welcome-text">
+			{{{nl2br beschreibung}}}
+		</div>
+		{{/if}}{{/if}}
 		<div class="section-image" style="background-image: url('{{image}}');"></div>
 		<div class="section-title">{{titel}}</div>
 		<div class="section-content" id="{{link}}">
 			<div class="gerichte-container">
-			{{#each gerichte}}
+				{{#each gerichte}}
 				<div class="gericht">
+
 					<div class="gericht-titel">{{titel}}</div>
 					<p>{{{nl2br beschreibung}}}</p>
 					{{#if zusatzstoffe}}
@@ -94,7 +100,7 @@
 			<img src="{{image}}" alt="Infotext Bild" style="width: 100%; height: auto; border-radius: 8px;" />
 			{{/if}}
 			<div class="gericht" style="{{#if image}}margin: -20% 10px 10px 10px; width: calc(100% - 20px);{{/if}}">
-				{{{nl2br infotext}}}
+				{{{nl2br beschreibung}}}
 			</div>
 		</div>
 	</script>

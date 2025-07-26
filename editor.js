@@ -298,14 +298,28 @@ function render() {
 				}
 			});
 		}
+		
+		// Migration: Infotext von titel nach beschreibung verschieben
+		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+		if (isInfotext && menu.titel && !menu.beschreibung) {
+			menu.beschreibung = menu.titel;
+			menu.titel = "";
+		}
 	});
 
 	const isInitial = !window.__renderedOnce;
 	window.__renderedOnce = true;
 
 	// Sichtbarkeit der Gerichte-Wrapper (collapsed = true → eingeklappt)
+	// Nur für normale Menüs (nicht Logo/Infotext)
+	const normalMenus = window.data.content.filter(menu => {
+		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+		const isLogo = menu.menutitel && menu.menutitel.toLowerCase() === "logo";
+		return !isInfotext && !isLogo;
+	});
+
 	const sichtbarkeit = isInitial
-		? window.data.content.map(() => false) // Initial alle eingeklappt
+		? normalMenus.map(() => false) // Initial alle eingeklappt
 		: Array.from(document.querySelectorAll(".gerichte-wrapper")).map(div =>
 			!div.classList.contains("collapsed")
 		);
@@ -313,20 +327,26 @@ function render() {
 	// Editor komplett leeren
 	editor.innerHTML = "";
 
+	let normalMenuIndex = 0; // Separate Zählung für normale Menüs
+
 	window.data.content.forEach((menu, menuIndex) => {
 		// Spezielle Behandlung für infotext und logo
 		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
 		const isLogo = menu.menutitel && menu.menutitel.toLowerCase() === "logo";
+		
+		// Für normale Menüs: aktueller Index im normalMenus Array
+		const currentNormalIndex = (!isInfotext && !isLogo) ? normalMenuIndex++ : -1;
 		
 		// Template-Daten für das Menü vorbereiten
 		const menuData = {
 			menutitel: menu.menutitel || "",
 			titel: menu.titel || "",
 			image: menu.image || "",
+			beschreibung: menu.beschreibung || "", // Begrüßungstext für Logo
 			isInfotext: isInfotext,
 			isLogo: isLogo,
-			gerichteVisible: (isInfotext || isLogo) ? false : (sichtbarkeit[menuIndex] || false),
-			gerichteToggleText: sichtbarkeit[menuIndex] ? "🔽 Gerichte ausblenden" : "▶️ Gerichte anzeigen",
+			gerichteVisible: (isInfotext || isLogo) ? false : (sichtbarkeit[currentNormalIndex] || false),
+			gerichteToggleText: (currentNormalIndex >= 0 && sichtbarkeit[currentNormalIndex]) ? "🔽 Gerichte ausblenden" : "▶️ Gerichte anzeigen",
 			allToggleText: menu.gerichte && menu.gerichte.every(g => g._collapsed) ? "▶️ Maximieren" : "🔽 Minimieren",
 			gerichte: (isInfotext || isLogo) ? [] : (menu.gerichte || []).map(gericht => ({
 				...gericht,
@@ -346,7 +366,7 @@ function render() {
 		const menuElement = tempDiv.firstElementChild;
 
 		// Event Listeners hinzufügen
-		setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit);
+		setupMenuEventListeners(menuElement, menu, menuIndex, currentNormalIndex, sichtbarkeit);
 
 		editor.appendChild(menuElement);
 	});
@@ -420,7 +440,7 @@ function ensureInfotextExists() {
 	}
 }
 
-function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
+function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, sichtbarkeit) {
 	// Spezielle Behandlung für infotext und logo
 	const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
 	const isLogo = menu.menutitel && menu.menutitel.toLowerCase() === "logo";
@@ -436,10 +456,10 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 		titelInput.oninput = (e) => menu.titel = e.target.value;
 	}
 
-	// Textarea für infotext
-	const infotextTextarea = menuElement.querySelector('textarea[data-field="titel"]');
-	if (infotextTextarea && isInfotext) {
-		infotextTextarea.oninput = (e) => menu.titel = e.target.value;
+	// Beschreibung für Logo (Begrüßungstext) und Infotext
+	const beschreibungTextarea = menuElement.querySelector('textarea[data-field="beschreibung"]');
+	if (beschreibungTextarea) {
+		beschreibungTextarea.oninput = (e) => menu.beschreibung = e.target.value;
 	}
 
 	// Bild-Auswahl (für normale Menüs und infotext)
@@ -452,7 +472,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 	}
 
 	// Toggle-Buttons (nur für normale Menüs)
-	if (!isInfotext && !isLogo) {
+	if (!isInfotext && !isLogo && normalMenuIndex >= 0) {
 		const toggleBtn = menuElement.querySelector('.toggle-gerichte');
 		const toggleAllBtn = menuElement.querySelector('.toggle-all-gerichte');
 		const gerichteWrapper = menuElement.querySelector('.gerichte-wrapper');
@@ -460,7 +480,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 		if (toggleBtn) {
 			toggleBtn.onclick = () => {
 				gerichteWrapper.classList.toggle("collapsed");
-				sichtbarkeit[menuIndex] = !gerichteWrapper.classList.contains("collapsed");
+				sichtbarkeit[normalMenuIndex] = !gerichteWrapper.classList.contains("collapsed");
 				render();
 			};
 		}

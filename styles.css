@@ -216,6 +216,15 @@ body {
     overflow-x: hidden;
     perspective: 10px;
     transform-style: preserve-3d;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer und Edge */
+}
+
+/* Webkit-Scrollbar verstecken (Chrome, Safari, etc.) */
+.container::-webkit-scrollbar {
+    display: none;
 }
 
 /* Reduce motion respektieren */
@@ -314,6 +323,28 @@ body {
     font-style: normal;
     font-size: 1.6em;
     color: var(--gericht-text-color);
+}
+
+.logo-welcome-text {
+    position: absolute;
+    top: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    text-align: center;
+    background: var(--gericht-background);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 3px solid var(--gericht-border);
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.1);
+    font-family: "Handlee", cursive;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 1.6em;
+    color: var(--gericht-text-color);
+    max-width: 80%;
 }
 
 .gericht img {

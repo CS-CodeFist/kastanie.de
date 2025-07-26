@@ -142,7 +142,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 			<div class="infotext-content">
 				<div class="image-row">
 					<div class="text-fields">
-						<label>Infotext (HTML möglich)<textarea rows="6" data-field="titel" placeholder="Text der am Ende der Speisekarte angezeigt wird...">{{titel}}</textarea></label>
+						<label>Infotext (HTML möglich)<textarea rows="6" data-field="beschreibung" placeholder="Text der am Ende der Speisekarte angezeigt wird...">{{beschreibung}}</textarea></label>
 					</div>
 					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
 				</div>
@@ -153,6 +153,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				<div class="image-row">
 					<div class="text-fields">
 						<label>Logo-Link<input type="text" value="{{titel}}" data-field="titel" placeholder="https://..." /></label>
+						<label>Begrüßungstext<textarea rows="4" data-field="beschreibung" placeholder="Herzlich willkommen in unserem Restaurant...">{{beschreibung}}</textarea></label>
 					</div>
 					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
 				</div>
