@@ -46,18 +46,22 @@ fetch(`data.json?t=${timestamp}`)
 
     data.content.forEach((item) => {
         const isLogo = item.menutitel.toLowerCase() === "logo";
+        const isInfotext = item.menutitel.toLowerCase() === "infotext";
        
-        const html = renderTemplate("template-menu-item", {
-            ...item,
-            isLogo: isLogo,
-            link: isLogo ? "http://www.kastanie-moltzow.de" : "#"+item.menutitel.toLowerCase()
-        });
+        // Logo im Menü anzeigen, aber infotext nicht
+        if (!isInfotext) {
+            const html = renderTemplate("template-menu-item", {
+                ...item,
+                isLogo: isLogo,
+                link: isLogo ? "http://www.kastanie-moltzow.de" : "#"+item.menutitel.toLowerCase()
+            });
 
-        const wrapper = document.createElement("div");
-        wrapper.innerHTML = html.trim();
-        const linkElement = wrapper.firstChild;
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = html.trim();
+            const linkElement = wrapper.firstChild;
 
-        menuContainer.appendChild(linkElement);
+            menuContainer.appendChild(linkElement);
+        }
 
         if (Array.isArray(item.gerichte) && item.gerichte.length > 0) {
             // Gerichte-Daten für Handlebars vorbereiten
@@ -74,8 +78,23 @@ fetch(`data.json?t=${timestamp}`)
             });
         
             contentContainer.insertAdjacentHTML("beforeend", sectionHTML);
+        } else if (isInfotext && item.titel) {
+            // Infotext als speziellen Bereich rendern
+            const infotextHTML = renderTemplate("template-infotext", {
+                infotext: item.titel,
+                image: item.image
+            });
+            contentContainer.insertAdjacentHTML("beforeend", infotextHTML);
         }
     });
+
+    // Infotext am Ende hinzufügen, falls vorhanden
+    if (data.infotext) {
+        const infotextHTML = renderTemplate("template-infotext", {
+            infotext: data.infotext
+        });
+        contentContainer.insertAdjacentHTML("beforeend", infotextHTML);
+    }
       
     const sections = document.querySelectorAll(".section-content");
     const menuLinks = document.querySelectorAll(".menu a");

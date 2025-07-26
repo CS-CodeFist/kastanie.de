@@ -269,6 +269,12 @@ function createImageSelector(imageData, onChange) {
 function render() {
 	const editor = document.getElementById("editor");
 
+	// Scroll-Position vor dem Re-Rendering speichern
+	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+	// Infotext-Menü erstellen falls nicht vorhanden
+	ensureInfotextExists();
+
 	// Rückwärtskompatibilität: zusatzstoffetitel für bestehende Gerichte setzen
 	window.data.content.forEach(menu => {
 		if (menu.gerichte) {
@@ -290,18 +296,23 @@ function render() {
 			!div.classList.contains("collapsed")
 		);
 
+	// Editor komplett leeren
 	editor.innerHTML = "";
 
 	window.data.content.forEach((menu, menuIndex) => {
+		// Spezielle Behandlung für infotext
+		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+		
 		// Template-Daten für das Menü vorbereiten
 		const menuData = {
 			menutitel: menu.menutitel || "",
 			titel: menu.titel || "",
 			image: menu.image || "",
-			gerichteVisible: sichtbarkeit[menuIndex] || false,
+			isInfotext: isInfotext,
+			gerichteVisible: isInfotext ? false : (sichtbarkeit[menuIndex] || false),
 			gerichteToggleText: sichtbarkeit[menuIndex] ? "🔽 Gerichte ausblenden" : "▶️ Gerichte anzeigen",
 			allToggleText: menu.gerichte && menu.gerichte.every(g => g._collapsed) ? "▶️ Maximieren" : "🔽 Minimieren",
-			gerichte: (menu.gerichte || []).map(gericht => ({
+			gerichte: isInfotext ? [] : (menu.gerichte || []).map(gericht => ({
 				...gericht,
 				zusatzstoffe: gericht.zusatzstoffe || [], // Direkt das Array verwenden, join wird im Template gemacht
 				preisliste: gericht.preisliste || [],
@@ -338,21 +349,57 @@ function render() {
 			render();
 		}
 	});
+
+	// Scroll-Position nach dem Re-Rendering wiederherstellen
+	setTimeout(() => {
+		window.scrollTo(0, scrollTop);
+	}, 0);
+}
+
+function ensureInfotextExists() {
+	// Prüfen, ob bereits ein infotext-Menü existiert
+	const hasInfotext = window.data.content.some(menu => 
+		menu.menutitel && menu.menutitel.toLowerCase() === "infotext"
+	);
+	
+	// Falls nicht, erstelle eines am Ende
+	if (!hasInfotext) {
+		window.data.content.push({
+			menutitel: "infotext",
+			titel: "",
+			image: "",
+			gerichte: []
+		});
+	}
 }
 
 function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
+	// Spezielle Behandlung für infotext
+	const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+	
 	// Input-Felder für Menü-Header
 	const menutitelInput = menuElement.querySelector('input[data-field="menutitel"]');
-	if (menutitelInput) {
+	if (menutitelInput && !isInfotext) {
 		menutitelInput.oninput = (e) => menu.menutitel = e.target.value;
 	}
 
 	const titelInput = menuElement.querySelector('input[data-field="titel"]');
 	if (titelInput) {
-		titelInput.oninput = (e) => menu.titel = e.target.value;
+		if (isInfotext) {
+			// Für infotext wird das titel-Feld als Infotext-Inhalt verwendet
+			titelInput.oninput = (e) => menu.titel = e.target.value;
+		} else {
+			titelInput.oninput = (e) => menu.titel = e.target.value;
+		}
 	}
 
-	// Bild-Auswahl
+	// Textarea für infotext
+	const infotextTextarea = menuElement.querySelector('textarea[data-field="titel"]');
+	if (infotextTextarea && isInfotext) {
+		infotextTextarea.oninput = (e) => menu.titel = e.target.value;
+	}
+
+	// Bild-Auswahl (für normale Menüs und infotext)
 	const imageThumb = menuElement.querySelector('.image-thumb');
 	if (imageThumb) {
 		imageThumb.onclick = () => openImageOverlay((newSrc) => {
@@ -361,53 +408,57 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 		}, menu.image);
 	}
 
-	// Toggle-Buttons
-	const toggleBtn = menuElement.querySelector('.toggle-gerichte');
-	const toggleAllBtn = menuElement.querySelector('.toggle-all-gerichte');
-	const gerichteWrapper = menuElement.querySelector('.gerichte-wrapper');
+	// Toggle-Buttons (nur für normale Menüs)
+	if (!isInfotext) {
+		const toggleBtn = menuElement.querySelector('.toggle-gerichte');
+		const toggleAllBtn = menuElement.querySelector('.toggle-all-gerichte');
+		const gerichteWrapper = menuElement.querySelector('.gerichte-wrapper');
 
-	if (toggleBtn) {
-		toggleBtn.onclick = () => {
-			gerichteWrapper.classList.toggle("collapsed");
-			sichtbarkeit[menuIndex] = !gerichteWrapper.classList.contains("collapsed");
-			render();
-		};
-	}
-
-	if (toggleAllBtn) {
-		toggleAllBtn.onclick = () => {
-			const allCollapsed = menu.gerichte.every(g => g._collapsed);
-			menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
-			render();
-		};
-	}
-
-	// Gericht-Event-Listeners
-	setupGerichtEventListeners(menuElement, menu);
-
-	// Menü löschen
-	const deleteMenuBtn = menuElement.querySelector('.delete-menu');
-	if (deleteMenuBtn) {
-		deleteMenuBtn.onclick = () => {
-			if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
-				window.data.content.splice(menuIndex, 1);
+		if (toggleBtn) {
+			toggleBtn.onclick = () => {
+				gerichteWrapper.classList.toggle("collapsed");
+				sichtbarkeit[menuIndex] = !gerichteWrapper.classList.contains("collapsed");
 				render();
-			}
-		};
+			};
+		}
+
+		if (toggleAllBtn) {
+			toggleAllBtn.onclick = () => {
+				const allCollapsed = menu.gerichte.every(g => g._collapsed);
+				menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
+				render();
+			};
+		}
+
+		// Gericht-Event-Listeners
+		setupGerichtEventListeners(menuElement, menu);
+
+		// Gerichte-Sortable
+		const gerichteWrapperForSortable = menuElement.querySelector('.gerichte-wrapper');
+		if (gerichteWrapperForSortable) {
+			Sortable.create(gerichteWrapperForSortable, {
+				animation: 150,
+				handle: ".gericht-header .drag-icon",
+				onEnd: function(evt) {
+					const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
+					menu.gerichte.splice(evt.newIndex, 0, moved);
+					render();
+				}
+			});
+		}
 	}
 
-	// Gerichte-Sortable
-	const gerichteWrapperForSortable = menuElement.querySelector('.gerichte-wrapper');
-	if (gerichteWrapperForSortable) {
-		Sortable.create(gerichteWrapperForSortable, {
-			animation: 150,
-			handle: ".gericht-header .drag-icon",
-			onEnd: function(evt) {
-				const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
-				menu.gerichte.splice(evt.newIndex, 0, moved);
-				render();
-			}
-		});
+	// Menü löschen (nur für normale Menüs, nicht für infotext)
+	if (!isInfotext) {
+		const deleteMenuBtn = menuElement.querySelector('.delete-menu');
+		if (deleteMenuBtn) {
+			deleteMenuBtn.onclick = () => {
+				if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
+					window.data.content.splice(menuIndex, 1);
+					render();
+				}
+			};
+		}
 	}
 }
 

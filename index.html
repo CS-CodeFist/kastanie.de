@@ -1,102 +1,114 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kastanie Moltzow</title>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Kastanie Moltzow</title>
 
-    <link rel="stylesheet" href="styles.css?20250722f" />
-    <link rel="stylesheet" href="seasons.css?20250402a" />
+	<link rel="stylesheet" href="styles.css?20250722f" />
+	<link rel="stylesheet" href="seasons.css?20250402a" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div class="kastanie-background">
-      <img src="bilder/Kastanie.svg" alt="Kastanie" />
-    </div>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+	<div class="kastanie-background">
+	<img src="bilder/Kastanie.svg" alt="Kastanie" />
+	</div>
 
-    <div id="loader">
+	<div id="loader">
 		<div class="spinner"></div>
 		<p>Speisekarte wird geladen…</p>
 	</div>
-    <div class="menu-container">
-      <nav class="menu" id="menu"></nav>
-    </div>
-    <div class="container" id="content"></div>
+	<div class="menu-container">
+	<nav class="menu" id="menu"></nav>
+	</div>
+	<div class="container" id="content"></div>
 
-    <!-- Menü-Template -->
-    <script id="template-menu-item" type="text/template">
-      <a href="{{link}}" target="_self" class="menu-item {{#if isLogo}}logo{{/if}}">
-        <img src="{{image}}" alt="{{menutitel}}">
-        {{#unless isLogo}}
-        <div class="menu-title">{{menutitel}}</div>
-        {{/unless}}
-      </a>
-    </script>
+	<!-- Menü-Template -->
+	<script id="template-menu-item" type="text/template">
+	<a href="{{link}}" target="_self" class="menu-item {{#if isLogo}}logo{{/if}}">
+		<img src="{{image}}" alt="{{menutitel}}">
+		{{#unless isLogo}}
+		<div class="menu-title">{{menutitel}}</div>
+		{{/unless}}
+	</a>
+	</script>
 
-    <!-- Abschnitt-Template -->
-    <script id="template-section" type="text/template">
-      <div class="section-image" style="background-image: url('{{image}}');"></div>
-      <div class="section-title">{{titel}}</div>
-      <div class="section-content" id="{{link}}">
-        <div class="gerichte-container">
-          {{#each gerichte}}
-            <div class="gericht">
-                <div class="gericht-titel">{{titel}}</div>
-                <p>{{{nl2br beschreibung}}}</p>
-                {{#if zusatzstoffe}}
-                <p class="zusatz">{{#if zusatzstoffetitel}}<strong>{{zusatzstoffetitel}}:</strong> {{/if}}{{zusatzstoffe}}</p>
-                {{/if}}
+	<!-- Abschnitt-Template -->
+	<script id="template-section" type="text/template">
+		<div class="section-image" style="background-image: url('{{image}}');"></div>
+		<div class="section-title">{{titel}}</div>
+		<div class="section-content" id="{{link}}">
+			<div class="gerichte-container">
+			{{#each gerichte}}
+				<div class="gericht">
+					<div class="gericht-titel">{{titel}}</div>
+					<p>{{{nl2br beschreibung}}}</p>
+					{{#if zusatzstoffe}}
+					<p class="zusatz">{{#if zusatzstoffetitel}}<strong>{{zusatzstoffetitel}}:</strong> {{/if}}{{zusatzstoffe}}</p>
+					{{/if}}
 
-                {{#if preisliste}}
-                  <div class="preis-liste">
-                    {{#each preisliste}}
-                      <div class="size">
-                        {{size}}
-                        <div class="preis">{{formatPreis preis}} €</div>
-                      </div>
-                    {{/each}}
-                  </div>
-                {{/if}}
+					{{#if preisliste}}
+					<div class="preis-liste">
+						{{#each preisliste}}
+						<div class="size">
+							{{size}}
+							<div class="preis">{{formatPreis preis}} €</div>
+						</div>
+						{{/each}}
+					</div>
+					{{/if}}
 
-                {{#if preis}}
-                  <div class="preis">{{formatPreis preis}} €</div>
-                {{/if}}
+					{{#if preis}}
+					<div class="preis">{{formatPreis preis}} €</div>
+					{{/if}}
 
-                {{#if beilagen}}
-                <div class="beilagen">
-                  {{#if beilagentitel}}<div>{{beilagentitel}}</div>{{/if}}
-                  <ul class="beilage-liste">
-                    {{#each beilagen}}
-                    <li class="beilage-item">
-                      {{name}}{{#if preis}} +{{formatPreis preis}} €{{/if}}
-                    </li>
-                    {{/each}}
-                  </ul>
-                </div>
-                {{/if}}
+					{{#if beilagen}}
+					<div class="beilagen">
+					{{#if beilagentitel}}<div>{{beilagentitel}}</div>{{/if}}
+					<ul class="beilage-liste">
+						{{#each beilagen}}
+						<li class="beilage-item">
+						{{name}}{{#if preis}} +{{formatPreis preis}} €{{/if}}
+						</li>
+						{{/each}}
+					</ul>
+					</div>
+					{{/if}}
 
-                {{#if tag}}
-                <div class="tag">{{tag}}</div>
-                {{/if}}
-              </div>
-            {{/each}}
-        </div>
-      </div>
-    </script>
+					{{#if tag}}
+					<div class="tag">{{tag}}</div>
+					{{/if}}
+				</div>
+				{{/each}}
+			</div>
+			
+		</div>
+	</script>
 
-    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Dark Mode umschalten">
-      <span class="sun-icon">☀️</span>
-      <span class="moon-icon">🌙</span>
-    </button>
+	<script type="text/template" id="template-infotext">
+		<div class="gericht" style="position: relative;">
+			{{#if image}}
+			<img src="{{image}}" alt="Infotext Bild" style="width: 100%; height: auto; border-radius: 8px;" />
+			{{/if}}
+			<div class="gericht" style="{{#if image}}margin: -20% 10px 10px 10px; width: calc(100% - 20px);{{/if}}">
+				{{{nl2br infotext}}}
+			</div>
+		</div>
+	</script>
 
-    <div class="s-elements" aria-hidden="true"></div>
+	<button class="dark-mode-toggle" id="darkModeToggle" aria-label="Dark Mode umschalten">
+	<span class="sun-icon">☀️</span>
+	<span class="moon-icon">🌙</span>
+	</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-    <script type="text/javascript" src="script.js?20250722g"></script>
-    <script type="text/javascript" src="seasons.js?202503300"></script>
+	<div class="s-elements" aria-hidden="true"></div>
 
-  </body>
+	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
+	<script type="text/javascript" src="script.js?20250726"></script>
+	<script type="text/javascript" src="seasons.js?202503300"></script>
+
+</body>
 </html>

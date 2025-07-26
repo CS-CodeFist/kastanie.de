@@ -131,11 +131,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 	<!-- TEMPLATE DEFINITIONS -->
 	<script type="text/template" id="template-menu">
-		<div class="menu">
+		<div class="menu {{#if isInfotext}}infotext-menu{{/if}}">
 			<div class="menu-header" style="display: flex; align-items: center;">
 				<button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>
-				<input type="text" value="{{menutitel}}" placeholder="Menütitel" data-field="menutitel" />
+				<input type="text" value="{{menutitel}}" placeholder="{{#if isInfotext}}infotext{{else}}Menütitel{{/if}}" data-field="menutitel" {{#if isInfotext}}readonly{{/if}} />
 			</div>
+			{{#unless isInfotext}}
 			<div class="image-row">
 				<div class="text-fields">
 					<label>Titel<input type="text" value="{{titel}}" data-field="titel" /></label>
@@ -195,8 +196,20 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				{{/each}}
 				<button type="button" class="add-gericht">➕ Gericht hinzufügen</button>
 			</div>
+			{{else}}
+			<div class="infotext-content">
+				<div class="image-row">
+					<div class="text-fields">
+						<label>Infotext (HTML möglich)<textarea rows="6" data-field="titel" placeholder="Text der am Ende der Speisekarte angezeigt wird...">{{titel}}</textarea></label>
+					</div>
+					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
+				</div>
+			</div>
+			{{/unless}}
 			<div class="button-right">
+				{{#unless isInfotext}}
 				<button type="button" class="delete-menu">🗑️ Menü löschen</button>
+				{{/unless}}
 			</div>
 		</div>
 	</script>
