@@ -224,12 +224,26 @@ async function loadArchives(templateName) {
 }
 
 window.addMenu = function() {
-	window.data.content.push({
+	// Finde den Index des Infotext-Menüs
+	const infotextIndex = window.data.content.findIndex(menu => 
+		menu.menutitel && menu.menutitel.toLowerCase() === "infotext"
+	);
+	
+	const newMenu = {
 		menutitel: "",
 		titel: "",
 		image: "",
 		gerichte: []
-	});
+	};
+	
+	// Wenn Infotext gefunden wurde, füge das neue Menü davor ein
+	if (infotextIndex !== -1) {
+		window.data.content.splice(infotextIndex, 0, newMenu);
+	} else {
+		// Fallback: am Ende hinzufügen falls kein Infotext gefunden
+		window.data.content.push(newMenu);
+	}
+	
 	render();
 };
 
@@ -300,8 +314,9 @@ function render() {
 	editor.innerHTML = "";
 
 	window.data.content.forEach((menu, menuIndex) => {
-		// Spezielle Behandlung für infotext
+		// Spezielle Behandlung für infotext und logo
 		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+		const isLogo = menu.menutitel && menu.menutitel.toLowerCase() === "logo";
 		
 		// Template-Daten für das Menü vorbereiten
 		const menuData = {
@@ -309,10 +324,11 @@ function render() {
 			titel: menu.titel || "",
 			image: menu.image || "",
 			isInfotext: isInfotext,
-			gerichteVisible: isInfotext ? false : (sichtbarkeit[menuIndex] || false),
+			isLogo: isLogo,
+			gerichteVisible: (isInfotext || isLogo) ? false : (sichtbarkeit[menuIndex] || false),
 			gerichteToggleText: sichtbarkeit[menuIndex] ? "🔽 Gerichte ausblenden" : "▶️ Gerichte anzeigen",
 			allToggleText: menu.gerichte && menu.gerichte.every(g => g._collapsed) ? "▶️ Maximieren" : "🔽 Minimieren",
-			gerichte: isInfotext ? [] : (menu.gerichte || []).map(gericht => ({
+			gerichte: (isInfotext || isLogo) ? [] : (menu.gerichte || []).map(gericht => ({
 				...gericht,
 				zusatzstoffe: gericht.zusatzstoffe || [], // Direkt das Array verwenden, join wird im Template gemacht
 				preisliste: gericht.preisliste || [],
@@ -343,6 +359,37 @@ function render() {
 		animation: 150,
 		handle: ".menu-header .drag-icon",
 		forceFallback: true,
+		
+		// Verhindere das Verschieben von Logo und Infotext
+		filter: function(evt) {
+			const menuIndex = Array.from(editor.children).indexOf(evt.item);
+			const menu = window.data.content[menuIndex];
+			const isLogo = menu && menu.menutitel && menu.menutitel.toLowerCase() === "logo";
+			const isInfotext = menu && menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+			return isLogo || isInfotext;
+		},
+		
+		// Verhindere das Droppen vor Logo oder nach Infotext
+		onMove: function(evt) {
+			const fromIndex = evt.dragged.getBoundingClientRect();
+			const toIndex = Array.from(editor.children).indexOf(evt.related);
+			
+			// Finde Logo und Infotext Positionen
+			const logoIndex = window.data.content.findIndex(menu => 
+				menu.menutitel && menu.menutitel.toLowerCase() === "logo"
+			);
+			const infotextIndex = window.data.content.findIndex(menu => 
+				menu.menutitel && menu.menutitel.toLowerCase() === "infotext"
+			);
+			
+			// Verhindere Droppen vor Logo (Position 0) oder nach Infotext (letzte Position)
+			if (toIndex <= logoIndex || toIndex >= infotextIndex) {
+				return false;
+			}
+			
+			return true;
+		},
+		
 		onEnd(evt) {
 			const movedMenu = window.data.content.splice(evt.oldIndex, 1)[0];
 			window.data.content.splice(evt.newIndex, 0, movedMenu);
@@ -374,23 +421,19 @@ function ensureInfotextExists() {
 }
 
 function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
-	// Spezielle Behandlung für infotext
+	// Spezielle Behandlung für infotext und logo
 	const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
+	const isLogo = menu.menutitel && menu.menutitel.toLowerCase() === "logo";
 	
 	// Input-Felder für Menü-Header
 	const menutitelInput = menuElement.querySelector('input[data-field="menutitel"]');
-	if (menutitelInput && !isInfotext) {
+	if (menutitelInput && !isInfotext && !isLogo) {
 		menutitelInput.oninput = (e) => menu.menutitel = e.target.value;
 	}
 
 	const titelInput = menuElement.querySelector('input[data-field="titel"]');
 	if (titelInput) {
-		if (isInfotext) {
-			// Für infotext wird das titel-Feld als Infotext-Inhalt verwendet
-			titelInput.oninput = (e) => menu.titel = e.target.value;
-		} else {
-			titelInput.oninput = (e) => menu.titel = e.target.value;
-		}
+		titelInput.oninput = (e) => menu.titel = e.target.value;
 	}
 
 	// Textarea für infotext
@@ -409,7 +452,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 	}
 
 	// Toggle-Buttons (nur für normale Menüs)
-	if (!isInfotext) {
+	if (!isInfotext && !isLogo) {
 		const toggleBtn = menuElement.querySelector('.toggle-gerichte');
 		const toggleAllBtn = menuElement.querySelector('.toggle-all-gerichte');
 		const gerichteWrapper = menuElement.querySelector('.gerichte-wrapper');
@@ -448,8 +491,8 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, sichtbarkeit) {
 		}
 	}
 
-	// Menü löschen (nur für normale Menüs, nicht für infotext)
-	if (!isInfotext) {
+	// Menü löschen (nur für normale Menüs, nicht für infotext oder logo)
+	if (!isInfotext && !isLogo) {
 		const deleteMenuBtn = menuElement.querySelector('.delete-menu');
 		if (deleteMenuBtn) {
 			deleteMenuBtn.onclick = () => {
@@ -628,9 +671,18 @@ function setupBeilagenEventListeners(gerichtElement, gericht) {
 	}
 }
 
+let savedScrollPosition = 0;
+
 function openImageOverlay(onSelect, currentSrc) {
 	currentImageTarget = onSelect;
+	
+	// Scroll-Position speichern
+	savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+	
 	document.body.classList.add("overlay-open");
+	
+	// Body an die aktuelle Scroll-Position "festkleben"
+	document.body.style.top = `-${savedScrollPosition}px`;
 
 	const grid = document.getElementById("imageLibraryGrid");
 	const refreshBtn = document.getElementById("refreshImageLibrary");
@@ -651,6 +703,11 @@ function openImageOverlay(onSelect, currentSrc) {
 
 function closeImageOverlay() {
 	document.body.classList.remove("overlay-open");
+	document.body.style.top = "";
+	
+	// Scroll-Position wiederherstellen
+	window.scrollTo(0, savedScrollPosition);
+	
 	document.getElementById("imageOverlay").style.display = "none";
 	currentImageTarget = null;
 }
@@ -913,7 +970,14 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
 });
 
 document.getElementById("optionsBtn")?.addEventListener("click", function () {
+	// Scroll-Position speichern
+	savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+	
 	document.body.classList.add("overlay-open");
+	
+	// Body an die aktuelle Scroll-Position "festkleben"
+	document.body.style.top = `-${savedScrollPosition}px`;
+	
     document.getElementById("optionsOverlay").style.display = "flex";
 	loadSeasonLayouts();
 });
@@ -921,6 +985,10 @@ document.getElementById("optionsBtn")?.addEventListener("click", function () {
 document.getElementById("closeOptionsOverlayBtn")?.addEventListener("click", function () {
     document.getElementById("optionsOverlay").style.display = "none";
 	document.body.classList.remove("overlay-open");
+	document.body.style.top = "";
+	
+	// Scroll-Position wiederherstellen
+	window.scrollTo(0, savedScrollPosition);
 });
 
 function loadSeasonLayouts() {
@@ -1028,6 +1096,10 @@ document.getElementById("saveSeasonConfigBtn").addEventListener("click", () => {
 			alert("✅ Optionen gespeichert");
 			document.getElementById("optionsOverlay").style.display = "none";
 			document.body.classList.remove("overlay-open");
+			document.body.style.top = "";
+			
+			// Scroll-Position wiederherstellen
+			window.scrollTo(0, savedScrollPosition);
 		} else {
 			alert("Fehler beim Speichern: " + result.error);
 		}

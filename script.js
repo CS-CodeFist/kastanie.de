@@ -50,13 +50,11 @@ fetch(`data.json?t=${timestamp}`)
        
         // Logo im Menü anzeigen, aber infotext nicht
         if (!isInfotext) {
-            const html = renderTemplate("template-menu-item", {
-                ...item,
-                isLogo: isLogo,
-                link: isLogo ? "http://www.kastanie-moltzow.de" : "#"+item.menutitel.toLowerCase()
-            });
-
-            const wrapper = document.createElement("div");
+        const html = renderTemplate("template-menu-item", {
+            ...item,
+            isLogo: isLogo,
+            link: isLogo ? (item.titel || "http://www.kastanie-moltzow.de") : "#"+item.menutitel.toLowerCase()
+        });            const wrapper = document.createElement("div");
             wrapper.innerHTML = html.trim();
             const linkElement = wrapper.firstChild;
 

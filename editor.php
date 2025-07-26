@@ -133,10 +133,31 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<script type="text/template" id="template-menu">
 		<div class="menu {{#if isInfotext}}infotext-menu{{/if}}">
 			<div class="menu-header" style="display: flex; align-items: center;">
+				{{#unless isInfotext}}{{#unless isLogo}}
 				<button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>
-				<input type="text" value="{{menutitel}}" placeholder="{{#if isInfotext}}infotext{{else}}Menütitel{{/if}}" data-field="menutitel" {{#if isInfotext}}readonly{{/if}} />
+				{{/unless}}{{/unless}}
+				<input type="text" value="{{menutitel}}" placeholder="{{#if isInfotext}}infotext{{else}}{{#if isLogo}}logo{{else}}Menütitel{{/if}}{{/if}}" data-field="menutitel" {{#if isInfotext}}readonly{{/if}}{{#if isLogo}}readonly{{/if}} />
 			</div>
-			{{#unless isInfotext}}
+			{{#if isInfotext}}
+			<div class="infotext-content">
+				<div class="image-row">
+					<div class="text-fields">
+						<label>Infotext (HTML möglich)<textarea rows="6" data-field="titel" placeholder="Text der am Ende der Speisekarte angezeigt wird...">{{titel}}</textarea></label>
+					</div>
+					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
+				</div>
+			</div>
+			{{else}}
+			{{#if isLogo}}
+			<div class="logo-content">
+				<div class="image-row">
+					<div class="text-fields">
+						<label>Logo-Link<input type="text" value="{{titel}}" data-field="titel" placeholder="https://..." /></label>
+					</div>
+					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
+				</div>
+			</div>
+			{{else}}
 			<div class="image-row">
 				<div class="text-fields">
 					<label>Titel<input type="text" value="{{titel}}" data-field="titel" /></label>
@@ -196,20 +217,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				{{/each}}
 				<button type="button" class="add-gericht">➕ Gericht hinzufügen</button>
 			</div>
-			{{else}}
-			<div class="infotext-content">
-				<div class="image-row">
-					<div class="text-fields">
-						<label>Infotext (HTML möglich)<textarea rows="6" data-field="titel" placeholder="Text der am Ende der Speisekarte angezeigt wird...">{{titel}}</textarea></label>
-					</div>
-					<img class="image-thumb {{#unless image}}placeholder{{/unless}}" {{#if image}}src="{{image}}"{{/if}} data-field="image" />
-				</div>
-			</div>
-			{{/unless}}
+			{{/if}}
+			{{/if}}
 			<div class="button-right">
-				{{#unless isInfotext}}
+				{{#unless isInfotext}}{{#unless isLogo}}
 				<button type="button" class="delete-menu">🗑️ Menü löschen</button>
-				{{/unless}}
+				{{/unless}}{{/unless}}
 			</div>
 		</div>
 	</script>
