@@ -97,6 +97,7 @@ html {
 }
 
 body {
+    overflow: hidden;
     font-family: "Noto Sans", sans-serif;
     font-optical-sizing: auto;
     font-weight: 300;
@@ -212,6 +213,8 @@ body {
 
 .container {
     height: 100vh;
+    position: relative;
+    margin-top: calc(100vw * -0.05 + 40px);
     overflow-y: auto;
     overflow-x: hidden;
     perspective: 10px;
@@ -327,9 +330,9 @@ body {
 
 .logo-welcome-text {
     position: absolute;
-    top: 200px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 180px;
+    left: 0;
+    right: 0;
     z-index: 10;
     text-align: center;
     background: var(--gericht-background);
@@ -342,9 +345,10 @@ body {
     font-family: "Handlee", cursive;
     font-weight: 400;
     font-style: normal;
-    font-size: 1.6em;
+    font-size: 1.2em;
     color: var(--gericht-text-color);
-    max-width: 80%;
+    width: calc(100% - 10px);
+    margin: 0 5px;
 }
 
 .gericht img {
