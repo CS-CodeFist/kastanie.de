@@ -413,14 +413,15 @@ function render() {
 		onEnd(evt) {
 			const movedMenu = window.data.content.splice(evt.oldIndex, 1)[0];
 			window.data.content.splice(evt.newIndex, 0, movedMenu);
-			render();
+			renderWithScrollPreservation();
 		}
 	});
 
-	// Scroll-Position nach dem Re-Rendering wiederherstellen
-	setTimeout(() => {
+	// Scroll-Position nach dem Re-Rendering zuverlässig wiederherstellen
+	// Verwende requestAnimationFrame für bessere Browser-Kompatibilität
+	requestAnimationFrame(() => {
 		window.scrollTo(0, scrollTop);
-	}, 0);
+	});
 }
 
 function ensureInfotextExists() {
@@ -467,7 +468,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 	if (imageThumb) {
 		imageThumb.onclick = () => openImageOverlay((newSrc) => {
 			menu.image = newSrc;
-			render();
+			renderWithScrollPreservation();
 		}, menu.image);
 	}
 
@@ -481,7 +482,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			toggleBtn.onclick = () => {
 				gerichteWrapper.classList.toggle("collapsed");
 				sichtbarkeit[normalMenuIndex] = !gerichteWrapper.classList.contains("collapsed");
-				render();
+				renderWithScrollPreservation();
 			};
 		}
 
@@ -489,7 +490,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			toggleAllBtn.onclick = () => {
 				const allCollapsed = menu.gerichte.every(g => g._collapsed);
 				menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
-				render();
+				renderWithScrollPreservation();
 			};
 		}
 
@@ -505,7 +506,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 				onEnd: function(evt) {
 					const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
 					menu.gerichte.splice(evt.newIndex, 0, moved);
-					render();
+					renderWithScrollPreservation();
 				}
 			});
 		}
@@ -518,7 +519,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			deleteMenuBtn.onclick = () => {
 				if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
 					window.data.content.splice(menuIndex, 1);
-					render();
+					renderWithScrollPreservation();
 				}
 			};
 		}
@@ -575,7 +576,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 		if (addGerichtBtn) {
 			addGerichtBtn.onclick = () => {
 				gericht.preisliste.push({ size: "", preis: "" });
-				render();
+				renderWithScrollPreservation();
 			};
 		}
 
@@ -585,7 +586,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				const confirmed = confirm("❌ Möchtest du dieses Gericht wirklich löschen?");
 				if (confirmed) {
 					menu.gerichte.splice(gerichtIndex, 1);
-					render();
+					renderWithScrollPreservation();
 				}
 			};
 		}
@@ -607,7 +608,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				beilagen: [],
 				_collapsed: false
 			});
-			render();
+			renderWithScrollPreservation();
 		};
 	}
 }
@@ -635,7 +636,7 @@ function setupPreisEventListeners(gerichtElement, gericht) {
 		if (deletePreisBtn) {
 			deletePreisBtn.onclick = () => {
 				gericht.preisliste.splice(preisIndex, 1);
-				render();
+				renderWithScrollPreservation();
 			};
 		}
 	});
@@ -645,7 +646,7 @@ function setupPreisEventListeners(gerichtElement, gericht) {
 	if (addPreisBtn) {
 		addPreisBtn.onclick = () => {
 			gericht.preisliste.push({ size: "", preis: "" });
-			render();
+			renderWithScrollPreservation();
 		};
 	}
 }
@@ -673,7 +674,7 @@ function setupBeilagenEventListeners(gerichtElement, gericht) {
 		if (deleteBeilageBtn) {
 			deleteBeilageBtn.onclick = () => {
 				gericht.beilagen.splice(beilageIndex, 1);
-				render();
+				renderWithScrollPreservation();
 			};
 		}
 	});
@@ -686,12 +687,22 @@ function setupBeilagenEventListeners(gerichtElement, gericht) {
 				gericht.beilagen = [];
 			}
 			gericht.beilagen.push({ name: "", preis: "" });
-			render();
+			renderWithScrollPreservation();
 		};
 	}
 }
 
 let savedScrollPosition = 0;
+
+// Hilfsfunktion für Scroll-erhaltende Renders
+function renderWithScrollPreservation() {
+	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+	render();
+	// Verwende requestAnimationFrame für zuverlässige Scroll-Wiederherstellung
+	requestAnimationFrame(() => {
+		window.scrollTo(0, scrollTop);
+	});
+}
 
 function openImageOverlay(onSelect, currentSrc) {
 	currentImageTarget = onSelect;

@@ -14,6 +14,8 @@ Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen
 - **Flexible Preisstruktur** mit verschiedenen Größen
 - **Kastanie-SVG Hintergrund** als Branding-Element
 - **Konfigurierbare Zusatzstoffe-Titel** für individuelle Beschriftungen
+- **Social Media Integration** - Instagram und Google Bewertungs-Links
+- **Pattern-basierte Links** - `[instagram]` und `[google]` Tags in Beschreibungen
 
 ## 🔧 Tech Stack & Externe Dependencies
 
@@ -58,6 +60,26 @@ Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen
 - **Cross-Browser Kompatibilität**: WebP wird von 95%+ der Browser unterstützt
 - **SVG-Integration**: Kastanie-Hintergrundbild als skalierbare Vektorgrafik
 
+## 🔗 Social Media Integration
+
+### Pattern-basierte Link-Generierung
+Das System unterstützt automatische Link-Erstellung durch spezielle Pattern in Beschreibungstexten:
+
+- **Instagram-Links**: `[instagram]` → Automatischer Link zu `https://www.instagram.com/kastaniemoltzow/`
+- **Google-Bewertungen**: `[google]` → Link zur Google-Bewertungsseite
+- **Icon-Integration**: Externe SVG-Icons (`bilder/instagram-icon.svg`, `bilder/google-icon.svg`)
+- **Hover-Effekte**: Scale-Animation und Farbänderungen bei Mouse-Over
+
+### Handlebars Helper
+```javascript
+// processInstagramText Helper verarbeitet beide Pattern
+{{{processInstagramText beschreibung}}}
+```
+
+Unterstützte Pattern:
+- `[instagram]` - Instagram-Icon mit Link
+- `[google]` - Google-Icon mit Link zu Bewertungen
+
 ## 🎯 Editor Features
 
 ### Content Management
@@ -89,6 +111,10 @@ Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen
 ├── data_handler.php    # Upload & Bildverarbeitung
 ├── editor.php          # Backend-Editor Interface
 ├── data.json           # Speisekarten-Daten
+├── bilder/             # SVG-Assets & Icons
+│   ├── Kastanie.svg   # Haupt-Branding-Logo
+│   ├── instagram-icon.svg # Instagram-Icon für Links
+│   └── google-icon.svg    # Google-Icon für Bewertungen
 ├── bilder_menu/        # Optimierte WebP-Bilder
 │   └── archiv/        # Archivierte Bilder
 └── seasons/            # Saisonale Dekorationen
@@ -128,7 +154,7 @@ Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen
 2. **Installation**
    ```bash
    chmod 755 bilder_menu/
-   chmod 755 logs/
+   chmod 755 bilder/
    chmod 644 data.json
    ```
 

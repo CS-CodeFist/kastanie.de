@@ -50,7 +50,7 @@ Handlebars.registerHelper('processInstagramText', function(text) {
 	});
 	
 	// Text verarbeiten: [google] durch klickbares Google-Icon ersetzen
-	const googleUrl = "https://www.google.com/search?q=Kastanie+Bistro+Café+Apartment+Moltzow+Bewertungen&hl=de";
+	const googleUrl = "https://www.google.com/maps/search/Kastanie+Bistro+Café+Apartment+Moltzow";
 	processedText = processedText.replace(googlePattern, function(match) {
 		return `<a href="${googleUrl}" target="_blank" rel="noopener noreferrer" class="google-link">${googleIcon}</a>`;
 	});
