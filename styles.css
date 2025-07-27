@@ -354,7 +354,6 @@ body {
 .gericht img {
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
 }
 
 .gericht .preis {
@@ -560,4 +559,52 @@ body {
 .dark-mode-toggle[data-mode="light"] .moon-icon {
     opacity: 0;
     transform: rotate(180deg) scale(0.5);
+}
+
+/* === Instagram und Google Links === */
+.gericht a[href*="instagram.com"],
+.gericht a[href*="google.com"],
+.instagram-link,
+.google-link {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--primary-green);
+    transition: color 0.3s ease;
+    line-height: 1;
+    vertical-align: baseline;
+    position: relative;
+    top: 2px;
+}
+
+.gericht a[href*="instagram.com"]:hover,
+.gericht a[href*="google.com"]:hover,
+.instagram-link:hover,
+.google-link:hover {
+    color: var(--primary-green);
+    filter: brightness(1.2);
+}
+
+.gericht a[href*="instagram.com"] svg,
+.gericht a[href*="instagram.com"] img,
+.gericht a[href*="google.com"] svg,
+.gericht a[href*="google.com"] img,
+.instagram-link svg,
+.instagram-link img,
+.google-link svg,
+.google-link img {
+    transition: transform 0.2s ease;
+    display: block;
+    filter: hue-rotate(0deg) saturate(0) brightness(0) invert(59%) sepia(68%) saturate(366%) hue-rotate(73deg) brightness(96%) contrast(86%);
+}
+
+.gericht a[href*="instagram.com"]:hover svg,
+.gericht a[href*="instagram.com"]:hover img,
+.gericht a[href*="google.com"]:hover svg,
+.gericht a[href*="google.com"]:hover img,
+.instagram-link:hover svg,
+.instagram-link:hover img,
+.google-link:hover svg,
+.google-link:hover img {
+    transform: scale(1.1);
+    filter: hue-rotate(0deg) saturate(0) brightness(0) invert(59%) sepia(68%) saturate(366%) hue-rotate(73deg) brightness(116%) contrast(86%);
 }

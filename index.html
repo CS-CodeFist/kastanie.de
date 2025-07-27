@@ -95,12 +95,12 @@
 	</script>
 
 	<script type="text/template" id="template-infotext">
-		<div class="gericht" style="position: relative; margin-bottom: 30px;">
+		<div style="position: relative; margin-bottom: 50px;">
 			{{#if image}}
-			<img src="{{image}}" alt="Infotext Bild" style="width: 100%; height: auto; border-radius: 8px;" />
+			<img src="{{image}}" alt="Infotext Bild" style="width: 100%; height: auto;" />
 			{{/if}}
 			<div class="gericht" style="{{#if image}}margin: -20% 10px 10px 10px; width: calc(100% - 20px);{{/if}}">
-				{{{nl2br beschreibung}}}
+				{{{processInstagramText beschreibung}}}
 			</div>
 		</div>
 	</script>

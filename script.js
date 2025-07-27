@@ -29,6 +29,38 @@ Handlebars.registerHelper('nl2br', function(text) {
 	return new Handlebars.SafeString(text.replace(/\r?\n/g, '<br>'));
 });
 
+// Handlebars Helper für Instagram und Google Links
+Handlebars.registerHelper('processInstagramText', function(text) {
+	if (!text) return '';
+	
+	// Instagram Icon als externes SVG
+	const instagramIcon = `<img src="bilder/instagram-icon.svg" width="20" height="20" alt="Instagram" style="margin-right: 4px;">`;
+	
+	// Google Bewertung Icon
+	const googleIcon = `<img src="bilder/google-icon.svg" width="20" height="20" alt="Google Bewertungen" style="margin-right: 4px;">`;
+	
+	// Regex zum Finden von [instagram] und [google] Mustern
+	const instagramPattern = /\[instagram\]/g;
+	const googlePattern = /\[google\]/g;
+	
+	// Text verarbeiten: [instagram] durch klickbares Instagram-Icon ersetzen
+	const instagramUrl = "https://www.instagram.com/kastaniemoltzow/";
+	let processedText = text.replace(instagramPattern, function(match) {
+		return `<a href="${instagramUrl}" target="_blank" rel="noopener noreferrer" class="instagram-link">${instagramIcon}</a>`;
+	});
+	
+	// Text verarbeiten: [google] durch klickbares Google-Icon ersetzen
+	const googleUrl = "https://www.google.com/search?q=Kastanie+Bistro+Café+Apartment+Moltzow+Bewertungen&hl=de";
+	processedText = processedText.replace(googlePattern, function(match) {
+		return `<a href="${googleUrl}" target="_blank" rel="noopener noreferrer" class="google-link">${googleIcon}</a>`;
+	});
+	
+	// Zeilenumbrüche verarbeiten
+	processedText = processedText.replace(/\r?\n/g, '<br>');
+	
+	return new Handlebars.SafeString(processedText);
+});
+
 function formatPreis(value) {
 	const number = parseFloat(value);
 	if (isNaN(number)) return value;
