@@ -47,6 +47,7 @@ window.onload = async function() {
 	try {
 		await loadTemplates();
 		await loadInitialData();
+		await loadSeasonLayouts(); // Season-Layouts initial laden
 		render();
 	} catch (err) {
 		console.error("❌ Fehler beim Initialisieren:", err);
@@ -298,13 +299,6 @@ function render() {
 				}
 			});
 		}
-		
-		// Migration: Infotext von titel nach beschreibung verschieben
-		const isInfotext = menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
-		if (isInfotext && menu.titel && !menu.beschreibung) {
-			menu.beschreibung = menu.titel;
-			menu.titel = "";
-		}
 	});
 
 	const isInitial = !window.__renderedOnce;
@@ -413,15 +407,14 @@ function render() {
 		onEnd(evt) {
 			const movedMenu = window.data.content.splice(evt.oldIndex, 1)[0];
 			window.data.content.splice(evt.newIndex, 0, movedMenu);
-			renderWithScrollPreservation();
+			render();
 		}
 	});
 
-	// Scroll-Position nach dem Re-Rendering zuverlässig wiederherstellen
-	// Verwende requestAnimationFrame für bessere Browser-Kompatibilität
-	requestAnimationFrame(() => {
+	// Scroll-Position nach dem Re-Rendering wiederherstellen
+	setTimeout(() => {
 		window.scrollTo(0, scrollTop);
-	});
+	}, 0);
 }
 
 function ensureInfotextExists() {
@@ -468,7 +461,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 	if (imageThumb) {
 		imageThumb.onclick = () => openImageOverlay((newSrc) => {
 			menu.image = newSrc;
-			renderWithScrollPreservation();
+			render();
 		}, menu.image);
 	}
 
@@ -482,7 +475,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			toggleBtn.onclick = () => {
 				gerichteWrapper.classList.toggle("collapsed");
 				sichtbarkeit[normalMenuIndex] = !gerichteWrapper.classList.contains("collapsed");
-				renderWithScrollPreservation();
+				render();
 			};
 		}
 
@@ -490,7 +483,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			toggleAllBtn.onclick = () => {
 				const allCollapsed = menu.gerichte.every(g => g._collapsed);
 				menu.gerichte.forEach(g => g._collapsed = !allCollapsed);
-				renderWithScrollPreservation();
+				render();
 			};
 		}
 
@@ -506,7 +499,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 				onEnd: function(evt) {
 					const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
 					menu.gerichte.splice(evt.newIndex, 0, moved);
-					renderWithScrollPreservation();
+					render();
 				}
 			});
 		}
@@ -519,7 +512,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 			deleteMenuBtn.onclick = () => {
 				if (confirm("❌ Möchtest du dieses Menü wirklich löschen?")) {
 					window.data.content.splice(menuIndex, 1);
-					renderWithScrollPreservation();
+					render();
 				}
 			};
 		}
@@ -576,7 +569,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 		if (addGerichtBtn) {
 			addGerichtBtn.onclick = () => {
 				gericht.preisliste.push({ size: "", preis: "" });
-				renderWithScrollPreservation();
+				render();
 			};
 		}
 
@@ -586,7 +579,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				const confirmed = confirm("❌ Möchtest du dieses Gericht wirklich löschen?");
 				if (confirmed) {
 					menu.gerichte.splice(gerichtIndex, 1);
-					renderWithScrollPreservation();
+					render();
 				}
 			};
 		}
@@ -608,7 +601,7 @@ function setupGerichtEventListeners(menuElement, menu) {
 				beilagen: [],
 				_collapsed: false
 			});
-			renderWithScrollPreservation();
+			render();
 		};
 	}
 }
@@ -636,7 +629,7 @@ function setupPreisEventListeners(gerichtElement, gericht) {
 		if (deletePreisBtn) {
 			deletePreisBtn.onclick = () => {
 				gericht.preisliste.splice(preisIndex, 1);
-				renderWithScrollPreservation();
+				render();
 			};
 		}
 	});
@@ -646,7 +639,7 @@ function setupPreisEventListeners(gerichtElement, gericht) {
 	if (addPreisBtn) {
 		addPreisBtn.onclick = () => {
 			gericht.preisliste.push({ size: "", preis: "" });
-			renderWithScrollPreservation();
+			render();
 		};
 	}
 }
@@ -674,7 +667,7 @@ function setupBeilagenEventListeners(gerichtElement, gericht) {
 		if (deleteBeilageBtn) {
 			deleteBeilageBtn.onclick = () => {
 				gericht.beilagen.splice(beilageIndex, 1);
-				renderWithScrollPreservation();
+				render();
 			};
 		}
 	});
@@ -687,21 +680,29 @@ function setupBeilagenEventListeners(gerichtElement, gericht) {
 				gericht.beilagen = [];
 			}
 			gericht.beilagen.push({ name: "", preis: "" });
-			renderWithScrollPreservation();
+			render();
 		};
 	}
 }
 
 let savedScrollPosition = 0;
 
-// Hilfsfunktion für Scroll-erhaltende Renders
-function renderWithScrollPreservation() {
-	const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-	render();
-	// Verwende requestAnimationFrame für zuverlässige Scroll-Wiederherstellung
+// Hilfsfunktionen für sanfte Overlay-Animationen
+function showOverlay(overlayElement) {
+	overlayElement.style.display = "flex";
+	// Kleine Verzögerung für CSS-Transition
 	requestAnimationFrame(() => {
-		window.scrollTo(0, scrollTop);
+		overlayElement.classList.add("show");
 	});
+}
+
+function hideOverlay(overlayElement, callback) {
+	overlayElement.classList.remove("show");
+	// Warten bis Animation fertig ist
+	setTimeout(() => {
+		overlayElement.style.display = "none";
+		if (callback) callback();
+	}, 300); // entspricht der CSS transition Dauer
 }
 
 function openImageOverlay(onSelect, currentSrc) {
@@ -729,18 +730,19 @@ function openImageOverlay(onSelect, currentSrc) {
 		});
 	}
 
-	document.getElementById("imageOverlay").style.display = "flex";
+	showOverlay(document.getElementById("imageOverlay"));
 }
 
 function closeImageOverlay() {
-	document.body.classList.remove("overlay-open");
-	document.body.style.top = "";
-	
-	// Scroll-Position wiederherstellen
-	window.scrollTo(0, savedScrollPosition);
-	
-	document.getElementById("imageOverlay").style.display = "none";
-	currentImageTarget = null;
+	hideOverlay(document.getElementById("imageOverlay"), () => {
+		document.body.classList.remove("overlay-open");
+		document.body.style.top = "";
+		
+		// Scroll-Position wiederherstellen
+		window.scrollTo(0, savedScrollPosition);
+		
+		currentImageTarget = null;
+	});
 }
 
 document.getElementById("cancelImageOverlay")?.addEventListener("click", closeImageOverlay);
@@ -860,8 +862,7 @@ function renderImageGrid(images) {
 
 // Export & Speichern
 function openSaveOverlay(existingTemplates = []) {
-	document.body.classList.add("overlay-open");
-	document.getElementById("saveOverlay").style.display = "flex";
+	showOverlay("saveOverlay");
 	const select = document.getElementById("saveTargetSelect");
 
 	// Aktuelle Menükarte
@@ -896,8 +897,7 @@ function openSaveOverlay(existingTemplates = []) {
 }
 
 function closeSaveOverlay() {
-	document.getElementById("saveOverlay").style.display = "none";
-	document.body.classList.remove("overlay-open");
+	hideOverlay("saveOverlay");
 }
 
 document.querySelectorAll("input[name='saveTarget']").forEach(r => {
@@ -1009,29 +1009,34 @@ document.getElementById("optionsBtn")?.addEventListener("click", function () {
 	// Body an die aktuelle Scroll-Position "festkleben"
 	document.body.style.top = `-${savedScrollPosition}px`;
 	
-    document.getElementById("optionsOverlay").style.display = "flex";
-	loadSeasonLayouts();
+	// Button-Event-Listener initialisieren
+	initializeSeasonButtons();
+	
+	showOverlay(document.getElementById("optionsOverlay"));
 });
 
 document.getElementById("closeOptionsOverlayBtn")?.addEventListener("click", function () {
-    document.getElementById("optionsOverlay").style.display = "none";
-	document.body.classList.remove("overlay-open");
-	document.body.style.top = "";
-	
-	// Scroll-Position wiederherstellen
-	window.scrollTo(0, savedScrollPosition);
+	hideOverlay(document.getElementById("optionsOverlay"), () => {
+		document.body.classList.remove("overlay-open");
+		document.body.style.top = "";
+		
+		// Scroll-Position wiederherstellen
+		window.scrollTo(0, savedScrollPosition);
+	});
 });
 
-function loadSeasonLayouts() {
-	fetch("data_handler.php", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded"
-		},
-		body: "action=load_layout_config"
-	})
-	.then(response => response.json())
-	.then(data => {
+async function loadSeasonLayouts() {
+	try {
+		const response = await fetch("data_handler.php", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			body: "action=load_layout_config"
+		});
+		
+		const data = await response.json();
+		
 		if (!Array.isArray(data)) {
 			console.error("Ungültiges Layout-Config-Format:", data);
 			return;
@@ -1058,26 +1063,43 @@ function loadSeasonLayouts() {
 
 		window._seasonLayouts = data;
 		updateSeasonButtons();
-	})
-	.catch(err => {
+	} catch (err) {
 		console.error("Fehler beim Laden der Saison-Layouts:", err);
+	}
+}
+
+// Event-Listener für Geschwindigkeits- und Menge-Buttons (nur einmal hinzufügen)
+function initializeSeasonButtons() {
+	// Geschwindigkeits-Buttons
+	document.querySelectorAll("#geschwindigkeitButtons button").forEach(btn => {
+		// Vorherige Event-Listener entfernen (falls vorhanden)
+		btn.removeEventListener("click", btn._clickHandler);
+		
+		// Neuen Event-Listener erstellen und zuweisen
+		btn._clickHandler = () => {
+			document.querySelectorAll("#geschwindigkeitButtons button").forEach(b => b.classList.remove("active"));
+			btn.classList.add("active");
+		};
+		
+		btn.addEventListener("click", btn._clickHandler);
+	});
+
+	// Menge-Buttons
+	document.querySelectorAll("#mengeButtons button").forEach(btn => {
+		// Vorherige Event-Listener entfernen (falls vorhanden)
+		btn.removeEventListener("click", btn._clickHandler);
+		
+		// Neuen Event-Listener erstellen und zuweisen
+		btn._clickHandler = () => {
+			document.querySelectorAll("#mengeButtons button").forEach(b => b.classList.remove("active"));
+			btn.classList.add("active");
+		};
+		
+		btn.addEventListener("click", btn._clickHandler);
 	});
 }
 
-document.querySelectorAll("#geschwindigkeitButtons button").forEach(btn => {
-	btn.addEventListener("click", () => {
-		document.querySelectorAll("#geschwindigkeitButtons button").forEach(b => b.classList.remove("active"));
-		btn.classList.add("active");
-	});
-});
-
-document.querySelectorAll("#mengeButtons button").forEach(btn => {
-	btn.addEventListener("click", () => {
-		document.querySelectorAll("#mengeButtons button").forEach(b => b.classList.remove("active"));
-		btn.classList.add("active");
-	});
-});
-
+// Event-Listener für Layout-Auswahl
 document.getElementById("layoutSelect").addEventListener("change", () => {
 	updateSeasonButtons();
 });

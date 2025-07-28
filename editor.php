@@ -1,9 +1,12 @@
 <?php
+
+/*
 session_start();
+
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header("Location: login.php");
     exit;
-}
+}*/
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -13,7 +16,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>Kastanie Molzow – Editor</title>
-	<link rel="stylesheet" href="editor.css?20250402c" />
+	<link rel="stylesheet" href="editor.css?20250729h" />
 </head>
 
 <body>
@@ -248,8 +251,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<!-- SCRIPTS -->
 	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-	<script src="editor_data.js"></script>
-	<script src="editor.js?20250401"></script>
+	<script src="editor.js?v=20250728"></script>
 </body>
 
 </html>

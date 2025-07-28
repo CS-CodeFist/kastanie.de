@@ -277,6 +277,7 @@ label {
     cursor: pointer;
     background-color: #fff;
     transition: opacity 0.3s ease;
+    margin-block-end: auto;
 }
 
 .image-row .image-thumb {
@@ -294,12 +295,30 @@ label {
 .overlay,
 #imageOverlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background: rgba(0, 0, 0, 0.6);
     z-index: 2000;
     display: none;
     justify-content: center;
     align-items: center;
+    /* iOS Safari Fix */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    /* Fade-In/Out Animation */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Overlay sichtbar Zustand */
+.overlay.show,
+.save-overlay.show,
+#imageOverlay.show {
+    opacity: 1;
 }
 
 .overlay-open {
@@ -319,6 +338,16 @@ label {
     display: flex;
     flex-direction: column;
     gap: 1em;
+    /* Sanfte Skalierungs-Animation */
+    transform: scale(0.9);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Overlay Content sichtbar Zustand */
+.overlay.show .overlay-content,
+.save-overlay.show .save-modal,
+#imageOverlay.show #imageOverlayContent {
+    transform: scale(1);
 }
 
 .overlay-footer {
@@ -358,6 +387,101 @@ label {
     margin-bottom: 0px;
     line-height: 0px;
     display: block;
+}
+
+/* === iOS Safari Touch Fix === */
+.overlay button,
+.overlay-content button,
+.overlay-footer button,
+.option-button-group button {
+    user-select: auto;
+    -webkit-user-select: auto;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    /* Zusätzliche iOS Safari Fixes */
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    outline: none;
+    border-style: solid;
+    cursor: pointer;
+}
+
+/* Spezielle iOS Safari Overlay-Fixes */
+.overlay {
+    -webkit-overflow-scrolling: touch;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
+    /* Force hardware acceleration */
+    -webkit-perspective: 1000;
+    perspective: 1000;
+    /* Aggressive iOS Safari Touch-Fixes */
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+}
+
+.overlay-content {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    /* Prevent zoom on focus */
+    -webkit-text-size-adjust: 100%;
+    /* Aggressive iOS Safari Touch-Fixes */
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+}
+
+/* AGGRESSIVE iOS Safari Overlay-Struktur-Fixes */
+#optionsOverlay {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    z-index: 10000 !important;
+}
+
+#optionsOverlay * {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+}
+
+/* iOS Safari Button-spezifische Fixes */
+#optionsOverlay button {
+    /* Verhindere iOS Zoom bei Touch */
+    font-size: 16px !important;
+    min-height: 44px;
+    position: relative;
+    z-index: 1;
+    /* Aggressive iOS Safari Touch-Fixes */
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    touch-action: manipulation !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    /* Force Hardware-Rendering */
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+}
+
+/* Zusätzliche Fixes für Button-Container */
+#geschwindigkeitButtons,
+#mengeButtons {
+    -webkit-tap-highlight-color: transparent !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    z-index: 10 !important;
+    position: relative !important;
+}
+
+/* Spezifische Button-Gruppe Fixes */
+.option-button-group button {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
 }
 
 /* === Bildauswahl Grid === */
@@ -530,5 +654,42 @@ select:focus {
 
     .overlay-content {
         padding: 1.2em 1em;
+    }
+
+    /* Mobile Optimierung für Option-Button-Groups */
+    .option-button-group {
+        /* Buttons bleiben nebeneinander */
+        flex-direction: row;
+        gap: 0.3em;
+        justify-content: space-between;
+    }
+
+    .option-button-group button {
+        margin: 0;
+        /* Gleiche Breite für alle Buttons */
+        flex: 1;
+        min-width: 0;
+        font-size: 0.8em;
+        padding: 0.5em 0.3em;
+        /* Verhindere Zeilenumbruch */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Mobile Optimierung für Zusatzstoffe-Layout */
+    .zusatzstoffe-row {
+        flex-direction: column !important;
+        gap: 0em !important;
+    }
+
+    .zusatzstoffe-row label {
+        flex: none !important;
+        width: 100% !important;
+        margin-top: 0.5em !important;
+    }
+
+    .zusatzstoffe-row label:first-child {
+        margin-top: 0 !important;
     }
 }
