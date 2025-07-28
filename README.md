@@ -110,13 +110,18 @@ Unterstützte Pattern:
 ├── script.js           # Frontend-Logik & Handlebars Helpers
 ├── data_handler.php    # Upload & Bildverarbeitung
 ├── editor.php          # Backend-Editor Interface
+├── editor.js           # Editor-Logik & Template-Rendering
+├── editor.css          # Editor-Styling & Responsive Design
 ├── data.json           # Speisekarten-Daten
+├── config.json         # Saison-Layout Konfiguration
 ├── bilder/             # SVG-Assets & Icons
 │   ├── Kastanie.svg   # Haupt-Branding-Logo
 │   ├── instagram-icon.svg # Instagram-Icon für Links
 │   └── google-icon.svg    # Google-Icon für Bewertungen
 ├── bilder_menu/        # Optimierte WebP-Bilder
 │   └── archiv/        # Archivierte Bilder
+├── templates/          # Speisekarten-Vorlagen
+│   └── archiv/        # Archivierte Templates
 └── seasons/            # Saisonale Dekorationen
     ├── spring/        # Blüten-Animationen
     ├── summer/        # Sommer-Effekte
