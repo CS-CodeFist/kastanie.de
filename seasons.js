@@ -157,8 +157,6 @@ function init(geschwindigkeit, menge) {
     // Weitere Animationsparameter
     const fallSpeed = baseSpeed * (0.9 + Math.random() * 0.2) * (0.6 + z * 0.6);
     globalBaseSpeed = baseSpeed;
-    const swayRange = 15 + Math.random() * 15;
-    const swaySpeed = 0.001 + Math.random() * 0.001;
     const rotationSpeed = 0.001 + Math.random() * 0.0015;
     const offset = Math.random() * 10000;
 
@@ -169,11 +167,8 @@ function init(geschwindigkeit, menge) {
       top: -10,
       left: startLeft,
       fallSpeed,
-      swayRange,
-      swaySpeed,
       rotationSpeed,
       offset,
-      //scale, // Auskommentiert aber nicht entfernt
       spinSpeed,
       orbitRadius,
       angle,
@@ -202,7 +197,6 @@ function animate() {
   // Neue Elemente nach Verzögerung aktivieren
   if (now - lastElementStart > elementStartDelay) {
     let loopCount = 0;
-    let activated = false;
 
     // Suche nach inaktiven Elementen zum Aktivieren
     while (loopCount < elements.length) {
@@ -219,13 +213,12 @@ function animate() {
         const img = item.inner.querySelector('img');
         const newScale = 0.9 + Math.random() * 0.8;
 
-        // Hier den Z-Index basierend auf der Skalierung setzen
+        // Z-Index basierend auf der Skalierung setzen
         // Höherer Scale = höherer Z-Index für bessere visuelle Tiefe
         const zIndexBase = 9990;
-        const zIndexOffset = Math.floor(newScale * 10); // Multiplikator anpassen nach Bedarf
+        const zIndexOffset = Math.floor(newScale * 10);
         item.el.style.zIndex = zIndexBase + zIndexOffset;
-  
-      
+
         img.src = globalImages[Math.floor(Math.random() * globalImages.length)];
         img.style.transform = `rotateX(0deg) scale(${newScale})`;
         item.currentScale = newScale;
@@ -233,7 +226,6 @@ function animate() {
         // Neue Fallgeschwindigkeit abhängig von Scale
         item.fallSpeed = globalBaseSpeed * (0.2 + newScale * 5) * (0.1 + Math.random() * 0.1);
 
-        activated = true;
         break;
       }
     }
