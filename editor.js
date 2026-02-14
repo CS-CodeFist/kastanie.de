@@ -862,7 +862,7 @@ function renderImageGrid(images) {
 
 // Export & Speichern
 function openSaveOverlay(existingTemplates = []) {
-	showOverlay("saveOverlay");
+	showOverlay(document.getElementById("saveOverlay"));
 	const select = document.getElementById("saveTargetSelect");
 
 	// Aktuelle Menükarte
@@ -897,7 +897,7 @@ function openSaveOverlay(existingTemplates = []) {
 }
 
 function closeSaveOverlay() {
-	hideOverlay("saveOverlay");
+	hideOverlay(document.getElementById("saveOverlay"));
 }
 
 document.querySelectorAll("input[name='saveTarget']").forEach(r => {
