@@ -7,6 +7,11 @@ const sectionButtonLinks = {
     apartments: 'apartments.html',
     email: 'mailto:info@kastanie-moltzow.de'
 };
+const instagramDemoComments = [
+    'Wunderschöne Stimmung. Da bekommt man direkt Lust auf einen gemütlichen Abend bei euch. Wir waren vor einiger Zeit mit Freunden in der Kastanie und erinnern uns noch immer an die entspannte Atmosphäre, die freundliche Begrüßung und das leckere Essen. Besonders schön finden wir, dass man hier nicht das Gefühl hat, schnell wieder weiterziehen zu müssen. Man kann ankommen, sich unterhalten und den Abend einfach genießen. Beim nächsten Ausflug in die Gegend möchten wir unbedingt wieder vorbeischauen und noch mehr von der Karte probieren. Die ländliche Umgebung macht den Besuch zusätzlich besonders angenehm. Nach einem Spaziergang ist es schön, einen Ort zu haben, an dem man zur Ruhe kommt und sich willkommen fühlt. Wir erzählen inzwischen auch anderen gern von euch und wünschen euch weiterhin viele solche gelungenen Abende.',
+    'Das sieht richtig einladend aus. Wir freuen uns schon auf unseren nächsten Besuch in Moltzow! Beim letzten Mal haben wir lange zusammengesessen und die gemütliche Stimmung sehr genossen. Es ist genau die Art von Ort, die man gern weiterempfiehlt: unkompliziert, herzlich und mit Liebe zum Detail. Auch unsere Freunde waren begeistert und haben direkt gefragt, wann wir wieder einen gemeinsamen Abend planen. Vielleicht klappt es ja schon bald, denn solche kleinen Auszeiten sollte man sich viel öfter gönnen. Besonders in Erinnerung geblieben sind uns die vielen netten Gespräche und die entspannte Atmosphäre im Raum. Man merkt, dass hier mit Freude gearbeitet wird. Vielen Dank für die Gastfreundschaft und bis hoffentlich ganz bald. Für uns gehört genau diese Mischung aus gutem Essen, Zeit miteinander und einem angenehmen Ambiente zu einem gelungenen Ausflug. Deshalb kommen wir sehr gern wieder und bringen beim nächsten Mal vielleicht noch weitere Freunde mit.',
+    'Ein toller Eindruck aus der Kastanie. Die Atmosphäre und die kleinen Details gefallen uns besonders gut. Auf den Bildern wirkt alles so ruhig und einladend, dass man fast das Gefühl hat, schon am Tisch zu sitzen. Wir mögen besonders Orte, an denen gutes Essen, freundlicher Service und eine angenehme Umgebung zusammenkommen. Für einen entspannten Abend zu zweit oder mit der Familie scheint das genau richtig zu sein. Danke für den schönen Einblick, wir behalten die Kastanie für unseren nächsten Besuch in Mecklenburg auf jeden Fall im Kopf. Gerade für Gäste von außerhalb ist es schön, eine so persönliche Empfehlung zu entdecken. Wir planen schon die nächste Tour und werden die Kastanie dann fest einplanen. Macht weiter so, das Konzept wirkt wirklich stimmig. Solche Orte machen einen Aufenthalt in der Region besonders und geben einem das Gefühl, wirklich willkommen zu sein. Wir freuen uns darauf, beim nächsten Besuch noch mehr Zeit bei euch zu verbringen.'
+];
 const imagePositions = ['links', 'rechts', 'zentriert'];
 
 function normalizeImagePosition(position) {
@@ -41,7 +46,9 @@ function createInstagramFeedSection(section, index) {
     }
 
     const feed = document.createElement('div');
-    feed.className = 'elfsight-app-70a90180-a023-41ff-a2bb-c5f756c83729';
+    feed.className = 'instagram-feed';
+    feed.setAttribute('aria-live', 'polite');
+    feed.innerHTML = '<div class="instagram-feed-loader" role="status"><span class="instagram-feed-spinner" aria-hidden="true"></span><span>Instagram-Beitraege werden geladen ...</span></div>';
     inner.appendChild(feed);
     element.appendChild(inner);
 
@@ -107,14 +114,137 @@ function createSection(section, index) {
     return { element, sectionId };
 }
 
-function loadInstagramFeed() {
-    if (document.querySelector('script[data-elfsight-platform]')) return;
+function formatInstagramDate(timestamp) {
+    if (!timestamp) return '';
 
-    const script = document.createElement('script');
-    script.src = 'https://apps.elfsight.com/p/platform.js';
-    script.defer = true;
-    script.dataset.elfsightPlatform = 'true';
-    document.body.appendChild(script);
+    const date = new Date(timestamp);
+    return Number.isNaN(date.getTime())
+        ? ''
+        : new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: 'long' }).format(date);
+}
+
+function formatInstagramCount(count) {
+    return new Intl.NumberFormat('de-DE', { notation: 'compact', maximumFractionDigits: 1 }).format(count || 0);
+}
+
+function renderInstagramPosts(feed, posts) {
+    feed.replaceChildren();
+
+    if (posts.length === 0) {
+        const status = document.createElement('p');
+        status.className = 'instagram-feed-status';
+        status.textContent = 'Instagram-Beitraege sind gerade nicht verfuegbar.';
+        feed.appendChild(status);
+        return;
+    }
+
+    posts.forEach((post, index) => {
+        const card = document.createElement('article');
+        card.className = 'instagram-post-card';
+
+        const link = document.createElement('a');
+        link.className = 'instagram-post-link';
+        link.href = post.permalink;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'Beitrag auf Instagram oeffnen');
+
+        const image = document.createElement('img');
+        image.src = post.media_type === 'VIDEO' ? post.thumbnail_url || post.media_url : post.media_url;
+        image.alt = post.caption ? post.caption.slice(0, 140) : 'Instagram-Beitrag von Kastanie Moltzow';
+        image.loading = 'lazy';
+        link.appendChild(image);
+
+        const media = document.createElement('div');
+        media.className = 'instagram-post';
+        media.appendChild(link);
+
+        const demoComment = document.createElement('p');
+        demoComment.className = 'instagram-demo-comment';
+        demoComment.textContent = instagramDemoComments[index % instagramDemoComments.length];
+        media.appendChild(demoComment);
+
+        const commentToggle = document.createElement('button');
+        commentToggle.className = 'instagram-comment-toggle';
+        commentToggle.type = 'button';
+        commentToggle.setAttribute('aria-label', 'Kommentar anzeigen');
+        commentToggle.setAttribute('aria-expanded', 'false');
+        commentToggle.title = 'Kommentar anzeigen';
+        const commentToggleIcon = document.createElement('span');
+        commentToggleIcon.className = 'instagram-engagement-icon is-comment';
+        commentToggleIcon.setAttribute('aria-hidden', 'true');
+        commentToggle.appendChild(commentToggleIcon);
+        commentToggle.addEventListener('click', () => {
+            const isOpen = media.classList.toggle('is-comment-open');
+            commentToggle.setAttribute('aria-expanded', String(isOpen));
+            commentToggle.setAttribute('aria-label', isOpen ? 'Kommentar ausblenden' : 'Kommentar anzeigen');
+            commentToggle.title = isOpen ? 'Kommentar ausblenden' : 'Kommentar anzeigen';
+        });
+        media.appendChild(commentToggle);
+
+        const title = document.createElement('h3');
+        title.className = 'instagram-post-title';
+        title.textContent = post.caption || 'Instagram-Beitrag';
+
+        const details = document.createElement('div');
+        details.className = 'instagram-post-details';
+
+        if (post.author_comment?.text) {
+            const authorComment = document.createElement('blockquote');
+            authorComment.className = 'instagram-author-comment';
+            authorComment.textContent = post.author_comment.text;
+            details.appendChild(authorComment);
+        }
+
+        const metadata = document.createElement('div');
+        metadata.className = 'instagram-post-meta';
+
+        const date = document.createElement('time');
+        date.dateTime = post.timestamp || '';
+        date.textContent = formatInstagramDate(post.timestamp);
+
+        const engagement = document.createElement('div');
+        engagement.className = 'instagram-engagement';
+
+        const likes = document.createElement('span');
+        likes.className = 'instagram-engagement-item';
+        likes.setAttribute('aria-label', `${formatInstagramCount(post.like_count)} Likes`);
+        const likeIcon = document.createElement('span');
+        likeIcon.className = 'instagram-engagement-icon is-heart';
+        likeIcon.setAttribute('aria-hidden', 'true');
+        likes.appendChild(likeIcon);
+        likes.append(` ${formatInstagramCount(post.like_count)}`);
+
+        const comments = document.createElement('span');
+        comments.className = 'instagram-engagement-item';
+        comments.setAttribute('aria-label', `${formatInstagramCount(post.comments_count)} Kommentare`);
+        const commentIcon = document.createElement('span');
+        commentIcon.className = 'instagram-engagement-icon is-comment';
+        commentIcon.setAttribute('aria-hidden', 'true');
+        comments.appendChild(commentIcon);
+        comments.append(` ${formatInstagramCount(post.comments_count)}`);
+
+        engagement.append(likes, comments);
+        metadata.append(date, engagement);
+        details.appendChild(metadata);
+
+        card.append(title, media, details);
+        feed.appendChild(card);
+    });
+}
+
+async function loadInstagramFeed() {
+    const feeds = [...document.querySelectorAll('.instagram-feed')];
+    if (feeds.length === 0) return;
+
+    try {
+        const response = await fetch('instagram_feed.php?limit=3');
+        const payload = response.ok ? await response.json() : { data: [] };
+        feeds.forEach((feed) => renderInstagramPosts(feed, Array.isArray(payload.data) ? payload.data : []));
+    } catch (error) {
+        console.error('Instagram-Beitraege konnten nicht geladen werden:', error);
+        feeds.forEach((feed) => renderInstagramPosts(feed, []));
+    }
 }
 
 function setupNavigationHighlighting() {

@@ -1,13 +1,18 @@
 <?php
 session_start();
 
-// Konfiguration – später auslagern
-$valid_username = "admin";
-$valid_password = "geheim123";
+$credentialsFile = __DIR__ . '/credentials.local.php';
+$previousCredentialsFile = __DIR__ . '/site_credentials.local.php';
+$credentialsFile = is_file($credentialsFile) ? $credentialsFile : $previousCredentialsFile;
+$credentials = is_file($credentialsFile) ? require $credentialsFile : [];
+$validUsername = $credentials['admin_username'] ?? '';
+$validPassword = $credentials['admin_password'] ?? '';
 
 // Login prüfen
 if (isset($_POST['username'], $_POST['password'])) {
-    if ($_POST['username'] === $valid_username && $_POST['password'] === $valid_password) {
+  if ($validUsername !== '' && $validPassword !== ''
+    && hash_equals($validUsername, $_POST['username'])
+    && hash_equals($validPassword, $_POST['password'])) {
         $_SESSION['logged_in'] = true;
         header("Location: editor.php");
         exit;

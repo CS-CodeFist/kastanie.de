@@ -45,8 +45,8 @@ require __DIR__ . '/partials/header.php';
             </section>
             <section>
                 <h2>7. Instagram-Feed</h2>
-                <p>Auf dieser Website wird ein Instagram-Feed ueber den Dienst Elfsight eingebunden. Beim Laden des Feeds kann Ihr Browser eine Verbindung zu Servern von Elfsight und weiteren beteiligten Anbietern herstellen. Dabei koennen technische Daten wie Ihre IP-Adresse und Browserinformationen verarbeitet werden.</p>
-                <p>Die Einbindung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO, damit aktuelle Inhalte unseres Instagram-Auftritts angezeigt werden koennen. Weitere Informationen finden Sie in der <a href="https://elfsight.com/privacy-policy/" target="_blank" rel="noopener noreferrer">Datenschutzerklaerung von Elfsight</a>.</p>
+                <p>Auf dieser Website werden aktuelle Instagram-Beitraege ueber die offizielle Meta Graph API abgerufen und von unserem Server bereitgestellt. Beim Laden der Uebersicht wird keine direkte Verbindung zwischen Ihrem Browser und Instagram hergestellt.</p>
+                <p>Erst beim Oeffnen eines Beitrags werden Sie zu Instagram weitergeleitet. Dabei gelten die Datenschutzbestimmungen von <a href="https://privacycenter.instagram.com/policy/" target="_blank" rel="noopener noreferrer">Instagram</a>.</p>
             </section>
         </article>
     </main>

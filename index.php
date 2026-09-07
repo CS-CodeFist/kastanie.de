@@ -7,5 +7,5 @@ require __DIR__ . '/partials/header.php';
         <div class="loading" role="status">Inhalte werden geladen ...</div>
     </main>
 
-    <script src="webseite/script.js?v=20260907a"></script>
+    <script src="webseite/script.js?v=20260907t"></script>
 <?php require __DIR__ . '/partials/footer.php'; ?>

@@ -60,7 +60,7 @@ Unterstuetzte Werte:
 | `buttonLink` | `speisekarte`, `apartments`, `email` | Ziel eines Buttons |
 | `buttonTheme` | `primary`, `secondary` | Darstellung eines Buttons |
 
-Leere Bildwerte werden in der oeffentlichen Ausgabe nicht als Bildflaeche gerendert. Eine Instagram-Sektion hat den Typ `instagram-feed`; sie wird ueber Elfsight geladen und erscheint nur im Webseitentab.
+Leere Bildwerte werden in der oeffentlichen Ausgabe nicht als Bildflaeche gerendert. Eine Instagram-Sektion hat den Typ `instagram-feed`; sie erscheint nur im Webseitentab und laedt Beitraege ueber den lokalen Endpunkt `instagram_feed.php`.
 
 ### Speisekarte
 
@@ -139,6 +139,30 @@ Alle schreibenden und lesenden Editor-Aktionen laufen ueber `data_handler.php`. 
 
 JSON-Anfragen werden als `application/json` verarbeitet, Bild-Uploads als Formularanfrage. Fehlerantworten werden ebenfalls als JSON geliefert.
 
+## Instagram-Reader
+
+Der eigene Instagram-Reader verwendet die offizielle Meta Graph API. Die Zugangsdaten duerfen nicht im Browser, im Repository oder in JSON-Inhalten stehen. Sie werden als Umgebungsvariablen des Webservers gesetzt:
+
+```text
+INSTAGRAM_ACCOUNT_ID=...
+INSTAGRAM_ACCESS_TOKEN=...
+```
+
+Wenn beim Hosting keine Umgebungsvariablen gesetzt werden koennen, kann stattdessen die lokale Datei `credentials.local.php` angelegt werden. Die Datei ist von Git ausgeschlossen; als Ausgangspunkt dient `credentials.example.php`. Darin stehen auch die Zugangsdaten fuer den Editor:
+
+```php
+<?php
+
+return [
+  'account_id' => 'DEINE_INSTAGRAM_KONTO_ID',
+  'access_token' => 'DEIN_INSTAGRAM_ACCESS_TOKEN',
+  'admin_username' => 'DEIN_EDITOR_BENUTZERNAME',
+  'admin_password' => 'DEIN_EDITOR_PASSWORT'
+];
+```
+
+Das Instagram-Konto muss ein Business- oder Creator-Konto sein. Der Zugriffstoken benoetigt die passenden Meta-Berechtigungen fuer das Lesen der Medien. Ohne diese Variablen zeigt der Feed keine Beitraege, die Webseite bleibt aber voll funktionsfaehig.
+
 ## Projektstruktur
 
 ```text
@@ -193,7 +217,6 @@ Die Anwendung bindet externe Bibliotheken per CDN ein:
 - Handlebars 4.7.8 fuer Speisekarten-Templates
 - SortableJS 1.15.0 fuer Drag-and-drop im Editor
 - Google Fonts: Handlee und Noto Sans
-- Elfsight fuer den optionalen Instagram-Feed
 
 ## Sicherheit und Wartung
 
