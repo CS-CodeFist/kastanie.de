@@ -16,7 +16,22 @@ Die Webseite und Apartments verwenden den gemeinsamen Renderer `webseite/script.
 
 ## CMS und Anmeldung
 
-`login.php` meldet am Editor an, `editor.php` stellt die Bearbeitungsoberflaeche bereit und `logout.php` beendet die Sitzung.
+`login.php` meldet am Editor an, `editor.php` stellt die Bearbeitungsoberflaeche bereit und `logout.php` beendet die Sitzung. Die Sitzung wird in PHP verwaltet.
+
+Die Zugangsdaten liegen ausschliesslich in einer lokalen, von Git ignorierten PHP-Datei. Die bevorzugte Datei ist `credentials.local.php`; aus Kompatibilitaetsgruenden werden auch `site_credentials.local.php` und `instagram_credentials.local.php` gelesen. Mindestens die folgenden Werte muessen in `credentials.local.php` gesetzt sein:
+
+```php
+<?php
+
+return [
+  'admin_username' => 'EDITOR_BENUTZERNAME',
+  'admin_password' => 'SICHERES_EDITOR_PASSWORT',
+  'account_id' => 'INSTAGRAM_KONTO_ID',
+  'access_token' => 'INSTAGRAM_ACCESS_TOKEN'
+];
+```
+
+Ohne `admin_username` und `admin_password` ist keine Editor-Anmeldung moeglich. Die Datei darf nicht ueber das Deployment, ein Backup oder ein Repository weitergegeben werden.
 
 Der Editor enthaelt drei Tabs:
 
@@ -141,27 +156,18 @@ JSON-Anfragen werden als `application/json` verarbeitet, Bild-Uploads als Formul
 
 ## Instagram-Reader
 
-Der eigene Instagram-Reader verwendet die offizielle Meta Graph API. Die Zugangsdaten duerfen nicht im Browser, im Repository oder in JSON-Inhalten stehen. Sie werden als Umgebungsvariablen des Webservers gesetzt:
+Der Endpunkt `instagram_feed.php` ruft Beitraege serverseitig ueber die offizielle Instagram Graph API unter `graph.instagram.com` ab. Die Zugangsdaten duerfen nie im Browser, im Repository oder in JSON-Inhalten stehen.
+
+Primaer liest der Endpunkt `account_id` und `access_token` aus `credentials.local.php`; die beiden oben beschriebenen aelteren lokalen Dateinamen funktionieren ebenfalls. Als Fallback sind Webserver-Umgebungsvariablen moeglich:
 
 ```text
 INSTAGRAM_ACCOUNT_ID=...
 INSTAGRAM_ACCESS_TOKEN=...
 ```
 
-Wenn beim Hosting keine Umgebungsvariablen gesetzt werden koennen, kann stattdessen die lokale Datei `credentials.local.php` angelegt werden. Die Datei ist von Git ausgeschlossen; als Ausgangspunkt dient `credentials.example.php`. Darin stehen auch die Zugangsdaten fuer den Editor:
+Das Instagram-Konto muss ein Business- oder Creator-Konto sein. Der Zugriffstoken benoetigt die passenden Meta-Berechtigungen fuer das Lesen der Medien. Der Reader liefert pro Beitrag unter anderem Bild oder Video-Vorschaubild, Beschreibung, Permalink, Zeitpunkt, Like- und Kommentaranzahl. Falls die API einen eigenen Kontokommentar liefert, wird dieser zusaetzlich als `author_comment` ausgegeben.
 
-```php
-<?php
-
-return [
-  'account_id' => 'DEINE_INSTAGRAM_KONTO_ID',
-  'access_token' => 'DEIN_INSTAGRAM_ACCESS_TOKEN',
-  'admin_username' => 'DEIN_EDITOR_BENUTZERNAME',
-  'admin_password' => 'DEIN_EDITOR_PASSWORT'
-];
-```
-
-Das Instagram-Konto muss ein Business- oder Creator-Konto sein. Der Zugriffstoken benoetigt die passenden Meta-Berechtigungen fuer das Lesen der Medien. Ohne diese Variablen zeigt der Feed keine Beitraege, die Webseite bleibt aber voll funktionsfaehig.
+Die Webseite laedt ueber `webseite/script.js` bis zu drei Beitraege. Sie zeigt einen Ladezustand und bleibt bei fehlenden Zugangsdaten, API-Fehlern oder nicht verfuegbaren Beitraegen funktionsfaehig. Die Kommentar-Overlays im Frontend sind derzeit bewusst Demo-Inhalte; sie stammen nicht aus dem Instagram-Endpunkt.
 
 ## Projektstruktur
 
@@ -205,8 +211,10 @@ post_max_size = 40M
 1. Das Projekt in das Document Root eines PHP-faehigen Webservers legen.
 2. Schreibrechte fuer die genannten Daten-, Bild- und Archivordner fuer den Webserver-Benutzer setzen.
 3. PHP-GD inklusive WebP aktivieren.
-4. Oeffentliche Seiten ueber `index.php`, `apartments.html` und `speisekarte.html` aufrufen.
-5. Den Editor ueber `login.php` oeffnen.
+4. `credentials.local.php` wie im Abschnitt CMS und Anmeldung anlegen und mit eindeutigen, sicheren Zugangsdaten fuellen.
+5. Fuer den Instagram-Feed Konto-ID und Zugriffstoken in derselben Datei hinterlegen.
+6. Oeffentliche Seiten ueber `index.php`, `apartments.html` und `speisekarte.html` aufrufen.
+7. Den Editor ueber `login.php` oeffnen.
 
 Nach Aenderungen an JavaScript oder CSS die Versionsparameter in den jeweiligen `<script>`- und `<link>`-Referenzen erhoehen, damit Browser die neue Datei abrufen.
 
@@ -220,7 +228,8 @@ Die Anwendung bindet externe Bibliotheken per CDN ein:
 
 ## Sicherheit und Wartung
 
-- Zugangsdaten gehoeren nicht in das Repository. Der Login ist aktuell direkt in `login.php` konfiguriert und sollte fuer einen produktiven Betrieb durch sicher gehashte Zugangsdaten ersetzt werden.
+- Zugangsdaten gehoeren ausschliesslich in eine lokale Credential-Datei oder in Webserver-Umgebungsvariablen, niemals in das Repository.
+- Der Editor-Login liest Benutzername und Passwort aus der lokalen Credential-Datei und vergleicht sie zeitangriffssicher. Fuer einen erweiterten Mehrbenutzerbetrieb waeren pro Benutzer gespeicherte Passwort-Hashes erforderlich.
 - `data_handler.php` ist eine schreibende API und prueft aktuell keine Session. Vor dem produktiven Betrieb muss der Zugriff serverseitig auf angemeldete Nutzer begrenzt werden.
 - Archive und Server-Logs sollten nicht direkt ueber das Web erreichbar sein.
 - Die Speisekarten-Speicherung setzt die Ausgabedatei auf die Rechte `0644`, damit die oeffentliche Seite sie lesen kann.
