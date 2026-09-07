@@ -25,6 +25,8 @@ let touchStartY = 0;
 let touchStartTime = 0;
 let globalBaseSpeed = 0.1;         // Basis-Fallgeschwindigkeit
 let globalImages = [];             // Array für die geladenen Bilder
+let animationFrameId = null;
+let lastAnimationTime = null;
 
 /**
  * Lädt saisonale Bilder basierend auf der aktiven Konfiguration
@@ -76,6 +78,18 @@ async function getSeasonalImages() {
  * @param {number} menge - Dichteeinstellung (1-3)
  */
 function init(geschwindigkeit, menge) {
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId);
+  }
+
+  elements.length = 0;
+  container.innerHTML = '';
+  lastAnimationTime = null;
+  orbitRadiusBoost = 0;
+  spinSpeedBoost = 0;
+  orbitBoostTarget = 0;
+  spinBoostTarget = 0;
+
   activeMenge = menge;
   activeGeschwindigkeit = geschwindigkeit;
   nextElementIndex = 0;
@@ -172,6 +186,9 @@ function init(geschwindigkeit, menge) {
       spinSpeed,
       orbitRadius,
       angle,
+      spinAngle: Math.random() * 360,
+      spinDirection: Math.random() < 0.5 ? -1 : 1,
+      fastSpinSpeed: 140 + Math.random() * 100,
       active: false
     });
   }
@@ -183,9 +200,12 @@ function init(geschwindigkeit, menge) {
 /**
  * Animationsschleife für alle Elemente
  */
-function animate() {
-  const now = Date.now();
-  const deltaTime = 16.67; // Feste Framerate angenommen statt tatsächliche zu berechnen
+function animate(now) {
+  const deltaTime = lastAnimationTime === null
+    ? 16.67
+    : Math.min(Math.max(now - lastAnimationTime, 0), 100);
+  const frameScale = deltaTime / 16.67;
+  lastAnimationTime = now;
 
   // Boost-Effekte aktualisieren mit Easing
   orbitRadiusBoost += (orbitBoostTarget - orbitRadiusBoost) * 0.06;
@@ -212,6 +232,7 @@ function animate() {
         // Bild und Skalierung setzen
         const img = item.inner.querySelector('img');
         const newScale = 0.9 + Math.random() * 0.8;
+        const depth = (newScale - 0.9) / 0.8;
 
         // Z-Index basierend auf der Skalierung setzen
         // Höherer Scale = höherer Z-Index für bessere visuelle Tiefe
@@ -220,6 +241,7 @@ function animate() {
         item.el.style.zIndex = zIndexBase + zIndexOffset;
 
         img.src = globalImages[Math.floor(Math.random() * globalImages.length)];
+  img.style.filter = `blur(${((1 - depth) * 0.8).toFixed(2)}px)`;
         img.style.transform = `rotateX(0deg) scale(${newScale})`;
         item.currentScale = newScale;
 
@@ -235,7 +257,7 @@ function animate() {
   elements.forEach(item => {
     if (item.active) {
       // Element nach unten bewegen
-      item.top += item.fallSpeed;
+      item.top += item.fallSpeed * frameScale;
 
       // Element deaktivieren, wenn es den unteren Rand erreicht
       if (item.top > 120) {
@@ -248,9 +270,12 @@ function animate() {
 
       // Animationsberechnungen
       const radius = Math.max(0, item.orbitRadius + orbitRadiusBoost);
-      const sway = Math.cos(item.angle) * radius;
+      const isFastFalling = item.fallSpeed > globalBaseSpeed * 1.1;
+      const sway = isFastFalling ? 0 : Math.cos(item.angle) * radius;
       const zSway = Math.sin(item.angle) * radius;
-      const rotation = Math.sin(now * item.rotationSpeed + item.offset) * 30;
+      const rotation = isFastFalling
+        ? (item.spinAngle += item.spinDirection * item.fastSpinSpeed * deltaTime / 1000)
+        : Math.sin(now * item.rotationSpeed + item.offset) * 30;
       const rotateY = Math.sin(now * item.rotationSpeed * 0.5 + item.offset) * 15;
       const bend = Math.sin(now * item.rotationSpeed + item.offset) * 40;
 
@@ -274,7 +299,7 @@ function animate() {
   });
 
   // Nächsten Frame anfordern
-  requestAnimationFrame(animate);
+  animationFrameId = requestAnimationFrame(animate);
 }
 
 // Touch-Event-Handler für Interaktivität
@@ -289,7 +314,7 @@ window.addEventListener('touchend', e => {
   const touch = e.changedTouches[0];
   const dx = touch.clientX - touchStartX;
   const dy = touch.clientY - touchStartY;
-  const dt = Date.now() - touchStartTime;
+  const dt = Math.max(Date.now() - touchStartTime, 1);
 
   // Berechne Geschwindigkeit der Geste
   const distance = Math.sqrt(dx * dx + dy * dy);

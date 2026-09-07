@@ -1,0 +1,28 @@
+{
+    "webseite": [
+        {
+            "menutitel": "Wohnbereich",
+            "image": "",
+            "titel": "Wohnbereich",
+            "untertitel": "Raum zum Ankommen und Entspannen.",
+            "text": "Unser gemütlicher Wohnbereich lädt dazu ein, nach einem erlebnisreichen Tag zur Ruhe zu kommen. Mit bequemen Sitzmöglichkeiten und einer freundlichen Atmosphäre bietet er den passenden Platz zum Lesen, Zusammensitzen oder einfach zum Wohlfühlen.",
+            "position": "zentriert",
+            "theme": "cream",
+            "buttonLabel": "",
+            "buttonLink": "",
+            "buttonTheme": "primary"
+        },
+        {
+            "menutitel": "Apartments",
+            "image": "",
+            "titel": "Apartments",
+            "untertitel": "Ankommen, durchatmen, wohlfuehlen.",
+            "text": "",
+            "position": "zentriert",
+            "theme": "forest",
+            "buttonLabel": "",
+            "buttonLink": "",
+            "buttonTheme": "primary"
+        }
+    ]
+}

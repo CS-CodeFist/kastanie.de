@@ -8,14 +8,14 @@
     },
     {
         "id": "summer",
-        "aktiv": true,
+        "aktiv": false,
         "label": "Sommer ☀️",
-        "geschwindigkeit": "2",
-        "menge": "2"
+        "geschwindigkeit": "3",
+        "menge": "3"
     },
     {
         "id": "autumn",
-        "aktiv": false,
+        "aktiv": true,
         "label": "Herbst 🍂",
         "geschwindigkeit": "2",
         "menge": "3"

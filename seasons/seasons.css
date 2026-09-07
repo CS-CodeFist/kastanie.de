@@ -36,6 +36,4 @@
     transform-style: preserve-3d;
     will-change: transform;
     pointer-events: none;
-    /* 👉 einzelne Bilder sind wieder interaktiv */
-    cursor: pointer;
 }

@@ -1,12 +1,11 @@
 <?php
 
-/*
 session_start();
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header("Location: login.php");
     exit;
-}*/
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -15,42 +14,118 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<title>Kastanie Molzow – Editor</title>
-	<link rel="stylesheet" href="editor.css?20250729h" />
+	<title>Kastanie Moltzow – Editor</title>
+	<link rel="stylesheet" href="editor/editor.css?20260907m" />
 </head>
 
 <body>
 	<div id="loader">
 		<div class="spinner"></div>
-		<p>Lade Speisekarte…</p>
-	</div>
-	<h1>Speisekarten bearbeiten</h1>
-
-	<div id="vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content:space-between;">
-		<div>
-			<label for="vorlagen">Speisekarte laden:</label>
-			<select id="vorlagen">
-				<option value="">– Auswahl –</option>
-			</select>
-		</div>
-		<div>
-			<label for="archivSelect">Archiv:</label>
-			<select id="archivSelect" disabled>
-				<option value="">– Archiv –</option>
-			</select>
-		</div>
+		<p>CMS wird geladen…</p>
 	</div>
 
-	<div id="editor"></div>
-
-	<div id="buttonWrapper" class="option-button-group">
-		<div style="display: flex; justify-content: space-between;">
-			<button onclick="addMenu()">➕ Menü hinzufügen</button>
-			<button id="optionsBtn">⚙️ Optionen</button>
-		</div>
-		<div style="display: flex; justify-content: space-between;">
-			<button id="saveMenuBtn">💾 Menü speichern</button>
+	<!-- Tab Navigation -->
+	<div class="tab-container">
+		<div class="tab-navigation">
+			<button class="tab-button active" data-tab="webseite">🌐 Webseite</button>
+			<button class="tab-button" data-tab="speisekarte">🍽️ Speisekarte</button>
+			<button class="tab-button" data-tab="apartments">🏠 Apartments</button>
 			<button id="logoutBtn">🚪 Logout</button>
+		</div>
+		
+		<!-- Webseite Tab Content -->
+		<div id="webseite-tab" class="tab-content active">
+			
+			<div id="webseiten-vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content:space-between;">
+				<div>
+					<label for="webseitenArchivSelect">Archiv:</label>
+					<select id="webseitenArchivSelect" disabled>
+						<option value="">– Archiv –</option>
+					</select>
+				</div>
+			</div>
+			
+			<div id="webseite-editor"></div>
+			
+			<div id="webseitenButtonWrapper" class="option-button-group">
+				<div style="display: flex; justify-content: space-between;">
+					<button id="addWebseitenSectionBtn">➕ Sektion hinzufügen</button>
+					<button id="optionsBtn">⚙️ Optionen</button>
+				</div>
+				<div style="display: flex; justify-content: space-between;">
+					<button id="saveWebseitenBtn">💾 Webseite speichern</button>
+				</div>
+			</div>
+			
+		</div>
+		
+		<!-- Speisekarte Tab Content -->
+		<div id="speisekarte-tab" class="tab-content">
+
+			<div id="vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content:space-between;">
+				<div>
+					<label for="vorlagen">Speisekarte laden:</label>
+					<select id="vorlagen">
+						<option value="">– Auswahl –</option>
+					</select>
+				</div>
+				<div>
+					<label for="archivSelect">Archiv:</label>
+					<select id="archivSelect" disabled>
+						<option value="">– Archiv –</option>
+					</select>
+				</div>
+			</div>
+
+			<div id="editor"></div>
+
+			<div id="buttonWrapper" class="option-button-group">
+				<div style="display: flex; justify-content: space-between;">
+					<button onclick="addMenu()">➕ Menü hinzufügen</button>
+					<button id="optionsBtn">⚙️ Optionen</button>
+				</div>
+				<div style="display: flex; justify-content: space-between;">
+					<button id="saveMenuBtn">💾 Menü speichern</button>
+				</div>
+			</div>
+
+		</div> <!-- Ende speisekarte-tab -->
+
+		<!-- Apartments Tab Content -->
+		<div id="apartments-tab" class="tab-content">
+			<div id="apartments-vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content: space-between;">
+				<div>
+					<label for="apartmentsArchivSelect">Archiv:</label>
+					<select id="apartmentsArchivSelect" disabled>
+						<option value="">– Archiv –</option>
+					</select>
+				</div>
+			</div>
+
+			<div id="apartments-editor"></div>
+
+			<div id="apartmentsButtonWrapper" class="option-button-group">
+				<div style="display: flex; justify-content: space-between;">
+					<button id="addApartmentsSectionBtn">➕ Sektion hinzufügen</button>
+				</div>
+				<div style="display: flex; justify-content: space-between;">
+					<button id="saveApartmentsBtn">💾 Apartments speichern</button>
+				</div>
+			</div>
+		</div> <!-- Ende apartments-tab -->
+	</div> <!-- Ende tab-container -->
+
+	<!-- Overlay für neue Webseiten-Sektion -->
+	<div id="webseitenSectionOverlay" class="overlay">
+		<div class="overlay-content">
+			<h2 style="margin: 0;">Sektion hinzufügen</h2>
+			<div class="option-button-group webseiten-section-type-buttons">
+				<button type="button" data-section-type="standard">Standardsektion</button>
+				<button type="button" data-section-type="instagram-feed">Instagram Feed</button>
+			</div>
+			<div class="overlay-footer">
+				<button type="button" id="closeWebseitenSectionOverlayBtn">Abbrechen</button>
+			</div>
 		</div>
 	</div>
 
@@ -62,7 +137,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 			<div id="imageLibraryGrid"></div>
 
 			<div class="overlay-actions">
-				<input type="file" id="imageUploadInput" accept="image/*" />
+				<input type="file" id="imageUploadInput" accept="image/jpeg,image/png,image/gif,image/webp" />
 
 				<div class="overlay-button-row">
 					<button id="refreshImageLibrary">🔄 Neu laden</button>
@@ -73,6 +148,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 			</div>
 
 			<div class="overlay-footer">
+				<button id="removeImageSelection" type="button">Kein Bild</button>
 				<button id="cancelImageOverlay">Abbrechen</button>
 			</div>
 		</div>
@@ -172,6 +248,9 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				<button class="toggle-gerichte">{{gerichteToggleText}}</button>
 				<button class="toggle-all-gerichte" {{#unless gerichteVisible}}style="display: none;"{{/unless}}>{{allToggleText}}</button>
 			</div>
+			{{#unless hasGerichte}}
+			<p class="empty-gerichte-hint">Noch keine Gerichte angelegt.</p>
+			{{/unless}}
 			<div class="gerichte-wrapper {{#unless gerichteVisible}}collapsed{{/unless}}">
 				{{#each gerichte}}
 					<div class="gericht {{#if _collapsed}}collapsed-gericht{{/if}}">
@@ -182,7 +261,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 							</div>
 						</div>
 						<label>Beschreibung<textarea rows="3" data-field="beschreibung">{{beschreibung}}</textarea></label>
-						<div style="display: flex; gap: 0.5em;">
+						<div class="zusatzstoffe-fields" style="display: flex; gap: 0.5em;">
 							<label style="flex: 1;">Zusatzstoffe-Titel<input type="text" value="{{zusatzstoffetitel}}" data-field="zusatzstoffetitel" placeholder="Titel" /></label>
 							<label style="flex: 2;">Zusatzstoffe (Komma)<input type="text" value="{{join zusatzstoffe ', '}}" data-field="zusatzstoffe" placeholder="Inhalt" /></label>
 						</div>
@@ -251,7 +330,19 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<!-- SCRIPTS -->
 	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-	<script src="editor.js?v=20250728"></script>
+	
+	<!-- EDITOR MODULES (Reihenfolge ist wichtig!) -->
+	<script src="editor/editor_core.js?v=20250728b"></script>
+	<script src="editor/editor_tabs.js?v=20260904c"></script>
+	<script src="editor/editor_spk.js?v=20260904e"></script>
+	<script src="editor/editor_webseite.js?v=20260907k"></script>
+	<script src="editor/editor_apartments.js?v=20260907k"></script>
+	<script src="editor/editor_images.js?v=20260904f"></script>
+	<script src="editor/editor_templates.js?v=20260904d"></script>
+	<script src="editor/editor_seasons.js?v=20260904a"></script>
+	
+	<!-- EDITOR MAIN (Koordiniert alle Module) -->
+	<script src="editor/main.js?v=20260904a"></script>
 </body>
 
 </html>

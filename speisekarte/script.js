@@ -68,7 +68,7 @@ function formatPreis(value) {
 }
 
 const timestamp = new Date().getTime();
-fetch(`data.json?t=${timestamp}`)
+fetch(`speisekarte/data.json?t=${timestamp}`)
   .then(response => response.json())
   .then(data => {
     document.getElementById("loader").style.display = "none";
