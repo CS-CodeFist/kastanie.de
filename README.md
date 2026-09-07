@@ -1,117 +1,204 @@
-# Kastanie.de - Digitale Speisekarte
+# Kastanie Moltzow
 
-Elegante, responsive Speisekarte mit Parallax-Effekten, Dark Mode und saisonalen Animationen.
+Webauftritt, digitale Speisekarte und browserbasiertes CMS fuer Kastanie Moltzow. Redaktionelle Inhalte werden als JSON gespeichert und im passwortgeschuetzten Editor bearbeitet. Ein Node- oder Build-Schritt ist nicht erforderlich.
 
-## ✨ Features
+## Oeffentliche Seiten
 
+| Seite | Zweck | Datenquelle |
+| --- | --- | --- |
+| `index.php` | Webseite mit dynamischen Inhaltssektionen | `webseite/data.json` |
+| `apartments.html` | Apartments mit eigener Navigation | `apartments/data.json` |
+| `speisekarte.html` | Digitale Speisekarte | `speisekarte/data.json` |
+| `impressum.php` | Impressum | Statischer Inhalt |
+| `datenschutz.php` | Datenschutzerklaerung | Statischer Inhalt |
 
-## 🔧 Tech Stack & Externe Dependencies
+Die Webseite und Apartments verwenden den gemeinsamen Renderer `webseite/script.js`. Die Navigation wird aus den Abschnitten erzeugt. Beim Scrollen wird der zugehoerige Punkt aktiviert und bei horizontalem Ueberlauf in den sichtbaren Bereich gefuehrt.
 
-### Frontend
-  ```html
-  <script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-  ```
-  ```html
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  ```
-  ```html
-  <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap">
-  ```
+## CMS und Anmeldung
 
-### Backend
+`login.php` meldet am Editor an, `editor.php` stellt die Bearbeitungsoberflaeche bereit und `logout.php` beendet die Sitzung.
 
-## 📸 Bildverarbeitungs-Pipeline
+Der Editor enthaelt drei Tabs:
 
-### Upload-Prozess (`data_handler.php`)
-1. **Upload-Validierung**: MIME-Type und Dateigröße prüfen
-2. **Format-Unterstützung**: JPEG, PNG, GIF → WebP Konvertierung
-3. **EXIF-Korrektur**: Automatische Rotation basierend auf EXIF-Daten
-4. **Größenoptimierung**: Resize auf max. 1600px (längste Seite)
-5. **Quadratischer Zuschnitt**: Zentriertes Cropping für einheitliche Darstellung
-6. **WebP-Komprimierung**: 80% Qualität für optimale Dateigröße
-7. **Zeitstempel-Benennung**: `originalname_timestamp.webp` für Eindeutigkeit
+- **Webseite:** Inhaltssektionen, Bilder, Textposition, Section-Themes, Call-to-Action-Buttons und Instagram-Feed.
+- **Speisekarte:** Menues, Gerichte, Preise, Beilagen, Zusatzstoffe, Vorlagen und saisonale Dekorationen.
+- **Apartments:** Separate Inhaltssektionen, Bilder, Textposition, Themes und Archive.
 
-### Archivierungs-System
+Die Tab-Logik liegt in `editor/editor_tabs.js`. Der Editor laedt die Inhalte eines Tabs erst bei dessen erster Aktivierung.
 
-### Bilddarstellung
+## Inhaltsdaten
 
-## 🔗 Social Media Integration
+### Webseite und Apartments
 
-### Pattern-basierte Link-Generierung
-Das System unterstützt automatische Link-Erstellung durch spezielle Pattern in Beschreibungstexten:
+`webseite/data.json` und `apartments/data.json` haben dieselbe Grundstruktur:
 
-
-### Handlebars Helper
-```javascript
-// processInstagramText Helper verarbeitet beide Pattern
-{{{processInstagramText beschreibung}}}
+```json
+{
+  "webseite": [
+    {
+      "menutitel": "Kontakt",
+      "image": "bilder_webseite/beispiel.webp",
+      "titel": "Besuchen Sie uns",
+      "untertitel": "Wir freuen uns auf Sie",
+      "text": "Freier Beschreibungstext.",
+      "position": "links",
+      "theme": "forest",
+      "buttonLabel": "E-Mail schreiben",
+      "buttonLink": "email",
+      "buttonTheme": "primary"
+    }
+  ]
+}
 ```
 
-Unterstützte Pattern:
+Unterstuetzte Werte:
 
-## 🎯 Editor Features
+| Feld | Werte | Bedeutung |
+| --- | --- | --- |
+| `position` | `links`, `rechts`, `zentriert` | Position des Textes gegenueber dem Bild |
+| `theme` | `forest`, `moss`, `clay`, `cream` | Farbthema einer Sektion |
+| `buttonLink` | `speisekarte`, `apartments`, `email` | Ziel eines Buttons |
+| `buttonTheme` | `primary`, `secondary` | Darstellung eines Buttons |
 
-### Content Management
+Leere Bildwerte werden in der oeffentlichen Ausgabe nicht als Bildflaeche gerendert. Eine Instagram-Sektion hat den Typ `instagram-feed`; sie wird ueber Elfsight geladen und erscheint nur im Webseitentab.
 
-### Erweiterte Funktionen
+### Speisekarte
 
-### Benutzerfreundlichkeit
+Die Speisekarte verwendet `speisekarte/data.json` mit einem `content`-Array. Ein Menueeintrag besitzt unter anderem `menutitel`, `titel`, `image` und `gerichte`. Gerichte koennen folgende Felder enthalten:
 
-## 📁 Struktur
-
-```
-├── index.html          # Haupttemplate mit Handlebars
-├── styles.css          # 3D-Parallax & Glasmorphismus
-├── script.js           # Frontend-Logik & Handlebars Helpers
-├── data_handler.php    # Upload & Bildverarbeitung
-├── editor.php          # Backend-Editor Interface
-├── editor.js           # Editor-Logik & Template-Rendering
-├── editor.css          # Editor-Styling & Responsive Design
-├── data.json           # Speisekarten-Daten
-├── config.json         # Saison-Layout Konfiguration
-├── bilder/             # SVG-Assets & Icons
-│   ├── Kastanie.svg   # Haupt-Branding-Logo
-│   ├── instagram-icon.svg # Instagram-Icon für Links
-│   └── google-icon.svg    # Google-Icon für Bewertungen
-├── bilder_menu/        # Optimierte WebP-Bilder
-│   └── archiv/        # Archivierte Bilder
-├── templates/          # Speisekarten-Vorlagen
-│   └── archiv/        # Archivierte Templates
-└── seasons/            # Saisonale Dekorationen
-    ├── spring/        # Blüten-Animationen
-    ├── summer/        # Sommer-Effekte
-    ├── autumn/        # Herbst-Blätter
-    ├── winter/        # Schneeflocken
-    └── party/         # Konfetti-Partikel
+```json
+{
+  "titel": "Beispielgericht",
+  "beschreibung": "Kurze Beschreibung",
+  "zusatzstoffetitel": "Inhaltsstoffe",
+  "zusatzstoffe": ["Zutat A", "Zutat B"],
+  "preisliste": [{ "size": "gross", "preis": "12.50" }],
+  "beilagentitel": "Dazu passend",
+  "beilagen": [{ "name": "Pommes", "preis": "3.00" }],
+  "tag": "Empfehlung"
+}
 ```
 
-## 📱 Responsive
+Besondere Menueeintraege:
 
+- `logo`: Logo, Link und Begruessungstext.
+- `infotext`: Ein freier Informationsbereich am Ende der Speisekarte.
 
-## 🎨 Design
+Im Infotext werden die Marker `[instagram]` und `[google]` als externe Links mit Symbolen ausgegeben.
 
-### Farben - Light Mode
+## Bilder
 
-### Farben - Dark Mode
+Die Bildbibliotheken sind getrennt:
 
+| Bibliothek | Verzeichnis | Verwendung |
+| --- | --- | --- |
+| Webseite | `bilder_webseite/` | Webseiten-Sektionen |
+| Apartments | `bilder_apartments/` | Apartments-Sektionen |
+| Speisekarte | `bilder_menu/` | Menues, Gerichte und Infotext |
 
-## 🚀 Setup
+Der Upload akzeptiert JPEG, PNG, GIF und WebP. Der Server korrigiert bei JPEG moegliche EXIF-Ausrichtung, skaliert die laengste Kante auf maximal 1600 Pixel, schneidet zentriert quadratisch zu und speichert als WebP mit 80 Prozent Qualitaet. Nicht mehr benoetigte Bilder werden in den Archiv-Unterordner der jeweiligen Bibliothek verschoben.
 
-1. **Server-Anforderungen**
-   - PHP 7.4+ mit GD Extension
-   - Schreibrechte für `/bilder_menu/` und `/templates/`
-   - Moderne Browser für backdrop-filter Support
+## Archive und Vorlagen
 
-2. **Installation**
-   ```bash
-   chmod 755 bilder_menu/
-   chmod 755 bilder/
-   chmod 644 data.json
-   ```
+Vor dem Speichern legt die Anwendung Sicherungen der bestehenden Inhalte an:
 
-3. **Zugriff**
-   - `index.html` - Öffentliche Speisekarte
-   - `editor.php` - Admin-Interface
-   - Login-Credentials in `login.php`
+| Bereich | Archiv |
+| --- | --- |
+| Webseite | `webseite/archiv/data_YYYY-MM-DD_HH-MM-SS.json` |
+| Apartments | `apartments/archiv/data_YYYY-MM-DD_HH-MM-SS.json` |
+| Speisekarte und Vorlagen | `templates/archiv/` |
 
-*Entwickelt für die digitale Gastronomie mit Fokus auf moderne Web-Standards und optimale User Experience* 🌰
+Speisekarten-Vorlagen liegen als JSON-Dateien direkt unter `templates/`. Die aktuelle Karte ist immer `speisekarte/data.json`.
+
+## Saisonale Dekoration
+
+`config.json` bestimmt die aktive saisonale Dekoration sowie Geschwindigkeit und Menge. Die zugehoerigen Assets und Skripte liegen unter `seasons/`:
+
+```text
+seasons/
+├── spring/
+├── summer/
+├── autumn/
+├── winter/
+└── party/
+```
+
+Die saisonalen Einstellungen werden im Speisekarten-Editor unter Optionen gepflegt.
+
+## API
+
+Alle schreibenden und lesenden Editor-Aktionen laufen ueber `data_handler.php`. Relevante Aktionen sind:
+
+| Bereich | Aktionen |
+| --- | --- |
+| Bilder | `load_images`, `upload_image`, `archive_image` |
+| Speisekarte | `save_file`, `list_templates`, `list_archives` |
+| Webseite | `save_webseite`, `list_webseiten_archives`, `load_webseiten_archive` |
+| Apartments | `save_apartments`, `list_apartments_archives`, `load_apartments_archive` |
+| Saison | `load_layout_config`, `save_layout_config`, `get_season_images` |
+
+JSON-Anfragen werden als `application/json` verarbeitet, Bild-Uploads als Formularanfrage. Fehlerantworten werden ebenfalls als JSON geliefert.
+
+## Projektstruktur
+
+```text
+.
+├── index.php                 # Oeffentliche Webseite
+├── apartments.html           # Oeffentliche Apartments-Seite
+├── speisekarte.html          # Oeffentliche Speisekarte
+├── editor.php                # Geschuetztes CMS
+├── login.php / logout.php    # Sitzung verwalten
+├── data_handler.php          # JSON-API, Uploads und Archive
+├── webseite/                 # Webseiten-Daten, Renderer, Styles und Archiv
+├── apartments/               # Apartments-Daten und Archiv
+├── speisekarte/              # Speisekarten-Daten, Renderer und Styles
+├── editor/                   # CMS-Module und Editor-Styles
+├── partials/                 # Gemeinsamer Kopf- und Fussbereich der PHP-Seiten
+├── bilder/                   # Logo und gemeinsame Assets
+├── bilder_webseite/          # Webseiten-Bibliothek
+├── bilder_apartments/        # Apartments-Bibliothek
+├── bilder_menu/              # Speisekarten-Bibliothek
+├── templates/                # Speisekarten-Vorlagen und Archive
+├── seasons/                  # Saisonale Effekte
+├── config.json               # Saison-Konfiguration
+└── .user.ini                 # PHP-Upload-Grenzen
+```
+
+## Voraussetzungen und Installation
+
+- PHP 7.4 oder neuer
+- PHP-GD mit WebP-Unterstuetzung
+- Ein Webserver mit PHP-Unterstuetzung
+- Schreibrechte fuer `webseite/`, `apartments/`, `speisekarte/`, `templates/` und die drei Bildbibliotheken inklusive Archiv-Unterordner
+
+Die Upload-Grenzen stehen in `.user.ini`:
+
+```ini
+upload_max_filesize = 32M
+post_max_size = 40M
+```
+
+1. Das Projekt in das Document Root eines PHP-faehigen Webservers legen.
+2. Schreibrechte fuer die genannten Daten-, Bild- und Archivordner fuer den Webserver-Benutzer setzen.
+3. PHP-GD inklusive WebP aktivieren.
+4. Oeffentliche Seiten ueber `index.php`, `apartments.html` und `speisekarte.html` aufrufen.
+5. Den Editor ueber `login.php` oeffnen.
+
+Nach Aenderungen an JavaScript oder CSS die Versionsparameter in den jeweiligen `<script>`- und `<link>`-Referenzen erhoehen, damit Browser die neue Datei abrufen.
+
+## Abhaengigkeiten
+
+Die Anwendung bindet externe Bibliotheken per CDN ein:
+
+- Handlebars 4.7.8 fuer Speisekarten-Templates
+- SortableJS 1.15.0 fuer Drag-and-drop im Editor
+- Google Fonts: Handlee und Noto Sans
+- Elfsight fuer den optionalen Instagram-Feed
+
+## Sicherheit und Wartung
+
+- Zugangsdaten gehoeren nicht in das Repository. Der Login ist aktuell direkt in `login.php` konfiguriert und sollte fuer einen produktiven Betrieb durch sicher gehashte Zugangsdaten ersetzt werden.
+- `data_handler.php` ist eine schreibende API und prueft aktuell keine Session. Vor dem produktiven Betrieb muss der Zugriff serverseitig auf angemeldete Nutzer begrenzt werden.
+- Archive und Server-Logs sollten nicht direkt ueber das Web erreichbar sein.
+- Die Speisekarten-Speicherung setzt die Ausgabedatei auf die Rechte `0644`, damit die oeffentliche Seite sie lesen kann.
+- Bei Speicherfehlern zuerst die Schreibrechte der betroffenen Daten- und Archivverzeichnisse sowie das PHP-Fehlerprotokoll pruefen.
