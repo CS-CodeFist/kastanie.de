@@ -29,7 +29,7 @@ if (!function_exists('curl_init')) {
 $limit = min(max((int) ($_GET['limit'] ?? 6), 1), 12);
 $fields = 'id,caption,comments_count,like_count,media_type,media_product_type,media_url,permalink,shortcode,thumbnail_url,timestamp,username,is_comment_enabled,is_shared_to_feed,video_title,children{id,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp}';
 $url = sprintf(
-    'https://graph.instagram.com/v22.0/%s/media?fields=%s&limit=%d&access_token=%s',
+    'https://graph.instagram.com/v25.0/%s/media?fields=%s&limit=%d&access_token=%s',
     rawurlencode($accountId),
     rawurlencode($fields),
     $limit,
@@ -59,12 +59,12 @@ $posts = array_values(array_filter($payload['data'] ?? [], function ($post) {
 }));
 
 foreach ($posts as &$post) {
-    if (empty($post['comments_count']) || empty($post['username'])) {
+    if (empty($post['comments_count'])) {
         continue;
     }
 
     $commentsUrl = sprintf(
-        'https://graph.instagram.com/v22.0/%s/comments?fields=id,text,timestamp,username&limit=25&access_token=%s',
+        'https://graph.instagram.com/v25.0/%s/comments?fields=id,text,timestamp&limit=25&access_token=%s',
         rawurlencode($post['id']),
         rawurlencode($accessToken)
     );
@@ -85,13 +85,9 @@ foreach ($posts as &$post) {
         continue;
     }
 
-    foreach ($commentsPayload['data'] ?? [] as $comment) {
-        $commentAuthor = $comment['username'] ?? $comment['from']['username'] ?? '';
-        if (strcasecmp($commentAuthor, $post['username']) === 0) {
-            $post['author_comment'] = $comment;
-            break;
-        }
-    }
+    $post['comments'] = array_values(array_filter($commentsPayload['data'] ?? [], function ($comment) {
+        return !empty($comment['text']);
+    }));
 }
 unset($post);
 

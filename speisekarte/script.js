@@ -91,7 +91,7 @@ fetch(`speisekarte/data.json?t=${timestamp}`)
         const html = renderTemplate("template-menu-item", {
             ...item,
             isLogo: isLogo,
-            link: isLogo ? (item.titel || "http://www.kastanie-moltzow.de") : "#"+item.menutitel.toLowerCase()
+            link: isLogo ? "./#start" : "#"+item.menutitel.toLowerCase()
         });            const wrapper = document.createElement("div");
             wrapper.innerHTML = html.trim();
             const linkElement = wrapper.firstChild;

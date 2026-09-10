@@ -396,11 +396,13 @@ h2 {
     object-fit: contain;
 }
 
-.instagram-demo-comment {
+.instagram-comments {
     position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
+    display: grid;
+    gap: 0.65rem;
     max-height: 100%;
     margin: 0;
     padding: 0.8rem 0.9rem;
@@ -413,17 +415,29 @@ h2 {
     pointer-events: none;
     transform: translateY(100%);
     transition: opacity 0.25s ease, transform 0.25s ease;
-    font-size: 0.85rem;
-    font-style: italic;
-    line-height: 1.45;
     scrollbar-color: color-mix(in srgb, var(--instagram-card-text) 70%, transparent) transparent;
 }
 
-.instagram-post-link:focus-visible~.instagram-demo-comment,
-.instagram-post.is-comment-open .instagram-demo-comment {
+.instagram-post-link:focus-visible~.instagram-comments,
+.instagram-post.is-comment-open .instagram-comments {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
+}
+
+.instagram-comment {
+    margin: 0;
+    font-size: 0.85rem;
+    font-style: italic;
+    line-height: 1.45;
+}
+
+.instagram-comment cite {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.78rem;
+    font-style: normal;
+    font-weight: 700;
 }
 
 .instagram-comment-toggle {
@@ -455,7 +469,7 @@ h2 {
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .instagram-post:hover .instagram-demo-comment {
+    .instagram-post:hover .instagram-comments {
         opacity: 1;
         pointer-events: auto;
         transform: translateY(0);

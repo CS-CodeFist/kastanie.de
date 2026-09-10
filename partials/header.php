@@ -18,12 +18,12 @@ $isHomepage = $isHomepage ?? false;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="webseite/styles.css?v=20260907ab">
+    <link rel="stylesheet" href="webseite/styles.css?v=20260910b">
 </head>
 <body>
     <header class="site-header">
         <div class="site-header-inner">
-            <a class="brand" href="index.php#start" aria-label="Kastanie Moltzow - Startseite">
+            <a class="brand" href="./#start" aria-label="Kastanie Moltzow - Startseite">
                 <img src="bilder/Kastanie.svg" alt="">
                 <span>Kastanie Moltzow</span>
             </a>
@@ -34,7 +34,7 @@ $isHomepage = $isHomepage ?? false;
             <?php else: ?>
                 <nav id="navigation" aria-label="Hauptnavigation">
                     <div class="navigation-items">
-                        <a href="index.php#start">Startseite</a>
+                        <a href="./#start">Startseite</a>
                     </div>
                 </nav>
             <?php endif; ?>

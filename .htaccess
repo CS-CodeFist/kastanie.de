@@ -1,0 +1,10 @@
+RewriteEngine On
+DirectoryIndex index.php index.html
+
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php(?:[?\s]) [NC]
+RewriteRule ^index\.php$ /%1 [R=301,L,NE]
+
+RewriteCond %{THE_REQUEST} \s/+(.*/)?(?:apartments|speisekarte)\.html(?:[?\s]) [NC]
+RewriteRule ^(apartments|speisekarte)\.html$ /%1$1 [R=301,L,NE]
+
+RewriteRule ^(apartments|speisekarte)/?$ $1.html [L]

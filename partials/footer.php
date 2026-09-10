@@ -5,7 +5,7 @@
                 <a href="impressum.php">Impressum</a>
                 <a href="datenschutz.php">Datenschutz</a>
             </nav>
-            <a href="speisekarte.html">Zur Speisekarte</a>
+            <a href="speisekarte">Zur Speisekarte</a>
         </div>
     </footer>
 </body>
