@@ -149,7 +149,8 @@ function createSection(section, index) {
     const sectionId = index === 0 ? 'start' : createSlug(section.menutitel, index);
     const element = document.createElement('section');
     const position = normalizeImagePosition(section.position);
-    const hasImage = Boolean(section.image);
+    const isMap = ['openstreetmap', 'apple-map'].includes(section.mediaType);
+    const hasImage = isMap || Boolean(section.image);
 
     element.id = sectionId;
     const positionClass = position;
@@ -190,10 +191,12 @@ function createSection(section, index) {
         copy.appendChild(button);
     }
 
-    const image = document.createElement('div');
-    image.className = 'section-image';
-    if (hasImage) {
-        image.style.backgroundImage = `url("${section.image.replace(/"/g, '\\"')}")`;
+    const image = isMap ? LocationMap.create() : document.createElement('div');
+    if (!isMap) {
+        image.className = 'section-image';
+        if (hasImage) {
+            image.style.backgroundImage = `url("${section.image.replace(/"/g, '\\"')}")`;
+        }
     }
 
     inner.appendChild(copy);
@@ -442,6 +445,7 @@ function setupNavigationHighlighting() {
 }
 
 function renderWebsite(data) {
+    LocationMap.disposeAll();
     clearInterval(openingHoursTimer);
     openingHoursRefreshers = [];
     const sections = Array.isArray(data.webseite) ? data.webseite : [];

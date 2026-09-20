@@ -62,6 +62,22 @@ function renderImageGrid(images) {
 	const grid = document.getElementById("imageLibraryGrid");
 	grid.innerHTML = "";
 
+	if (activeImageLibrary === 'webseite' || activeImageLibrary === 'apartments') {
+		const mapChoice = document.createElement('button');
+		mapChoice.type = 'button';
+		mapChoice.className = 'image-map-choice';
+		mapChoice.textContent = 'Karte';
+		mapChoice.title = 'Warener Straße 3, 17194 Moltzow';
+		mapChoice.disabled = deleteMode;
+		mapChoice.onclick = () => {
+			if (typeof currentImageTarget === 'function') {
+				currentImageTarget('', 'openstreetmap');
+				closeImageOverlay();
+			}
+		};
+		grid.appendChild(mapChoice);
+	}
+
 	images.forEach(img => {
 		const imageData = {
 			src: img.src,

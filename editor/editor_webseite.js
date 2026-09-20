@@ -165,7 +165,9 @@ function renderWebseitenSection(section, index) {
                             <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel" /></label>
                         </div>
                     </div>
-                    <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image" />
+                    ${['openstreetmap', 'apple-map'].includes(section.mediaType)
+                        ? '<button type="button" class="image-thumb image-map-choice" data-field="image">Karte</button>'
+                        : `<img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image" />`}
                 </div>
                     <div class="text-fields">
                         <label>Text<textarea rows="6" data-field="text" placeholder="Beschreibungstext...">${section.text || ''}</textarea></label>
@@ -588,15 +590,22 @@ function handleWebseitenImageClick(imageThumb) {
     const section = imageThumb.closest('.webseiten-section');
     const index = parseInt(section.dataset.index);
 
-    EditorImages.openImageOverlay((newSrc) => {
+    EditorImages.openImageOverlay((newSrc, mediaType) => {
         webseitenData.webseite[index].image = newSrc;
-        if (newSrc) {
-            imageThumb.src = newSrc;
-            imageThumb.classList.remove('placeholder');
+        if (mediaType === 'openstreetmap') webseitenData.webseite[index].mediaType = mediaType;
+        else delete webseitenData.webseite[index].mediaType;
+        const preview = document.createElement(mediaType === 'openstreetmap' ? 'button' : 'img');
+        preview.dataset.field = 'image';
+        preview.className = 'image-thumb';
+        if (mediaType === 'openstreetmap') {
+            preview.type = 'button';
+            preview.classList.add('image-map-choice');
+            preview.textContent = 'Karte';
         } else {
-            imageThumb.src = imagePlaceholderSrc;
-            imageThumb.classList.add('placeholder');
+            preview.src = newSrc || imagePlaceholderSrc;
+            preview.classList.toggle('placeholder', !newSrc);
         }
+        imageThumb.replaceWith(preview);
     }, webseitenData.webseite[index].image, 'webseite', true);
 }
 

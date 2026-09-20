@@ -1071,6 +1071,45 @@ label {
     position: relative;
 }
 
+.image-map-choice {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0.5rem;
+    border: 2px solid var(--primary);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--primary-dark);
+    font: inherit;
+    text-align: center;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.image-map-choice,
+.image-map-choice:hover {
+    background: var(--white) url("../webseite/map-positron.webp") center / cover no-repeat;
+    box-shadow: inset 0 -2.5rem 0 rgba(255, 255, 255, 0.94);
+    color: var(--primary-dark);
+}
+
+#imageLibraryGrid>.image-map-choice {
+    aspect-ratio: 1;
+}
+
+.image-map-choice:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.image-map-choice:focus-visible {
+    outline: 2px solid var(--primary-dark);
+    outline-offset: -6px;
+}
+
 .image-grid-item img.image-thumb {
     aspect-ratio: 1 / 1;
     object-fit: cover;

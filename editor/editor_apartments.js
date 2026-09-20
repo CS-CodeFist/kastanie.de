@@ -90,7 +90,9 @@ const ApartmentsEditor = (() => {
                                 <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel"></label>
                             </div>
                         </div>
-                        <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image">
+                        ${['openstreetmap', 'apple-map'].includes(section.mediaType)
+                            ? '<button type="button" class="image-thumb image-map-choice" data-field="image">Karte</button>'
+                            : `<img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image">`}
                     </div>
                         <div class="text-fields">
                             <label>Text<textarea rows="6" data-field="text" placeholder="Beschreibungstext...">${section.text || ''}</textarea></label>
@@ -166,10 +168,22 @@ const ApartmentsEditor = (() => {
 
     function selectImage(imageThumb) {
         const index = Number(imageThumb.closest('.webseiten-section').dataset.index);
-        EditorImages.openImageOverlay((newSrc) => {
+        EditorImages.openImageOverlay((newSrc, mediaType) => {
             apartmentsData.webseite[index].image = newSrc;
-            imageThumb.src = newSrc || imagePlaceholderSrc;
-            imageThumb.classList.toggle('placeholder', !newSrc);
+            if (mediaType === 'openstreetmap') apartmentsData.webseite[index].mediaType = mediaType;
+            else delete apartmentsData.webseite[index].mediaType;
+            const preview = document.createElement(mediaType === 'openstreetmap' ? 'button' : 'img');
+            preview.dataset.field = 'image';
+            preview.className = 'image-thumb';
+            if (mediaType === 'openstreetmap') {
+                preview.type = 'button';
+                preview.classList.add('image-map-choice');
+                preview.textContent = 'Karte';
+            } else {
+                preview.src = newSrc || imagePlaceholderSrc;
+                preview.classList.toggle('placeholder', !newSrc);
+            }
+            imageThumb.replaceWith(preview);
         }, apartmentsData.webseite[index].image, 'apartments', true);
     }
 

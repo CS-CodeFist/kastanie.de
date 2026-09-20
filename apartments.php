@@ -14,5 +14,6 @@ require __DIR__ . '/partials/header.php';
     </main>
 
     <script src="webseite/opening-hours.js?v=20260920-rest-day"></script>
-    <script src="webseite/script.js?v=20260920-stacked-times"></script>
+    <script src="webseite/map.js?v=20260920-map-close-icon"></script>
+    <script src="webseite/script.js?v=20260920-openstreetmap"></script>
 <?php require __DIR__ . '/partials/footer.php'; ?>

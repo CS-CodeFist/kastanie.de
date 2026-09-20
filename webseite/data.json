@@ -198,7 +198,8 @@
             "text": "Kastanie\nBistro Cafe Apartment\nWarener Strasse 3\n17194 Moltzow\n\nTelefon: +49 (0) 39933 736 022\nTelefax: +49 (0) 39933 736 022\nE-Mail: info@bistro-kastanie.de",
             "position": "links",
             "theme": "forest",
-            "showInMenu": true
+            "showInMenu": true,
+            "mediaType": "apple-map"
         }
     ]
 }
