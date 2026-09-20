@@ -7,12 +7,38 @@ Webauftritt, digitale Speisekarte und browserbasiertes CMS fuer Kastanie Moltzow
 | Seite | Zweck | Datenquelle |
 | --- | --- | --- |
 | `index.php` | Webseite mit dynamischen Inhaltssektionen | `webseite/data.json` |
-| `apartments.html` | Apartments mit eigener Navigation | `apartments/data.json` |
+| `apartments.php` | Apartments mit eigener Navigation | `apartments/data.json` |
 | `speisekarte.html` | Digitale Speisekarte | `speisekarte/data.json` |
 | `impressum.php` | Impressum | Statischer Inhalt |
 | `datenschutz.php` | Datenschutzerklaerung | Statischer Inhalt |
 
 Die Webseite und Apartments verwenden den gemeinsamen Renderer `webseite/script.js`. Die Navigation wird aus den Abschnitten erzeugt. Beim Scrollen wird der zugehoerige Punkt aktiviert und bei horizontalem Ueberlauf in den sichtbaren Bereich gefuehrt.
+
+Startseite, Apartments und rechtliche Seiten binden `partials/header.php` und `partials/footer.php` ein. Weitere PHP-Seiten setzen vor dem Header-Include ihren `$pageTitle`, `$pageDescription` und `$pagePath`. Fuer JSON-Inhalte koennen sie wie `apartments.php` zusaetzlich `$contentSource`, `$hasSectionNavigation` und `$navigationLabel` setzen und den gemeinsamen Renderer laden. `$baseHref` ist optional und wird fuer die Apartments-Adresse mit abschliessendem Slash auf `../` gesetzt.
+
+Die oeffentliche Apartments-Adresse bleibt `/apartments/`. `.htaccess` leitet auch bisherige HTML-Links und direkte Aufrufe von `apartments.php` dorthin weiter. Bei der Umstellung `apartments.php` und den gemeinsamen Header zuerst hochladen, danach `.htaccess` aktualisieren und die alte `apartments.html` auf dem Server entfernen.
+
+## Metadaten und Icons
+
+Die oeffentlichen Seiten enthalten individuelle Titel, Beschreibungen und kanonische URLs fuer `https://www.bistro-kastanie.de`. Open-Graph- und Twitter-Card-Metadaten verweisen auf das gemeinsame PNG-Vorschaubild mit 1200 x 630 Pixeln. Die Startseite enthaelt zusaetzlich strukturierte Restaurantdaten (JSON-LD); bei Adressaenderungen muss auch `partials/header.php` angepasst werden.
+
+Die Originale `bilder/kastanie-logo-pur.png` und `bilder/kastanie-logo.png` bleiben unveraendert. Daraus entstehen:
+
+- `favicon.ico` mit 16, 32 und 48 Pixeln sowie PNG-Favicons unter `bilder/icons/`.
+- Apple-Touch-Icon mit 180 Pixeln und App-Icons mit 192 und 512 Pixeln.
+- Ein separates maskierbares 512-Pixel-Icon mit Sicherheitsabstand fuer Android.
+- `bilder/icons/social-preview.png` fuer Linkvorschauen.
+- `bilder/icons/instagram-profile.png` als kreissicheres Profilbild (600 x 600), das manuell bei Instagram hochgeladen wird. Website-Metadaten aendern das Instagram-Profilbild nicht.
+
+`site.webmanifest` beschreibt Name, Startseite, Farben und App-Icons. Es stellt keine Offline-Funktion bereit und garantiert keine Installationsaufforderung; das Verhalten haengt vom Browser ab.
+
+Zum erneuten Erzeugen der Bilddateien wird Python 3 mit Pillow benoetigt (`python3 -m pip install Pillow`):
+
+```sh
+python3 tools/generate_icons.py
+```
+
+Das ist eine Bildkonvertierung, kein Website-Build. Fuer das Deployment werden `favicon.ico`, `site.webmanifest`, `bilder/kastanie-logo.svg`, der komplette Ordner `bilder/icons/` und die geaenderten PHP-/HTML-Seiten einschliesslich `partials/header.php` benoetigt. Das Python-Werkzeug muss nicht auf den Webserver. Das Original `bilder/kastanie-logo.svg` ist auf allen oeffentlichen Seiten als skalierbares SVG-Favicon eingebunden; PNG und ICO bleiben als Fallback erhalten. Apple-Touch-Icons und Social-Vorschaubilder verwenden weiterhin PNG fuer breite Kompatibilitaet.
 
 ## CMS und Anmeldung
 
@@ -35,11 +61,23 @@ Ohne `admin_username` und `admin_password` ist keine Editor-Anmeldung moeglich. 
 
 Der Editor enthaelt drei Tabs:
 
-- **Webseite:** Inhaltssektionen, Bilder, Textposition, Section-Themes, Call-to-Action-Buttons und Instagram-Feed.
+- **Webseite:** Inhaltssektionen, Bilder, Textposition, Section-Themes, Call-to-Action-Buttons, Instagram-Feed und Oeffnungszeiten.
 - **Speisekarte:** Menues, Gerichte, Preise, Beilagen, Zusatzstoffe, Vorlagen und saisonale Dekorationen.
 - **Apartments:** Separate Inhaltssektionen, Bilder, Textposition, Themes und Archive.
 
 Die Tab-Logik liegt in `editor/editor_tabs.js`. Der Editor laedt die Inhalte eines Tabs erst bei dessen erster Aktivierung.
+
+### Oeffnungszeiten
+
+Im Webseiten-Tab unter **Sektion hinzufuegen > Oeffnungszeiten** wird eine Sektion mit Wochenzeiten und datierten Ausnahmen angelegt. Neue Sektionen starten mit sieben geschlossenen Tagen; es werden keine Beispielzeiten gespeichert. Pro Tag sind bis zu zwei aufsteigende, nicht ueberlappende Zeitfenster am selben Tag moeglich. Zeiten ueber Mitternacht werden nicht unterstuetzt.
+
+Ausnahmen gelten vom Startdatum bis einschliesslich Enddatum und ersetzen die normalen Wochenzeiten. Sie koennen Schliesszeiten oder abweichende Oeffnungszeiten samt Anlass enthalten. Ueberlappende Ausnahmen und unvollstaendige Zeitfenster blockieren das Speichern im Editor.
+
+Wochen- und Ausnahmetage bieten die Statusauswahl **Geoeffnet**, **Geschlossen**, **Ruhetag** und **Geschlossene Gesellschaft**. Eine geschlossene Gesellschaft gilt ganztags, wird oeffentlich entsprechend bezeichnet und nicht als Oeffnungszeit gewertet. Gespeichert wird dafuer `closed: true` zusammen mit `privateEvent: true`. Ein Ruhetag wird mit `closed: true` und `restDay: true` gespeichert und bei der naechsten Oeffnung ebenfalls uebersprungen. `restDay` und `privateEvent` schliessen sich gegenseitig aus; bestehende Daten ohne diese Felder bleiben gueltig. Beim Statuswechsel bleiben eingetragene Zeiten erhalten.
+
+Die Sektion speichert `type: "opening-hours"` und `openingHours: { week: [...], exceptions: [...] }` in `webseite/data.json`. `week` beginnt mit Montag; jeder Tag hat `closed` und `periods` mit `start`/`end` im Format `HH:MM`. Ausnahmen ergaenzen `from`/`to` (`YYYY-MM-DD`) und `note`.
+
+`webseite/opening-hours.js` liefert die gemeinsame Validierung und Statusberechnung in der Zeitzone `Europe/Berlin`. Die Webseite zeigt den Status und die kommenden sieben Tage, aktualisiert minuetlich sowie nach Rueckkehr zum Tab und kennzeichnet die letzten 30 Minuten vor Schliessung. Feiertage werden nicht automatisch ermittelt, sondern als Ausnahmen gepflegt. Die Uhrzeit stammt vom Besuchergeraet. iCal ist nicht Bestandteil dieser Sektion.
 
 ## Inhaltsdaten
 
@@ -70,12 +108,15 @@ Unterstuetzte Werte:
 
 | Feld | Werte | Bedeutung |
 | --- | --- | --- |
+| `showInMenu` | `true`, `false` | Menueeintrag anzeigen; `false` blendet nur den Navigationseintrag aus, nicht die Sektion. Ohne Feld gilt das bisherige Verhalten anhand des Menutitels. |
 | `position` | `links`, `rechts`, `zentriert` | Position des Textes gegenueber dem Bild |
 | `theme` | `forest`, `moss`, `clay`, `cream` | Farbthema einer Sektion |
-| `buttonLink` | `speisekarte`, `apartments`, `email` | Ziel eines Buttons |
+| `buttonLink` | `speisekarte`, `apartments`, `email`, `telefon`, `route` | Ziel eines Buttons; `telefon` verwendet `tel:+4939933736022`, `route` oeffnet Google Maps zur Warener Strasse 3, 17194 Moltzow |
 | `buttonTheme` | `primary`, `secondary` | Darstellung eines Buttons |
 
 Leere Bildwerte werden in der oeffentlichen Ausgabe nicht als Bildflaeche gerendert. Eine Instagram-Sektion hat den Typ `instagram-feed`; sie erscheint nur im Webseitentab und laedt Beitraege ueber den lokalen Endpunkt `instagram_feed.php`.
+
+Im Webseiten- und Apartments-Editor steuert **Als Menuepunkt anzeigen: Ja / Nein** den Navigationseintrag unabhaengig vom Menutitel. Der Titel kann damit als interne Bezeichnung erhalten bleiben. Beim Laden aelterer Sektionen wird die bisherige Sichtbarkeit uebernommen; ein leerer Menutitel bleibt auch bei Auswahl von Ja ohne Navigationseintrag.
 
 ### Speisekarte
 
@@ -125,9 +166,21 @@ Vor dem Speichern legt die Anwendung Sicherungen der bestehenden Inhalte an:
 
 Speisekarten-Vorlagen liegen als JSON-Dateien direkt unter `templates/`. Die aktuelle Karte ist immer `speisekarte/data.json`.
 
+## Sitemap
+
+`/sitemaps.xml` wird ueber die Rewrite-Regel in `.htaccess` dynamisch von `sitemaps.php` ausgeliefert. Beide Dateien muessen auf dem Server vorhanden sein; eine physische XML-Datei wird nicht angelegt.
+
+Die Sitemap enthaelt die Startseite, Apartments, Speisekarte, Impressum und Datenschutz. `lastmod` stammt fuer die drei Inhaltsseiten aus dem Dateiaenderungsdatum ihrer jeweiligen `data.json`, fuer die rechtlichen Seiten aus der jeweiligen PHP-Datei. Die Zeitangaben werden in UTC ausgegeben. Aenderungen im Editor werden dadurch beim naechsten Sitemap-Abruf beruecksichtigt, ohne zusaetzliche Schreibrechte. Bei Uploads darf das alte Dateiaenderungsdatum nicht beibehalten werden, wenn ein neues `lastmod` gewuenscht ist.
+
+Domain, Protokoll und gegebenenfalls Unterverzeichnis werden aus dem Aufruf ermittelt. Hinter einem TLS-Proxy muss der Webserver HTTPS korrekt an PHP melden. Nach Festlegung der oeffentlichen Domain kann die vollstaendige HTTPS-URL als `Sitemap:`-Eintrag in `robots.txt` hinterlegt oder direkt bei Suchmaschinen eingereicht werden.
+
 ## Saisonale Dekoration
 
-`config.json` bestimmt die aktive saisonale Dekoration sowie Geschwindigkeit und Menge. Die zugehoerigen Assets und Skripte liegen unter `seasons/`:
+Jeder Editor-Tab hat eigene Saison-Optionen (aktive Saison, Geschwindigkeit und Menge). Beim Oeffnen zeigt der Optionsdialog die Seite im Titel und laedt deren Einstellungen. Gespeichert wird getrennt in `webseite/season-config.json`, `speisekarte/season-config.json` und `apartments/season-config.json`.
+
+Die Dateien werden beim ersten Speichern angelegt. PHP benoetigt dafuer Schreibrechte im jeweiligen Ordner und danach auf der Datei. `config.json` bleibt die unveraenderte Vorgabe fuer noch nicht gespeicherte Seiten: Webseite und Speisekarte uebernehmen die bisherigen Werte, Apartments startet ohne aktive Saison. Diese Dateien bei spaeteren Deployments nicht mit lokalen Testwerten ueberschreiben.
+
+Die zugehoerigen Assets und Skripte liegen unter `seasons/`:
 
 ```text
 seasons/
@@ -135,10 +188,16 @@ seasons/
 ├── summer/
 ├── autumn/
 ├── winter/
-└── party/
+├── party/
+├── advent/
+└── valentine/
 ```
 
-Die saisonalen Einstellungen werden im Speisekarten-Editor unter Optionen gepflegt.
+**Advent** verwendet drei goldene bzw. champagnerfarbene Sterne und zwei rote Schleifen als transparente PNGs. Menge und Geschwindigkeit sind wie bei allen Seasons frei waehlbar. Die API ergaenzt Advent beim Laden bestehender Konfigurationen automatisch als inaktive Option; vorhandene Einstellungen werden nicht ueberschrieben. Zum Bereitstellen `data_handler.php` und die PNG-Dateien unter `seasons/advent/` hochladen. Der optionale Generator `seasons/advent/generate_assets.py` benoetigt Pillow und erzeugt die Motive erneut.
+
+**Valentinstag** verwendet drei transparente Herzen in Rot, Bordeaux und Rose. Die Auswahl wird ebenfalls automatisch inaktiv ergaenzt; Menge und Geschwindigkeit bleiben frei waehlbar. Zum Bereitstellen `data_handler.php` und die drei PNG-Dateien unter `seasons/valentine/` hochladen. Der optionale Generator `seasons/valentine/generate_assets.py` nutzt Pillow und die Zeichenroutinen des Advent-Generators; die Generatoren sind fuer den Website-Betrieb nicht erforderlich.
+
+Die API-Aktionen `load_layout_config` und `save_layout_config` erhalten den Parameter `page` (`webseite`, `speisekarte` oder `apartments`). Ohne Parameter gilt fuer alte Clients `speisekarte`. Die oeffentlichen Seiten laden dieselbe Konfiguration. PHP-Seiten aktivieren die gemeinsame Einbindung durch `$seasonPage` vor dem Header-Include; Header und Footer laden CSS, Ebene und Script. Rechtliche Seiten bleiben ohne Saison-Ebene.
 
 ## API
 
@@ -174,7 +233,7 @@ Die Webseite laedt ueber `webseite/script.js` bis zu drei Beitraege. Sie zeigt e
 ```text
 .
 ├── index.php                 # Oeffentliche Webseite
-├── apartments.html           # Oeffentliche Apartments-Seite
+├── apartments.php            # Apartments mit gemeinsamem Header und Footer
 ├── speisekarte.html          # Oeffentliche Speisekarte
 ├── editor.php                # Geschuetztes CMS
 ├── login.php / logout.php    # Sitzung verwalten
@@ -190,7 +249,7 @@ Die Webseite laedt ueber `webseite/script.js` bis zu drei Beitraege. Sie zeigt e
 ├── bilder_menu/              # Speisekarten-Bibliothek
 ├── templates/                # Speisekarten-Vorlagen und Archive
 ├── seasons/                  # Saisonale Effekte
-├── config.json               # Saison-Konfiguration
+├── config.json               # Vorgabe fuer noch nicht gespeicherte Saison-Optionen
 └── .user.ini                 # PHP-Upload-Grenzen
 ```
 
@@ -213,7 +272,7 @@ post_max_size = 40M
 3. PHP-GD inklusive WebP aktivieren.
 4. `credentials.local.php` wie im Abschnitt CMS und Anmeldung anlegen und mit eindeutigen, sicheren Zugangsdaten fuellen.
 5. Fuer den Instagram-Feed Konto-ID und Zugriffstoken in derselben Datei hinterlegen.
-6. Oeffentliche Seiten ueber `index.php`, `apartments.html` und `speisekarte.html` aufrufen.
+6. Oeffentliche Seiten ueber die Startadresse, `apartments/` und `speisekarte/` aufrufen.
 7. Den Editor ueber `login.php` oeffnen.
 
 Nach Aenderungen an JavaScript oder CSS die Versionsparameter in den jeweiligen `<script>`- und `<link>`-Referenzen erhoehen, damit Browser die neue Datei abrufen.

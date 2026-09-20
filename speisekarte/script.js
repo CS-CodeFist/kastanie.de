@@ -223,11 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initDarkModeToggle();
 });
 
-// Zusätzliche Initialisierung bei window.load
-window.addEventListener('load', () => {
-    initDarkModeToggle();
-});
-
 // Dark Mode Toggle Funktionalität
 function initDarkModeToggle() {
     const toggleButton = document.getElementById('darkModeToggle');
@@ -272,5 +267,9 @@ function updateDarkMode(mode) {
         document.documentElement.setAttribute('data-theme', 'dark');
     } else {
         document.documentElement.setAttribute('data-theme', 'light');
+    }
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) {
+        themeColor.content = getComputedStyle(document.documentElement).getPropertyValue('--body-background').trim();
     }
 }

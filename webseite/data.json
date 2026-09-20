@@ -8,7 +8,8 @@
             "text": "Schön, dass Sie den Weg zu uns gefunden haben. Wir sind ein traditionsreiches Gasthaus in Moltzow und freuen uns, Ihnen unser neues Konzept vorstellen zu können. Unter der Leitung von Sebastian Giese möchten wir Ihnen kulinarische Erlebnisse und unvergessliche Veranstaltungen bieten. Sebastian Giese, gebürtiger Mecklenburger, hat in seiner Jugend bereits in der Kastanie ausgeholfen und kehrt nun als Betreiber zurück. Wir sind stolz darauf, diese romantische Geschichte weiterzuschreiben und Ihnen in Zukunft ein einzigartiges kulinarisches Erlebnis zu bieten.",
             "position": "rechts",
             "theme": "cream",
-            "buttonTheme": "primary"
+            "buttonTheme": "primary",
+            "showInMenu": true
         },
         {
             "menutitel": "Über uns",
@@ -17,12 +18,14 @@
             "untertitel": "Regionaler Genuss trifft Mecklenburgische Tradition",
             "text": "Die Kastanie in Moltzow ist seit vielen Jahren ein beliebter Ort zum Einkehren und Verweilen. Wir haben es uns zur Aufgabe gemacht, diese Tradition fortzuführen und Ihnen ein besonderes gastronomisches Angebot zu präsentieren. Unsere Spezialität sind Burger und Kartoffelrösti mit verschiedenen Toppings wie z.B. Gyros. Für unsere Burger verwenden wir Bio-Rindfleisch aus der Umgebung. Außerdem bieten wir belegte Brote und Snacks an. Wenn Sie einen länger Aufenthalt planen, können Sie eines unserer voll möblierten Apartments in der oberen Etage mieten.",
             "position": "zentriert",
-            "theme": "moss"
+            "theme": "moss",
+            "showInMenu": true
         },
         {
             "type": "instagram-feed",
-            "menutitel": "",
-            "theme": "clay"
+            "menutitel": "Instagram Feed",
+            "theme": "clay",
+            "showInMenu": false
         },
         {
             "menutitel": "Wir bieten",
@@ -34,7 +37,8 @@
             "theme": "cream",
             "buttonLabel": "E-Mail schreiben",
             "buttonLink": "email",
-            "buttonTheme": "primary"
+            "buttonTheme": "primary",
+            "showInMenu": true
         },
         {
             "menutitel": "Speisekarte",
@@ -46,7 +50,8 @@
             "theme": "moss",
             "buttonLabel": "Zur Speisekarte",
             "buttonLink": "speisekarte",
-            "buttonTheme": "primary"
+            "buttonTheme": "primary",
+            "showInMenu": true
         },
         {
             "menutitel": "Appartments",
@@ -58,7 +63,132 @@
             "theme": "cream",
             "buttonLabel": "Zu den Apartments",
             "buttonLink": "apartments",
-            "buttonTheme": "primary"
+            "buttonTheme": "primary",
+            "showInMenu": true
+        },
+        {
+            "type": "opening-hours",
+            "menutitel": "Öffnungszeiten",
+            "titel": "Wir sehen uns in Moltzow.",
+            "theme": "clay",
+            "openingHours": {
+                "week": [
+                    {
+                        "closed": false,
+                        "periods": [
+                            {
+                                "start": "09:00",
+                                "end": "11:00"
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ],
+                        "privateEvent": false
+                    },
+                    {
+                        "closed": true,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ]
+                    },
+                    {
+                        "closed": true,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ]
+                    },
+                    {
+                        "closed": true,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ]
+                    },
+                    {
+                        "closed": true,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ]
+                    },
+                    {
+                        "closed": true,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ]
+                    },
+                    {
+                        "closed": false,
+                        "periods": [
+                            {
+                                "start": "09:00",
+                                "end": "11:00"
+                            },
+                            {
+                                "start": "11:15",
+                                "end": "20:15"
+                            }
+                        ],
+                        "privateEvent": false
+                    }
+                ],
+                "exceptions": [
+                    {
+                        "closed": true,
+                        "privateEvent": false,
+                        "periods": [
+                            {
+                                "start": "",
+                                "end": ""
+                            },
+                            {
+                                "start": "",
+                                "end": ""
+                            }
+                        ],
+                        "from": "2026-09-21",
+                        "to": "2026-09-25",
+                        "note": "Urlaub"
+                    }
+                ]
+            },
+            "position": "zentriert",
+            "showInMenu": true
         },
         {
             "menutitel": "Kontakt",
@@ -67,7 +197,8 @@
             "untertitel": "Wir freuen uns auf Sie",
             "text": "Kastanie\nBistro Cafe Apartment\nWarener Strasse 3\n17194 Moltzow\n\nTelefon: +49 (0) 39933 736 022\nTelefax: +49 (0) 39933 736 022\nE-Mail: info@bistro-kastanie.de",
             "position": "links",
-            "theme": "forest"
+            "theme": "forest",
+            "showInMenu": true
         }
     ]
 }

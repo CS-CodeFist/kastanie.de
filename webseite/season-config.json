@@ -15,7 +15,7 @@
     },
     {
         "id": "autumn",
-        "aktiv": true,
+        "aktiv": false,
         "label": "Herbst 🍂",
         "geschwindigkeit": "1",
         "menge": "2"
@@ -31,6 +31,20 @@
         "id": "party",
         "aktiv": false,
         "label": "Party 🎉",
+        "geschwindigkeit": "3",
+        "menge": "3"
+    },
+    {
+        "id": "advent",
+        "aktiv": false,
+        "label": "Advent ⭐",
+        "geschwindigkeit": "1",
+        "menge": "1"
+    },
+    {
+        "id": "valentine",
+        "aktiv": true,
+        "label": "Valentinstag ❤️",
         "geschwindigkeit": "3",
         "menge": "3"
     }

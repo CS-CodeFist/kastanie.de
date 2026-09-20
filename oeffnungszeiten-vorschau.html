@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Öffnungszeiten · Designvorschau | Kastanie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="webseite/styles.css?v=20260919-mobile-logo-gap">
+    <style>
+        body { font-weight: 400; }
+        button, select, summary { font: inherit; }
+        a { color: inherit; text-underline-offset: 4px; }
+        button, select, summary, a { touch-action: manipulation; }
+        :focus-visible { outline: 3px solid var(--forest); outline-offset: 4px; }
+        .preview-head, .preview-controls, .variant-label, .inner, .preview-foot {
+            width: min(100% - 40px, 1080px); margin-inline: auto;
+        }
+        .preview-head { display: flex; align-items: center; gap: 20px; padding-block: 28px 18px; }
+        .preview-head img { width: 56px; height: 56px; object-fit: contain; }
+        h1 { font: 400 32px/1.2 'Handlee', cursive; margin: 0; }
+        .preview-head p { margin: 6px 0 0; font-size: 13px; }
+        .preview-controls { display: flex; gap: 16px 28px; flex-wrap: wrap; align-items: end; padding-block: 12px 26px; }
+        .preview-controls label { font-size: 13px; }
+        .scenario { display: grid; gap: 6px; }
+        select { max-width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); padding: 8px 32px 8px 12px; }
+        .theme-control { display: flex; align-items: center; min-height: 44px; gap: 8px; }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--moss); }
+        .variant-label { display: flex; align-items: baseline; gap: 12px; padding-block: 32px 14px; }
+        .variant-label span { font-size: 12px; font-weight: 700; color: var(--moss); }
+        .variant-label h2 { margin: 0; font-size: 15px; font-weight: 500; }
+        .band { border-block: 1px solid var(--line); background: var(--paper); }
+        .status { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600; }
+        .status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--moss); flex: 0 0 8px; }
+        [data-state="closed"] .status::before, [data-state="holiday"] .status::before { background: var(--ink); opacity: 0.5; }
+        .time { font-size: 14px; margin: 6px 0 0; }
+        .actions { display: flex; gap: 12px 20px; flex-wrap: wrap; align-items: center; }
+        .actions a { min-height: 44px; display: inline-flex; align-items: center; font-size: 14px; }
+        .compact { display: grid; grid-template-columns: 1fr auto auto; gap: 16px 32px; align-items: center; padding-block: 18px; }
+        .compact details { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 8px; }
+        summary { cursor: pointer; padding-block: 10px; font-size: 14px; width: fit-content; }
+        .compact .week { max-width: 520px; margin-top: 12px; }
+        .hours-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; padding-block: 32px; }
+        h3 { font: 400 34px/1.2 'Handlee', cursive; margin: 0 0 20px; }
+        .hours-intro { display: flex; flex-direction: column; align-items: flex-start; }
+        .large-time { font: 400 38px/1.2 'Handlee', cursive; margin: 12px 0; }
+        .note { font-size: 13px; opacity: 0.8; margin: 0 0 24px; }
+        .hours-intro .actions { margin-top: auto; }
+        .week { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .week th, .week td { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+        .week th { text-align: left; font-weight: 400; }
+        .week td { text-align: right; white-space: nowrap; }
+        .week tr[data-today] { background: var(--cream); }
+        .week tr[data-today] th { font-weight: 700; }
+        .visit { background: var(--section-moss-background); color: var(--section-moss-text); }
+        .visit .inner { padding-block: 36px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; }
+        .visit h3 { font-size: 38px; margin-bottom: 14px; }
+        .visit .status::before { background: currentColor; }
+        .visit .large-time { margin-block: 12px 8px; }
+        .visit-address { border-left: 1px solid currentColor; padding-left: 36px; display: flex; flex-direction: column; justify-content: center; }
+        address { font-style: normal; font-size: 15px; line-height: 1.8; margin-bottom: 20px; }
+        .visit a { color: inherit; }
+        .visit details { margin-top: 12px; }
+        .visit .week tr[data-today] { background: transparent; }
+        .visit .week th, .visit .week td { border-color: currentColor; padding-inline: 0; }
+        .preview-foot { font-size: 13px; padding-block: 28px 40px; }
+        @media (max-width: 640px) {
+            .preview-head, .preview-controls, .variant-label, .inner, .preview-foot { width: calc(100% - 32px); }
+            .preview-head { gap: 12px; }
+            h1 { font-size: 28px; }
+            .preview-head img { width: 44px; height: 44px; }
+            .compact { grid-template-columns: 1fr auto; gap: 8px 12px; }
+            .compact .actions { grid-column: 1 / -1; }
+            .compact > .time { max-width: 120px; text-align: right; }
+            .hours-grid, .visit .inner { grid-template-columns: 1fr; gap: 28px; }
+            .hours-intro .actions { margin-top: 0; }
+            .visit-address { padding: 24px 0 0; border-left: 0; border-top: 1px solid currentColor; }
+            h3, .visit h3 { font-size: 30px; }
+            .large-time { font-size: 32px; }
+        }
+    </style>
+</head>
+<body data-state="open">
+    <header class="preview-head">
+        <img src="bilder/kastanie-logo-pur.png" alt="" width="56" height="56">
+        <div><h1>Kastanie · Öffnungszeiten</h1><p>Designvorschau · Alle Zeiten sind Beispieldaten.</p></div>
+    </header>
+    <div class="preview-controls">
+        <label class="scenario">Beispielzustand
+            <select id="scenario">
+                <option value="open">Geöffnet · Freitag</option>
+                <option value="soon">Schließt bald · Freitag</option>
+                <option value="closed">Ruhetag · Montag</option>
+                <option value="holiday">Betriebsferien</option>
+            </select>
+        </label>
+        <label class="theme-control"><input type="checkbox" id="dark-preview"> Dunkle Ansicht</label>
+    </div>
+
+    <section aria-labelledby="variant-a">
+        <div class="variant-label"><span>A</span><h2 id="variant-a">Kompakte Statuszeile</h2></div>
+        <div class="band">
+            <div class="inner compact">
+                <div class="status" data-status>Jetzt geöffnet</div>
+                <p class="time" data-time>Heute 11–21 Uhr</p>
+                <div class="actions"><a href="tel:+4939933736022">Anrufen</a><a href="https://www.google.com/maps/search/?api=1&amp;query=Kastanie+Warener+Strasse+3+17194+Moltzow" target="_blank" rel="noopener noreferrer">Route planen</a></div>
+                <details><summary>Alle Öffnungszeiten</summary><div data-week></div><p class="note" data-notice>Warme Küche bis 20 Uhr</p></details>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="variant-b">
+        <div class="variant-label"><span>B</span><h2 id="variant-b">Heute &amp; die ganze Woche</h2></div>
+        <div class="band">
+            <div class="inner hours-grid">
+                <div class="hours-intro">
+                    <h3>Zeit für eine Pause.</h3>
+                    <div class="status" data-status>Jetzt geöffnet</div>
+                    <p class="large-time" data-time>Heute 11–21 Uhr</p>
+                    <p class="note" data-notice>Warme Küche bis 20 Uhr</p>
+                    <div class="actions"><a href="tel:+4939933736022">Tisch anfragen</a><a href="speisekarte/">Zur Speisekarte</a></div>
+                </div>
+                <div data-week></div>
+            </div>
+        </div>
+    </section>
+
+    <section aria-labelledby="variant-c">
+        <div class="variant-label"><span>C</span><h2 id="variant-c">Öffnungszeiten &amp; Anfahrt</h2></div>
+        <div class="visit">
+            <div class="inner">
+                <div>
+                    <h3>Wir sehen uns in Moltzow.</h3>
+                    <div class="status" data-status>Jetzt geöffnet</div>
+                    <p class="large-time" data-time>Heute 11–21 Uhr</p>
+                    <p class="note" data-notice>Warme Küche bis 20 Uhr</p>
+                    <details><summary>Die Woche im Überblick</summary><div data-week></div></details>
+                </div>
+                <div class="visit-address">
+                    <address><strong>Kastanie Bistro · Café · Apartment</strong><br>Warener Straße 3<br>17194 Moltzow</address>
+                    <div class="actions"><a href="https://www.google.com/maps/search/?api=1&amp;query=Kastanie+Warener+Strasse+3+17194+Moltzow" target="_blank" rel="noopener noreferrer">Route planen</a><a href="tel:+4939933736022">Anrufen</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="preview-foot"><a href="./">Zur bestehenden Webseite</a></footer>
+    <script>
+        const scenarios = {
+            open: { status: 'Jetzt geöffnet', time: 'Heute 11–21 Uhr', notice: 'Warme Küche bis 20 Uhr', day: 4 },
+            soon: { status: 'Schließt in 30 Minuten', time: 'Heute bis 21 Uhr', notice: 'Die Küche ist bereits geschlossen', day: 4 },
+            closed: { status: 'Heute Ruhetag', time: 'Mittwoch ab 11 Uhr', notice: 'Wir freuen uns auf euren Besuch.', day: 0 },
+            holiday: { status: 'Betriebsferien', time: 'Ab 8. Oktober', notice: 'Vom 1. bis 7. Oktober geschlossen.', day: -1 }
+        };
+        const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+        const hours = ['Ruhetag', 'Ruhetag', '11–21 Uhr', '11–21 Uhr', '11–21 Uhr', '11–21 Uhr', '11–18 Uhr'];
+        function updatePreview() {
+            const state = document.getElementById('scenario').value;
+            const scenario = scenarios[state];
+            document.body.dataset.state = state;
+            for (const field of ['status', 'time', 'notice']) {
+                document.querySelectorAll(`[data-${field}]`).forEach(element => { element.textContent = scenario[field]; });
+            }
+            document.querySelectorAll('[data-week]').forEach(element => {
+                const table = document.createElement('table');
+                table.className = 'week';
+                table.setAttribute('aria-label', 'Beispielhafte Wochenöffnungszeiten');
+                const tbody = table.createTBody();
+                days.forEach((day, index) => {
+                    const row = tbody.insertRow();
+                    if (index === scenario.day) row.dataset.today = '';
+                    const heading = document.createElement('th');
+                    heading.scope = 'row';
+                    heading.textContent = day;
+                    row.appendChild(heading);
+                    row.insertCell().textContent = state === 'holiday' ? 'Betriebsferien' : hours[index];
+                });
+                element.replaceChildren(table);
+            });
+        }
+        document.getElementById('scenario').addEventListener('change', updatePreview);
+        document.getElementById('dark-preview').addEventListener('change', event => {
+            document.documentElement.dataset.theme = event.target.checked ? 'dark' : 'light';
+        });
+        updatePreview();
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 /* === Farbvariablen === */
 :root,
 [data-theme="light"] {
+    color-scheme: light;
     /* Light Mode (Standard und manuell) */
 
     /* === Grundfarben === */
@@ -17,7 +18,7 @@
 
     /* === Komponenten-Hintergründe === */
     --body-background: #DFCB97;
-    --menu-background: rgba(223, 203, 151, 0.9);
+    --menu-background: #DFCB97;
     --section-title-background: rgba(255, 255, 255, 0.65);
     --gericht-background: rgba(255, 255, 255, 0.75);
     --beilagen-background: rgba(233, 233, 233, 0.01);
@@ -38,7 +39,7 @@
     --dark-dark-gray: #bbb;
     --dark-gericht-border: #292929;
     --dark-body-background: #2d2922;
-    --dark-menu-background: rgba(45, 41, 34, 0.9);
+    --dark-menu-background: #2d2922;
     --dark-section-title-background: rgba(0, 0, 0, 0.65);
     --dark-gericht-background: rgba(26, 26, 26, 0.75);
     --dark-beilagen-background: rgba(51, 51, 51, 0.3);
@@ -49,6 +50,7 @@
 /* Dark Mode - System und manuell verwenden gleiche Werte */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
+        color-scheme: dark;
         --primary-green: var(--dark-primary-green);
         --warm-beige: var(--dark-warm-beige);
         --dark-brown: var(--dark-brown-color);
@@ -68,6 +70,7 @@
 }
 
 [data-theme="dark"] {
+    color-scheme: dark;
     --primary-green: var(--dark-primary-green);
     --warm-beige: var(--dark-warm-beige);
     --dark-brown: var(--dark-brown-color);
@@ -94,6 +97,7 @@
 html {
     scroll-behavior: smooth;
     font-size: clamp(18px, 2.5vw, 28px);
+    background-color: var(--body-background);
 }
 
 body {
@@ -108,9 +112,9 @@ body {
 
 /* === Loader === */
 #loader {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    background: var(--white);
+    background: var(--body-background);
     z-index: 9999;
     display: flex;
     flex-direction: column;
@@ -141,17 +145,11 @@ body {
     left: 0;
     width: 100%;
     background: var(--menu-background);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    overflow-x: auto;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
     z-index: 1000;
     box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.menu-container::-webkit-scrollbar {
+.menu::-webkit-scrollbar {
     display: none;
 }
 
@@ -159,7 +157,12 @@ body {
     display: flex;
     padding: 10px;
     width: max-content;
+    max-width: 100%;
     margin: auto;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .menu-item {

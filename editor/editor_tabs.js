@@ -84,10 +84,6 @@ const EditorTabs = {
 			await EditorTemplates.loadSelectedTemplate(templateSelect.value);
 			console.log("✅ Aktuelle Menükarte geladen");
 
-			// Season-Layouts laden
-			await EditorSeasons.loadSeasonLayouts();
-			console.log("✅ Season-Layouts geladen");
-
 			// Globale Funktionen setzen
 			window.render = EditorSPK.render;
 			window.openImageOverlay = EditorImages.openImageOverlay;
@@ -96,7 +92,6 @@ const EditorTabs = {
 			// Event-Listeners initialisieren
 			EditorImages.initializeImageEventListeners();
 			EditorTemplates.initializeTemplateEventListeners();
-			EditorSeasons.initializeSeasonEventListeners();
 
 			this.speisekarteLoaded = true;
 			console.log('✅ Speisekarte-Tab vollständig geladen');

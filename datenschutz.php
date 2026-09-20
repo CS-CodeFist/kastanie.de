@@ -1,5 +1,7 @@
 <?php
 $pageTitle = 'Datenschutz | Kastanie Moltzow';
+$pageDescription = 'Datenschutzerklaerung der Kastanie in Moltzow: Informationen zur Verarbeitung personenbezogener Daten auf unserer Website.';
+$pagePath = '/datenschutz.php';
 require __DIR__ . '/partials/header.php';
 ?>
     <main class="legal-page">

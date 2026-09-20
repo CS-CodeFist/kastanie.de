@@ -4,22 +4,31 @@
 // (window._seasonLayouts wird automatisch von loadSeasonLayouts() gesetzt)
 
 // ===== SEASON-LAYOUT-MANAGEMENT =====
-async function loadSeasonLayouts() {
+let seasonPage = null;
+let seasonLoadId = 0;
+let seasonSaving = false;
+let seasonListenersInitialized = false;
+
+async function loadSeasonLayouts(page = EditorTabs.currentTab) {
+	const loadId = ++seasonLoadId;
+	const saveButton = document.getElementById('saveSeasonConfigBtn');
+	saveButton.disabled = true;
+	window._seasonLayouts = null;
 	try {
 		const response = await fetch("data_handler.php", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/x-www-form-urlencoded"
 			},
-			body: "action=load_layout_config"
+			body: new URLSearchParams({ action: 'load_layout_config', page })
 		});
 		
 		const data = await response.json();
 		
-		if (!Array.isArray(data)) {
-			console.error("Ungültiges Layout-Config-Format:", data);
-			return;
+		if (!response.ok || !Array.isArray(data)) {
+			throw new Error(data.error || 'Ungültige Saison-Konfiguration');
 		}
+		if (loadId !== seasonLoadId) return;
 
 		const select = document.getElementById("layoutSelect");
 		select.innerHTML = "";
@@ -41,9 +50,11 @@ async function loadSeasonLayouts() {
 		});
 
 		window._seasonLayouts = data;
+		seasonPage = page;
 		updateSeasonButtons();
+		saveButton.disabled = false;
 	} catch (err) {
-		console.error("Fehler beim Laden der Saison-Layouts:", err);
+		if (loadId === seasonLoadId) alert('Fehler beim Laden der Optionen: ' + err.message);
 	}
 }
 
@@ -82,22 +93,26 @@ function updateSeasonButtons() {
 	const selectedId = document.getElementById("layoutSelect").value;
 	const layout = window._seasonLayouts?.find(l => l.id === selectedId);
 
-	if (!layout) return;
-
 	const geschwButtons = document.querySelectorAll("#geschwindigkeitButtons button");
 	const mengeButtons = document.querySelectorAll("#mengeButtons button");
 
 	geschwButtons.forEach(btn => {
-		btn.classList.toggle("active", Number(btn.dataset.value) === Number(layout.geschwindigkeit));
+		btn.classList.toggle("active", Number(btn.dataset.value) === Number(layout?.geschwindigkeit || 1));
 	});
 
 	mengeButtons.forEach(btn => {
-		btn.classList.toggle("active", Number(btn.dataset.value) === Number(layout.menge));
+		btn.classList.toggle("active", Number(btn.dataset.value) === Number(layout?.menge || 1));
 	});
 }
 
 // ===== OPTIONS-OVERLAY-MANAGEMENT =====
 function openOptionsOverlay() {
+	if (seasonSaving) return;
+	const page = EditorTabs.currentTab;
+	const labels = { webseite: 'Webseite', speisekarte: 'Speisekarte', apartments: 'Apartments' };
+	seasonPage = null;
+	document.querySelector('#optionsOverlay h2').textContent = 'Optionen: ' + labels[page];
+	document.getElementById('layoutSelect').replaceChildren(new Option('Lade Layouts...', '__none__'));
 	// Scroll-Position speichern
 	EditorCore.saveScrollPosition();
 	EditorCore.lockBodyScroll();
@@ -106,16 +121,23 @@ function openOptionsOverlay() {
 	initializeSeasonButtons();
 	
 	EditorCore.showOverlay(document.getElementById("optionsOverlay"));
+	return loadSeasonLayouts(page);
 }
 
 function closeOptionsOverlay() {
+	if (seasonSaving) return;
+	seasonLoadId++;
+	seasonPage = null;
 	EditorCore.hideOverlay(document.getElementById("optionsOverlay"), () => {
 		EditorCore.unlockBodyScroll();
 		EditorCore.restoreScrollPosition();
 	});
 }
 
-function saveSeasonConfig() {
+async function saveSeasonConfig() {
+	if (seasonSaving || !seasonPage || !Array.isArray(window._seasonLayouts)) return;
+	const page = seasonPage;
+	const saveButton = document.getElementById('saveSeasonConfigBtn');
 	const selectedId = document.getElementById("layoutSelect").value;
 	const geschw = document.querySelector("#geschwindigkeitButtons .active")?.dataset.value || "1";
 	const menge = document.querySelector("#mengeButtons .active")?.dataset.value || "1";
@@ -129,30 +151,35 @@ function saveSeasonConfig() {
 		}
 	});
 
-	fetch("data_handler.php", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded"
-		},
-		body: "action=save_layout_config&data=" + encodeURIComponent(JSON.stringify(window._seasonLayouts))
-	})
-	.then(res => res.json())
-	.then(result => {
-		if (result.success) {
-			alert("✅ Optionen gespeichert");
-			document.getElementById("optionsOverlay").style.display = "none";
-			EditorCore.unlockBodyScroll();
-			EditorCore.restoreScrollPosition();
-		} else {
-			alert("Fehler beim Speichern: " + result.error);
-		}
-	});
+	seasonSaving = true;
+	saveButton.disabled = true;
+	try {
+		const response = await fetch("data_handler.php", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			body: new URLSearchParams({ action: 'save_layout_config', page, data: JSON.stringify(window._seasonLayouts) })
+		});
+		const result = await response.json();
+		if (!response.ok || !result.success) throw new Error(result.error || 'Speichern fehlgeschlagen');
+		alert('✅ Optionen gespeichert');
+		seasonSaving = false;
+		closeOptionsOverlay();
+	} catch (error) {
+		alert('Fehler beim Speichern: ' + error.message);
+	} finally {
+		seasonSaving = false;
+		saveButton.disabled = false;
+	}
 }
 
 // ===== EVENT-LISTENERS INITIALISIERUNG =====
 function initializeSeasonEventListeners() {
+	if (seasonListenersInitialized) return;
+	seasonListenersInitialized = true;
 	// Options Button
-	document.querySelectorAll("#optionsBtn").forEach(button => {
+	document.querySelectorAll("#optionsBtn, #apartmentsOptionsBtn").forEach(button => {
 		button.addEventListener("click", openOptionsOverlay);
 	});
 	

@@ -1,5 +1,7 @@
 <?php
 $pageTitle = 'Impressum | Kastanie Moltzow';
+$pageDescription = 'Impressum der Kastanie in Moltzow: Angaben zum Betreiber und Kontaktinformationen.';
+$pagePath = '/impressum.php';
 require __DIR__ . '/partials/header.php';
 ?>
     <main class="legal-page">

@@ -13,6 +13,7 @@ window.onload = async function() {
 		// Core Event-Listeners
 		initializeCoreEventListeners();
 		EditorImages.initializeImageEventListeners();
+		EditorSeasons.initializeSeasonEventListeners();
 		
 		// Loader verstecken
 		document.getElementById("loader").style.display = "none";

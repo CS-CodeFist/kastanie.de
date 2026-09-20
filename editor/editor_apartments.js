@@ -4,7 +4,9 @@ const ApartmentsEditor = (() => {
     const buttonLinks = [
         ['', 'Kein Link'],
         ['speisekarte', 'Speisekarte'],
-        ['email', 'E-Mail']
+        ['email', 'E-Mail'],
+        ['telefon', 'Telefon'],
+        ['route', 'Route mit Google Maps']
     ];
     let apartmentsData = { webseite: [] };
     let loaded = false;
@@ -56,7 +58,17 @@ const ApartmentsEditor = (() => {
         </div>`;
     }
 
+    function renderMenuVisibilityPicker(section, index) {
+        return `<div class="text-position-picker menu-visibility-picker" role="group" aria-label="Als Menüpunkt anzeigen">
+            <span>Als Menüpunkt anzeigen</span>
+            ${[[true, 'Ja'], [false, 'Nein']].map(([value, label]) => `
+                <label class="menu-visibility-choice"><input type="radio" name="apartments-menu-visibility-${index}" data-field="showInMenu" value="${value}" ${section.showInMenu === value ? 'checked' : ''}><span>${label}</span></label>
+            `).join('')}
+        </div>`;
+    }
+
     function renderSection(section, index) {
+        if (typeof section.showInMenu !== 'boolean') section.showInMenu = Boolean(section.menutitel);
         const buttonLinkSelect = buttonLinks.map(([value, label]) =>
             `<option value="${value}" ${section.buttonLink === value ? 'selected' : ''}>${label}</option>`
         ).join('');
@@ -69,19 +81,24 @@ const ApartmentsEditor = (() => {
                     <button type="button" class="toggle-section" aria-expanded="false" aria-label="Details anzeigen"><span class="toggle-icon" aria-hidden="true">▶</span></button>
                 </div>
                 <div class="section-details collapsed">
-                    <div class="image-row">
+                    <div class="image-row section-options-row">
+                        <div class="section-options-controls">
+                            ${renderMenuVisibilityPicker(section, index)}
+                            ${renderThemePicker(section.theme)}
+                            <div class="text-fields">
+                                <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Haupttitel"></label>
+                                <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel"></label>
+                            </div>
+                        </div>
+                        <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image">
+                    </div>
                         <div class="text-fields">
-                            <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Haupttitel"></label>
-                            <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel"></label>
                             <label>Text<textarea rows="6" data-field="text" placeholder="Beschreibungstext...">${section.text || ''}</textarea></label>
                             ${renderTextPositionPicker(section.position)}
-                            ${renderThemePicker(section.theme)}
                             <label>Button-Beschriftung<input type="text" value="${section.buttonLabel || ''}" data-field="buttonLabel" placeholder="z. B. Jetzt anfragen"></label>
                             <label>Button-Link<select data-field="buttonLink">${buttonLinkSelect}</select></label>
                             ${renderButtonThemePicker(section.buttonTheme || 'primary')}
                         </div>
-                        <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image">
-                    </div>
                     <div class="button-right"><button type="button" class="delete-section">🗑️ Sektion löschen</button></div>
                 </div>
             </div>`;
@@ -110,7 +127,8 @@ const ApartmentsEditor = (() => {
 
     function updateField(input) {
         const index = Number(input.closest('.webseiten-section').dataset.index);
-        if (apartmentsData.webseite[index]) apartmentsData.webseite[index][input.dataset.field] = input.value;
+        const value = input.dataset.field === 'showInMenu' ? input.value === 'true' : input.value;
+        if (apartmentsData.webseite[index]) apartmentsData.webseite[index][input.dataset.field] = value;
     }
 
     function updateTheme(button) {

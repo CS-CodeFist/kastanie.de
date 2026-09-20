@@ -28,7 +28,7 @@ function initWebseitenEditor() {
 // Webseiten-Daten laden
 async function loadWebseitenData() {
     try {
-        const response = await fetch('webseite/data.json');
+        const response = await fetch('webseite/data.json', { cache: 'no-store' });
         if (response.ok) {
             webseitenData = await response.json();
             webseitenData.webseite.forEach((section) => {
@@ -107,8 +107,19 @@ function renderTextPositionPicker(position = 'zentriert') {
     </div>`;
 }
 
+function renderMenuVisibilityPicker(section, index) {
+    return `<div class="text-position-picker menu-visibility-picker" role="group" aria-label="Als Menüpunkt anzeigen">
+        <span>Als Menüpunkt anzeigen</span>
+        ${[[true, 'Ja'], [false, 'Nein']].map(([value, label]) => `
+            <label class="menu-visibility-choice"><input type="radio" name="webseite-menu-visibility-${index}" data-field="showInMenu" value="${value}" ${section.showInMenu === value ? 'checked' : ''}><span>${label}</span></label>
+        `).join('')}
+    </div>`;
+}
+
 // Einzelne Webseiten-Sektion rendern
 function renderWebseitenSection(section, index) {
+    if (typeof section.showInMenu !== 'boolean') section.showInMenu = Boolean(section.menutitel);
+    if (section.type === 'opening-hours') return renderOpeningHoursEditor(section, index);
     if (section.type === 'instagram-feed') {
         return renderInstagramFeedSection(section, index);
     }
@@ -117,7 +128,9 @@ function renderWebseitenSection(section, index) {
         ['', 'Kein Link'],
         ['speisekarte', 'Speisekarte'],
         ['apartments', 'Apartments'],
-        ['email', 'E-Mail']
+        ['email', 'E-Mail'],
+        ['telefon', 'Telefon'],
+        ['route', 'Route mit Google Maps']
     ];
     const buttonLinkSelect = buttonLinks.map(([value, label]) =>
         `<option value="${value}" ${section.buttonLink === value ? 'selected' : ''}>${label}</option>`
@@ -143,13 +156,20 @@ function renderWebseitenSection(section, index) {
             </div>
             
             <div class="section-details collapsed">
-                <div class="image-row">
+                <div class="image-row section-options-row">
+                    <div class="section-options-controls">
+                        ${renderMenuVisibilityPicker(section, index)}
+                        ${renderThemePicker(section.theme)}
+                        <div class="text-fields">
+                            <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Haupttitel" /></label>
+                            <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel" /></label>
+                        </div>
+                    </div>
+                    <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image" />
+                </div>
                     <div class="text-fields">
-                        <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Haupttitel" /></label>
-                        <label>Untertitel<input type="text" value="${section.untertitel || ''}" data-field="untertitel" placeholder="Untertitel" /></label>
                         <label>Text<textarea rows="6" data-field="text" placeholder="Beschreibungstext...">${section.text || ''}</textarea></label>
                         ${renderTextPositionPicker(section.position)}
-                        ${renderThemePicker(section.theme)}
                         <label>Button-Beschriftung<input type="text" value="${section.buttonLabel || ''}" data-field="buttonLabel" placeholder="z. B. Zur Speisekarte" /></label>
                         <label>Button-Link
                             <select data-field="buttonLink">
@@ -158,8 +178,6 @@ function renderWebseitenSection(section, index) {
                         </label>
                         ${renderButtonThemePicker(section.buttonTheme || 'primary')}
                     </div>
-                    <img class="image-thumb ${!section.image ? 'placeholder' : ''}" src="${section.image || imagePlaceholderSrc}" data-field="image" />
-                </div>
                 <div class="button-right">
                     ${deleteButtonHtml}
                 </div>
@@ -178,8 +196,9 @@ function renderInstagramFeedSection(section, index) {
             </div>
             <div class="section-details collapsed">
                 <div class="text-fields">
-                    <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Überschrift" /></label>
+                    ${renderMenuVisibilityPicker(section, index)}
                     ${renderThemePicker(section.theme)}
+                    <label>Titel<input type="text" value="${section.titel || ''}" data-field="titel" placeholder="Überschrift" /></label>
                     Der Feed zeigt automatisch die aktuellen Beiträge von kastaniemoltzow.
                 </div>
                 <div class="button-right">
@@ -190,19 +209,261 @@ function renderInstagramFeedSection(section, index) {
     `;
 }
 
+function openingHoursEscape(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+}
+
+let openingHoursControlId = 0;
+
+function renderOpeningHoursTime(value, field, periodIndex, closed) {
+    const parts = (value || '').split(':');
+    const controls = ['hour', 'minute'].map((part, partIndex) => {
+        const values = Array.from({ length: part === 'hour' ? 24 : 4 }, (_, index) =>
+            String(part === 'hour' ? index : index * 15).padStart(2, '0'));
+        const selected = parts[partIndex] || '';
+        if (selected && !values.includes(selected)) values.push(selected);
+        const name = `hours-part-${++openingHoursControlId}`;
+        return `<div class="hours-list" role="group" aria-label="${field === 'start' ? 'Von' : 'Bis'}: ${part === 'hour' ? 'Stunde' : 'Minute'}">
+            ${['', ...values].map(option => `<label class="hours-choice"><input type="radio" name="${name}" value="${openingHoursEscape(option)}" data-hours-field="${field}" data-period="${periodIndex}" data-time-part="${part}" ${option === selected ? 'checked' : ''} ${closed ? 'disabled' : ''}><span>${openingHoursEscape(option) || '--'}</span></label>`).join('')}
+        </div>`;
+    });
+    return `<div class="hours-time">${controls.join('')}</div>`;
+}
+
+function renderOpeningHoursDay(day, index, exception = false) {
+    const escape = openingHoursEscape;
+    const periods = [0, 1].map(periodIndex => {
+        const period = day.periods?.[periodIndex] || {};
+        return `<details class="hours-period" data-period="${periodIndex}">
+            <summary aria-disabled="${day.closed}">${escape(period.start || '--:--')} bis ${escape(period.end || '--:--')}</summary>
+            <div class="hours-dropdown">
+                <div class="hours-range-labels"><strong>Von</strong><strong>Bis</strong></div>
+                <div class="hours-range-lists">${renderOpeningHoursTime(period.start, 'start', periodIndex, day.closed)}${renderOpeningHoursTime(period.end, 'end', periodIndex, day.closed)}</div>
+                <div class="hours-dropdown-actions"><button type="button" data-hours-clear>Leeren</button><button type="button" data-hours-done>Fertig</button></div>
+            </div>
+        </details>`;
+    }).join('');
+    return `<fieldset class="hours-day-editor" data-hours-day="${index}" data-hours-group="${exception ? 'exceptions' : 'week'}">
+        <legend>${exception ? `Ausnahme ${index + 1}` : OpeningHours.days[index]}</legend>
+        ${exception ? `<div class="hours-exception-dates"><label>Von<input type="date" data-hours-field="from" value="${escape(day.from)}"></label><label>Bis einschließlich<input type="date" data-hours-field="to" value="${escape(day.to)}"></label></div>
+        <label>Anlass<input type="text" data-hours-field="note" value="${escape(day.note)}" placeholder="z. B. Betriebsferien"></label>` : ''}
+        <select data-hours-field="status" aria-label="Status">
+            <option value="open" ${!day.closed ? 'selected' : ''}>Geöffnet</option>
+            <option value="closed" ${day.closed && !day.privateEvent && !day.restDay ? 'selected' : ''}>Geschlossen</option>
+            <option value="rest-day" ${day.restDay ? 'selected' : ''}>Ruhetag</option>
+            <option value="private-event" ${day.privateEvent ? 'selected' : ''}>Geschlossene Gesellschaft</option>
+        </select>
+        <div class="hours-periods" style="${day.closed ? 'display: none;' : ''}">${periods}</div>
+        ${exception ? '<button type="button" data-hours-remove>Ausnahme löschen</button>' : ''}
+    </fieldset>`;
+}
+
+function renderOpeningHoursEditor(section, index) {
+    const config = section.openingHours || (section.openingHours = OpeningHours.defaults());
+    const escape = openingHoursEscape;
+    return `<div class="webseiten-section opening-hours-editor" data-index="${index}">
+        <div class="section-header">
+            <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
+            <input type="text" value="${escape(section.menutitel)}" placeholder="Menütitel" data-field="menutitel">
+            <button type="button" class="toggle-section" aria-expanded="false" aria-label="Details anzeigen"><span class="toggle-icon" aria-hidden="true">▶</span></button>
+        </div>
+        <div class="section-details collapsed">
+            <div class="text-fields">
+                ${renderMenuVisibilityPicker(section, index)}
+                ${renderThemePicker(section.theme)}
+                <label>Titel<input type="text" data-field="titel" value="${escape(section.titel)}"></label>
+            </div>
+            <h3>Wochenzeiten</h3>
+            <div class="hours-week-editor">${config.week.map((day, dayIndex) => renderOpeningHoursDay(day, dayIndex)).join('')}</div>
+            <h3>Ausnahmen</h3>
+            <div class="hours-exceptions">${config.exceptions.map((day, dayIndex) => renderOpeningHoursDay(day, dayIndex, true)).join('')}</div>
+            <button type="button" data-hours-add>Ausnahme hinzufügen</button>
+            <div class="button-right"><button type="button" class="delete-section">Sektion löschen</button></div>
+        </div>
+    </div>`;
+}
+
+const openingHoursScrollTimers = new WeakMap();
+
+function scrollOpeningHoursOption(option, behavior = 'smooth') {
+    const list = option.closest('.hours-list');
+    if (!list || !list.clientHeight || !option.closest('.hours-period').open) return;
+    clearTimeout(openingHoursScrollTimers.get(list));
+    const selected = option.closest('label').getBoundingClientRect();
+    const bounds = list.getBoundingClientRect();
+    if (behavior === 'smooth' && selected.top >= bounds.top + list.clientTop && selected.bottom <= bounds.top + list.clientTop + list.clientHeight) return;
+    const top = list.scrollTop + selected.top - bounds.top - list.clientTop - (list.clientHeight - selected.height) / 2;
+    const scrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : behavior;
+    list.scrollTo({
+        top,
+        behavior: scrollBehavior
+    });
+    if (scrollBehavior === 'smooth') {
+        openingHoursScrollTimers.set(list, setTimeout(() => {
+            if (!option.isConnected || !option.checked || !option.closest('.hours-period').open) return;
+            const current = option.closest('label').getBoundingClientRect();
+            const viewport = list.getBoundingClientRect();
+            if (current.top < viewport.top + list.clientTop || current.bottom > viewport.top + list.clientTop + list.clientHeight) {
+                scrollOpeningHoursOption(option, 'auto');
+            }
+        }, 600));
+    }
+}
+
+function setOpeningHoursTimeControls(container, field, value, revealSelection = false) {
+    const parts = (value || '').split(':');
+    ['hour', 'minute'].forEach((part, index) => {
+        const option = container.querySelector(`input[data-hours-field="${field}"][data-time-part="${part}"][value="${parts[index] || ''}"]`);
+        if (option && (!option.checked || revealSelection)) {
+            option.checked = true;
+            scrollOpeningHoursOption(option);
+        }
+    });
+}
+
+function updateOpeningHoursField(input) {
+    const section = input.closest('.webseiten-section');
+    const row = input.closest('[data-hours-day]');
+    const config = webseitenData.webseite[Number(section.dataset.index)].openingHours;
+    const day = config[row.dataset.hoursGroup][Number(row.dataset.hoursDay)];
+    const field = input.dataset.hoursField;
+    if (field === 'status') {
+        day.closed = input.value !== 'open';
+        day.privateEvent = input.value === 'private-event';
+        day.restDay = input.value === 'rest-day';
+        row.querySelector('.hours-periods').style.display = day.closed ? 'none' : '';
+        row.querySelectorAll('input[data-period]').forEach(time => { time.disabled = day.closed; });
+        row.querySelectorAll('.hours-period').forEach(period => {
+            period.querySelector('summary').setAttribute('aria-disabled', String(day.closed));
+            if (day.closed) period.open = false;
+        });
+    } else if (field === 'start' || field === 'end') {
+        const periodIndex = Number(input.dataset.period);
+        day.periods ||= [];
+        day.periods[periodIndex] ||= { start: '', end: '' };
+        const previousPeriods = day.periods.map(entry => ({ ...entry }));
+        const period = day.periods[periodIndex];
+        const container = input.closest('.hours-period');
+        const time = input.closest('.hours-time');
+        let hour = time.querySelector('[data-time-part="hour"]:checked').value;
+        let minute = time.querySelector('[data-time-part="minute"]:checked').value;
+        if (field === 'start' && input.value) {
+            hour ||= '09';
+            minute ||= '00';
+            const minimumEnd = Number(hour) * 60 + Number(minute) + 120;
+            if (minimumEnd > 23 * 60 + 45) {
+                setOpeningHoursTimeControls(container, 'start', period.start);
+                showWebseitenSaveDialog('Für zwei Stunden bis zur Schließung bitte spätestens 21:45 wählen. Zeiten über Mitternacht werden noch nicht unterstützt.');
+                return;
+            }
+            setOpeningHoursTimeControls(container, 'start', `${hour}:${minute}`);
+            if (!/^\d{2}:\d{2}$/.test(period.end) || Number(period.end.slice(0, 2)) * 60 + Number(period.end.slice(3)) < minimumEnd) {
+                period.end = `${String(Math.floor(minimumEnd / 60)).padStart(2, '0')}:${String(minimumEnd % 60).padStart(2, '0')}`;
+            }
+        }
+        period[field] = hour || minute ? `${hour}:${minute}` : '';
+        const firstEnd = day.periods[0]?.end;
+        const second = day.periods[1];
+        if (/^\d{2}:\d{2}$/.test(firstEnd) && /^\d{2}:\d{2}$/.test(second?.start) && second.start <= firstEnd) {
+            const firstEndMinutes = Number(firstEnd.slice(0, 2)) * 60 + Number(firstEnd.slice(3));
+            const secondStart = (Math.floor(firstEndMinutes / 15) + 1) * 15;
+            const secondEnd = secondStart + 120;
+            if (secondEnd > 23 * 60 + 45) {
+                day.periods = previousPeriods;
+                showWebseitenSaveDialog('Nach dem ersten Zeitraum ist kein Platz mehr für einen zweiten mit mindestens zwei Stunden am selben Tag. Bitte zuerst den zweiten Zeitraum leeren oder den ersten früher enden lassen.');
+            } else {
+                second.start = `${String(Math.floor(secondStart / 60)).padStart(2, '0')}:${String(secondStart % 60).padStart(2, '0')}`;
+                if (!/^\d{2}:\d{2}$/.test(second.end) || Number(second.end.slice(0, 2)) * 60 + Number(second.end.slice(3)) < secondEnd) {
+                    second.end = `${String(Math.floor(secondEnd / 60)).padStart(2, '0')}:${String(secondEnd % 60).padStart(2, '0')}`;
+                }
+            }
+        }
+        row.querySelectorAll('.hours-period').forEach(periodElement => {
+            const entry = day.periods[Number(periodElement.dataset.period)];
+            if (!entry) return;
+            setOpeningHoursTimeControls(periodElement, 'start', entry.start);
+            setOpeningHoursTimeControls(periodElement, 'end', entry.end, periodElement === container && field === 'start' && Boolean(input.value));
+            periodElement.querySelector('summary').textContent = `${entry.start || '--:--'} bis ${entry.end || '--:--'}`;
+        });
+    } else {
+        day[field] = input.value;
+    }
+}
+
+function changeOpeningHoursException(button, remove) {
+    const section = button.closest('.webseiten-section');
+    const config = webseitenData.webseite[Number(section.dataset.index)].openingHours;
+    if (remove) config.exceptions.splice(Number(button.closest('[data-hours-day]').dataset.hoursDay), 1);
+    else config.exceptions.push({ ...OpeningHours.emptyDay(), from: '', to: '', note: '' });
+    section.querySelector('.hours-exceptions').innerHTML = config.exceptions.map((day, index) => renderOpeningHoursDay(day, index, true)).join('');
+}
+
 // Event-Handler für Webseiten-Editor
 function setupWebseitenEvents() {
     const editorContainer = document.getElementById('webseite-editor');
     if (!editorContainer) return;
+
+    document.addEventListener('click', (event) => {
+        editorContainer.querySelectorAll('.hours-period[open]').forEach(period => {
+            if (!period.contains(event.target)) period.open = false;
+        });
+    });
+    editorContainer.addEventListener('keydown', (event) => {
+        const period = event.target.closest('.hours-period[open]');
+        if (event.key === 'Escape' && period) {
+            period.open = false;
+            period.querySelector('summary').focus();
+            event.preventDefault();
+        }
+    });
+    editorContainer.addEventListener('toggle', (event) => {
+        const period = event.target;
+        if (!period.matches('.hours-period') || !period.open) return;
+        const hasTime = [...period.querySelectorAll('input:checked')].some(input => input.value);
+        if (!hasTime && period.querySelector('summary').getAttribute('aria-disabled') !== 'true') {
+            setOpeningHoursTimeControls(period, 'start', '09:00');
+            updateOpeningHoursField(period.querySelector('[data-hours-field="start"][data-time-part="hour"]:checked'));
+        }
+        period.querySelectorAll('.hours-list').forEach(list => {
+            scrollOpeningHoursOption(list.querySelector('input:checked'), 'auto');
+        });
+    }, true);
     
     // Delegate events für dynamisch erstellte Elemente
     editorContainer.addEventListener('input', (e) => {
+        if (e.target.matches('[data-hours-field]')) updateOpeningHoursField(e.target);
         if (e.target.matches('[data-field]')) {
             updateWebseitenField(e.target);
         }
     });
     
     editorContainer.addEventListener('click', (e) => {
+        if (e.target.closest('.hours-period summary[aria-disabled="true"]')) {
+            e.preventDefault();
+            return;
+        }
+        const hoursAction = e.target.closest('[data-hours-clear], [data-hours-done]');
+        if (hoursAction) {
+            const period = hoursAction.closest('.hours-period');
+            if (hoursAction.hasAttribute('data-hours-clear')) {
+                const row = period.closest('[data-hours-day]');
+                const section = period.closest('.webseiten-section');
+                const config = webseitenData.webseite[Number(section.dataset.index)].openingHours;
+                const day = config[row.dataset.hoursGroup][Number(row.dataset.hoursDay)];
+                day.periods[Number(period.dataset.period)] = { start: '', end: '' };
+                period.querySelectorAll('input[value=""]').forEach(input => { input.checked = true; });
+                period.querySelector('summary').textContent = '--:-- bis --:--';
+            } else {
+                period.open = false;
+                period.querySelector('summary').focus();
+            }
+            return;
+        }
+        const exceptionButton = e.target.closest('[data-hours-add], [data-hours-remove]');
+        if (exceptionButton) {
+            changeOpeningHoursException(exceptionButton, exceptionButton.hasAttribute('data-hours-remove'));
+            return;
+        }
         const themeButton = e.target.closest('[data-section-theme]');
         if (themeButton) {
             updateWebseitenTheme(themeButton);
@@ -228,9 +489,18 @@ function setupWebseitenEvents() {
     const sectionOverlay = document.getElementById('webseitenSectionOverlay');
     if (sectionOverlay) {
         sectionOverlay.addEventListener('click', (event) => {
-            const sectionType = event.target.dataset.sectionType;
-            if (sectionType) addWebseitenSection(sectionType);
-            if (event.target === sectionOverlay || sectionType) closeWebseitenSectionOverlay();
+            const sectionType = event.target.closest('[data-section-type]')?.dataset.sectionType;
+            if (sectionType) {
+                try {
+                    addWebseitenSection(sectionType);
+                    closeWebseitenSectionOverlay();
+                } catch (error) {
+                    console.error('Sektion konnte nicht hinzugefügt werden:', error);
+                    showWebseitenSaveDialog('Sektion konnte nicht hinzugefügt werden: ' + error.message);
+                }
+            } else if (event.target === sectionOverlay) {
+                closeWebseitenSectionOverlay();
+            }
         });
     }
 
@@ -306,7 +576,7 @@ function updateWebseitenField(input) {
     const section = input.closest('.webseiten-section');
     const index = parseInt(section.dataset.index);
     const field = input.dataset.field;
-    const value = input.value;
+    const value = field === 'showInMenu' ? input.value === 'true' : input.value;
     
     if (webseitenData.webseite[index]) {
         webseitenData.webseite[index][field] = value;
@@ -350,7 +620,18 @@ function closeWebseitenSectionOverlay() {
 
 // Neue Sektion hinzufügen
 function addWebseitenSection(sectionType) {
-    const newSection = sectionType === 'instagram-feed'
+    if (sectionType === 'opening-hours' && typeof OpeningHours === 'undefined') {
+        throw new Error('Die Öffnungszeiten-Funktion wurde nicht geladen. Bitte webseite/opening-hours.js auf dem Server prüfen und den Editor neu laden.');
+    }
+    const newSection = sectionType === 'opening-hours'
+        ? {
+            type: 'opening-hours',
+            menutitel: 'Öffnungszeiten',
+            titel: 'Wir sehen uns in Moltzow.',
+            theme: 'moss',
+            openingHours: OpeningHours.defaults()
+        }
+        : sectionType === 'instagram-feed'
         ? {
             type: 'instagram-feed',
             menutitel: 'Instagram',
@@ -520,6 +801,14 @@ async function loadWebseitenArchive() {
 
 // Webseiten-Daten speichern
 async function saveWebseitenData() {
+    for (const section of webseitenData.webseite) {
+        if (section.type !== 'opening-hours') continue;
+        const error = OpeningHours.validate(section.openingHours);
+        if (error) {
+            showWebseitenSaveDialog(`${section.menutitel || 'Öffnungszeiten'}: ${error}`);
+            return;
+        }
+    }
     const saveButton = document.getElementById('saveWebseitenBtn');
     const buttonLabel = saveButton?.textContent;
 

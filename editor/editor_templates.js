@@ -253,9 +253,10 @@ async function confirmSaveJson() {
 			})
 		});
 
-		if (!response.ok) throw new Error(`HTTP ${response.status}`);
-		const result = await response.json();
-		if (!result.success) throw new Error(result.error || "Unbekannter Fehler");
+		const result = await response.json().catch(() => null);
+		if (!response.ok || !result?.success) {
+			throw new Error(result?.error || (response.ok ? "Ungültige Serverantwort" : `HTTP ${response.status}`));
+		}
 
 		EditorSPK.markMenuSaved();
 		if (filename === "data.json") {

@@ -398,47 +398,72 @@ switch ($action) {
         echo json_encode($data);
         break;
 
-        case 'load_layout_config':
-            $configFile = __DIR__ . '/config.json';
-            if (!file_exists($configFile)) {
-                respondWithError('config.json nicht gefunden', 404);
+    case 'load_layout_config':
+    case 'save_layout_config':
+        $page = $input['page'] ?? 'speisekarte';
+        if (!in_array($page, ['webseite', 'speisekarte', 'apartments'], true)) {
+            respondWithError('Ungültige Seite für Saison-Optionen', 400);
+        }
+        $configFile = __DIR__ . '/' . $page . '/season-config.json';
+        if ($action === 'load_layout_config') {
+            $hasPageConfig = is_file($configFile);
+            $source = $hasPageConfig ? $configFile : __DIR__ . '/config.json';
+            if (!is_file($source)) {
+                respondWithError('Saison-Konfiguration nicht gefunden', 404);
             }
-            $json = file_get_contents($configFile);
-            $data = json_decode($json, true);
-    
-            if (!is_array($data)) {
-                respondWithError('Ungültige JSON-Struktur in config.json');
+            $configData = json_decode(file_get_contents($source), true);
+            if (!is_array($configData)) {
+                respondWithError('Ungültige Saison-Konfiguration');
             }
-    
-            echo json_encode($data);
+            if (!$hasPageConfig && $page === 'apartments') {
+                foreach ($configData as &$layout) {
+                    $layout['aktiv'] = false;
+                }
+                unset($layout);
+            }
+            if (!in_array('advent', array_column($configData, 'id'), true)) {
+                $configData[] = ['id' => 'advent', 'aktiv' => false, 'label' => 'Advent ⭐', 'geschwindigkeit' => '1', 'menge' => '1'];
+            }
+            if (!in_array('valentine', array_column($configData, 'id'), true)) {
+                $configData[] = ['id' => 'valentine', 'aktiv' => false, 'label' => 'Valentinstag ❤️', 'geschwindigkeit' => '1', 'menge' => '1'];
+            }
+            foreach ($configData as &$layout) {
+                if (($layout['id'] ?? null) === 'advent' && ($layout['label'] ?? '') === 'Advent') {
+                    $layout['label'] = 'Advent ⭐';
+                }
+            }
+            unset($layout);
+            echo json_encode($configData);
             break;
+        }
 
-
-            $json = $_POST['data'] ?? '';
-
-            // Prüfen ob gültiges JSON
-            $decoded = json_decode($json, true);
-            if (!is_array($decoded)) {
-                echo json_encode(['success' => false, 'error' => 'Ungültiges JSON']);
-                exit;
+        $configData = json_decode($input['data'] ?? '', true);
+        if (!is_array($configData) || array_values($configData) !== $configData || !in_array(count($configData), [5, 6, 7], true)) {
+            respondWithError('Ungültige Saison-Optionen', 400);
+        }
+        $seasonIds = [];
+        $activeCount = 0;
+        foreach ($configData as $layout) {
+            if (!is_array($layout)
+                || !in_array($layout['id'] ?? null, ['spring', 'summer', 'autumn', 'winter', 'party', 'advent', 'valentine'], true)
+                || in_array($layout['id'], $seasonIds, true)
+                || !is_bool($layout['aktiv'] ?? null)
+                || !is_string($layout['label'] ?? null)
+                || !in_array($layout['geschwindigkeit'] ?? null, [1, 2, 3, '1', '2', '3'], true)
+                || !in_array($layout['menge'] ?? null, [1, 2, 3, '1', '2', '3'], true)) {
+                respondWithError('Ungültige Saison-Optionen', 400);
             }
-        
-        case 'save_layout_config':
-            $json = $_POST['data'] ?? '';
-
-            // Prüfen ob gültiges JSON
-            $decoded = json_decode($json, true);
-            if (!is_array($decoded)) {
-                echo json_encode(['success' => false, 'error' => 'Ungültiges JSON']);
-                exit;
-            }
-
-            // Neue Datei speichern
-            if (file_put_contents('config.json', json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE))) {
-                echo json_encode(['success' => true]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Konnte Datei nicht schreiben']);
-            }
+            $seasonIds[] = $layout['id'];
+            $activeCount += $layout['aktiv'] ? 1 : 0;
+        }
+        if ($activeCount > 1) {
+            respondWithError('Nur eine Saison darf aktiv sein', 400);
+        }
+        $json = json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        if ($json === false || file_put_contents($configFile, $json, LOCK_EX) === false) {
+            respondWithError('Konnte ' . $page . '/season-config.json nicht schreiben. Bitte Schreibrechte der Datei bzw. des Ordners prüfen.');
+        }
+        echo json_encode(['success' => true]);
         break;
 
 

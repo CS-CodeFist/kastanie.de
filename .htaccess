@@ -7,4 +7,14 @@ RewriteRule ^index\.php$ /%1 [R=301,L,NE]
 RewriteCond %{THE_REQUEST} \s/+(.*/)?(?:apartments|speisekarte)\.html(?:[?\s]) [NC]
 RewriteRule ^(apartments|speisekarte)\.html$ /%1$1 [R=301,L,NE]
 
-RewriteRule ^(apartments|speisekarte)/?$ $1.html [L]
+RewriteCond %{THE_REQUEST} \s/+(.*/)?apartments\.php(?:[?\s]) [NC]
+RewriteRule ^apartments\.php$ /%1apartments/ [R=301,L,NE]
+
+RewriteRule ^apartments/?$ apartments.php [L]
+RewriteRule ^speisekarte/?$ speisekarte.html [L]
+
+RewriteRule ^sitemaps\.xml$ sitemaps.php [L]
+
+<IfModule mod_mime.c>
+	AddType application/manifest+json .webmanifest
+</IfModule>

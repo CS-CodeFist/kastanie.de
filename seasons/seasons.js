@@ -3,6 +3,30 @@ const container = document.querySelector('.s-elements');
 const isMobile = window.innerWidth <= 600; // Mobile Erkennung für responsive Design
 const elements = []; // Array für alle Animationselemente
 
+let restoreSeasonFrame = null;
+function refreshSeasonLayer() {
+  if (!container) return;
+  if (restoreSeasonFrame !== null) cancelAnimationFrame(restoreSeasonFrame);
+  restoreSeasonFrame = null;
+  container.style.display = 'none';
+  if (!container.childElementCount) return;
+  restoreSeasonFrame = requestAnimationFrame(() => {
+    restoreSeasonFrame = requestAnimationFrame(() => {
+      container.style.display = 'block';
+      restoreSeasonFrame = null;
+    });
+  });
+}
+
+if (container) {
+  const themeObserver = new MutationObserver(refreshSeasonLayer);
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  });
+  refreshSeasonLayer();
+}
+
 // Steuerungsvariablen
 let total = 0;                     // Gesamtzahl der Elemente
 let activeMenge = 1;               // Ausgewählte Dichteeinstellung (1-3)
@@ -33,15 +57,22 @@ let lastAnimationTime = null;
  */
 async function getSeasonalImages() {
   try {
-    // Lade Konfiguration mit Cache-Busting
-    const configRes = await fetch("config.json?nocache=" + Date.now());
-    if (!configRes.ok) throw new Error("Konnte config.json nicht laden.");
+    if (!container) return;
+    const configRes = await fetch('data_handler.php', {
+      method: 'POST',
+      body: new URLSearchParams({
+        action: 'load_layout_config',
+        page: container.dataset.seasonPage
+      }),
+      cache: 'no-store'
+    });
+    if (!configRes.ok) throw new Error('Konnte Saison-Konfiguration nicht laden.');
 
     const configList = await configRes.json();
     const active = configList.find(item => item.aktiv);
 
     if (!active) {
-      console.warn("⚠️ Keine aktive Saison in config.json gefunden.");
+      container.style.display = 'none';
       return;
     }
 
@@ -194,6 +225,7 @@ function init(geschwindigkeit, menge) {
   }
 
   // Animation starten
+  refreshSeasonLayer();
   animate();
 }
 

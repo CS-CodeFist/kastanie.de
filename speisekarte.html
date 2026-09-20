@@ -4,10 +4,47 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<base href="../">
-	<title>Kastanie Moltzow</title>
+	<title>Speisekarte | Kastanie Moltzow</title>
+	<meta name="description" content="Die aktuelle Speisekarte der Kastanie in Moltzow: Gerichte, Getränke und Preise auf einen Blick.">
+	<link rel="canonical" href="https://www.bistro-kastanie.de/speisekarte">
+	<meta name="theme-color" content="#DFCB97">
+	<meta name="application-name" content="Kastanie Moltzow">
+	<meta name="apple-mobile-web-app-title" content="Kastanie">
+	<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+	<link rel="icon" type="image/png" sizes="32x32" href="bilder/icons/favicon-32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="bilder/icons/favicon-16.png">
+	<link rel="icon" type="image/svg+xml" sizes="any" href="bilder/kastanie-logo.svg">
+	<link rel="apple-touch-icon" sizes="180x180" href="bilder/icons/apple-touch-icon.png">
+	<link rel="manifest" href="site.webmanifest">
+	<meta property="og:type" content="website">
+	<meta property="og:locale" content="de_DE">
+	<meta property="og:site_name" content="Kastanie Moltzow">
+	<meta property="og:title" content="Speisekarte | Kastanie Moltzow">
+	<meta property="og:description" content="Die aktuelle Speisekarte der Kastanie in Moltzow: Gerichte, Getränke und Preise auf einen Blick.">
+	<meta property="og:url" content="https://www.bistro-kastanie.de/speisekarte">
+	<meta property="og:image" content="https://www.bistro-kastanie.de/bilder/icons/social-preview.png">
+	<meta property="og:image:type" content="image/png">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="Logo der Kastanie Moltzow: grünes Kastanienblatt mit weißem K">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Speisekarte | Kastanie Moltzow">
+	<meta name="twitter:description" content="Die aktuelle Speisekarte der Kastanie in Moltzow: Gerichte, Getränke und Preise auf einen Blick.">
+	<meta name="twitter:image" content="https://www.bistro-kastanie.de/bilder/icons/social-preview.png">
+	<meta name="twitter:image:alt" content="Logo der Kastanie Moltzow: grünes Kastanienblatt mit weißem K">
 
-	<link rel="stylesheet" href="speisekarte/styles.css?20250727" />
-	<link rel="stylesheet" href="seasons/seasons.css?20250402a" />
+	<script>
+		let initialMode = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+		try {
+			const savedMode = localStorage.getItem('darkMode');
+			if (savedMode === 'dark' || savedMode === 'light') initialMode = savedMode;
+		} catch (error) {}
+		document.documentElement.dataset.theme = initialMode;
+		document.querySelector('meta[name="theme-color"]').content = initialMode === 'dark' ? '#2d2922' : '#DFCB97';
+	</script>
+
+	<link rel="stylesheet" href="speisekarte/styles.css?v=20260919-loader-theme" />
+	<link rel="stylesheet" href="seasons/seasons.css?v=20260919-hidden-test" />
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,11 +148,11 @@
 	<span class="moon-icon">🌙</span>
 	</button>
 
-	<div class="s-elements" aria-hidden="true"></div>
+	<div class="s-elements" data-season-page="speisekarte" aria-hidden="true"></div>
 
 	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-	<script type="text/javascript" src="speisekarte/script.js?20250728"></script>
-	<script type="text/javascript" src="seasons/seasons.js?20260904e"></script>
+	<script type="text/javascript" src="speisekarte/script.js?v=20260919-single-theme-init"></script>
+	<script type="text/javascript" src="seasons/seasons.js?v=20260919-page-seasons"></script>
 
 </body>
 </html>

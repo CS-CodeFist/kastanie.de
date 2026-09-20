@@ -130,6 +130,23 @@
     flex: 1;
 }
 
+.webseiten-section .section-options-row {
+    align-items: flex-start;
+}
+
+.section-options-controls {
+    flex: 1;
+    min-width: 0;
+}
+
+.webseiten-section .image-row.section-options-row .image-thumb {
+    flex: 0 0 240px;
+    width: 240px;
+    height: 240px;
+    object-fit: contain;
+    box-sizing: border-box;
+}
+
 .webseiten-section .image-row .image-thumb {
     width: 60px;
     height: 60px;
@@ -145,8 +162,177 @@
 .webseiten-section .text-fields input[type="text"],
 .webseiten-section .text-fields select,
 .webseiten-section .text-fields textarea {
+    box-sizing: border-box;
     width: 100%;
     margin-bottom: 0.5em;
+}
+
+.opening-hours-editor .section-header {
+    display: flex;
+    align-items: center;
+}
+
+.opening-hours-editor .drag-icon {
+    order: 2;
+}
+
+.hours-day-editor {
+    min-width: 0;
+    margin: 0 0 0.8rem;
+    padding: 0.6rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.hours-day-editor legend {
+    font-weight: 600;
+}
+
+.hours-day-editor .hours-closed {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.hours-day-editor input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.hours-periods,
+.hours-exception-dates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+}
+
+.hours-period {
+    position: relative;
+    min-width: 0;
+}
+
+.hours-periods {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+}
+
+.hours-period summary {
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+}
+
+.hours-period summary[aria-disabled="true"] {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.hours-period[open] {
+    z-index: 30;
+}
+
+.hours-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--white);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.hours-range-labels,
+.hours-range-lists,
+.hours-time {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.hours-range-labels,
+.hours-range-lists {
+    column-gap: 1rem;
+}
+
+.hours-range-labels {
+    padding-bottom: 0.4rem;
+    text-align: center;
+}
+
+.hours-list {
+    height: 12rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--border);
+}
+
+.hours-list .hours-choice {
+    position: relative;
+    display: block;
+    margin: 0;
+    cursor: pointer;
+}
+
+.hours-choice input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.hours-choice span {
+    display: block;
+    padding: 0.55rem 0;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.hours-choice input:checked+span {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 700;
+}
+
+.hours-choice input:focus-visible+span {
+    outline: 2px solid var(--primary-dark);
+    outline-offset: -2px;
+}
+
+.hours-dropdown-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.hours-dropdown-actions button {
+    margin: 0;
+    padding: 0.5rem;
+}
+
+.hours-day-editor input,
+.hours-day-editor select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.hours-day-editor input:disabled,
+.hours-day-editor select:disabled {
+    opacity: 0.45;
+}
+
+@media (max-width: 600px) {
+
+    .hours-periods,
+    .hours-exception-dates {
+        grid-template-columns: 1fr;
+    }
 }
 
 .section-theme-picker {
@@ -173,6 +359,42 @@
 .text-position-picker>span {
     margin-right: 0.2rem;
     font-weight: 600;
+}
+
+.menu-visibility-picker .menu-visibility-choice {
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}
+
+.menu-visibility-choice input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    opacity: 0;
+}
+
+.menu-visibility-choice span {
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0.4rem 0.7rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+}
+
+.menu-visibility-choice input:checked+span {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.menu-visibility-choice input:focus-visible+span {
+    outline: 2px solid var(--primary-dark);
+    outline-offset: 2px;
 }
 
 .position-swatch {
@@ -949,6 +1171,42 @@ select:focus {
         padding: 1em;
     }
 
+    .webseiten-section .section-options-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .webseiten-section .image-row.section-options-row .image-thumb {
+        order: -1;
+        flex: none;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+        max-height: 240px;
+    }
+
+    .tab-navigation {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.25rem;
+        overflow-y: hidden;
+        overflow-x: auto;
+    }
+
+    .tab-navigation>button,
+    .tab-navigation #logoutBtn {
+        box-sizing: border-box;
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 0;
+        min-height: 44px;
+        margin: 0;
+        align-self: stretch;
+        text-align: left;
+        white-space: nowrap;
+    }
+
     .menu {
         padding: 0.5em 0.8em;
         margin-bottom: 1em;
@@ -1025,6 +1283,30 @@ select:focus {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    #webseitenButtonWrapper,
+    #buttonWrapper,
+    #apartmentsButtonWrapper,
+    #webseitenButtonWrapper>div,
+    #buttonWrapper>div,
+    #apartmentsButtonWrapper>div {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    #webseitenButtonWrapper button,
+    #buttonWrapper button,
+    #apartmentsButtonWrapper button {
+        box-sizing: border-box;
+        flex: 0 0 auto;
+        width: 100%;
+        min-height: 44px;
+        font-size: 1rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     /* Mobile Optimierung für Zusatzstoffe-Layout */

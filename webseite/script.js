@@ -5,7 +5,9 @@ const contentSource = document.body.dataset.contentSource || 'webseite/data.json
 const sectionButtonLinks = {
     speisekarte: 'speisekarte',
     apartments: 'apartments',
-    email: 'mailto:info@kastanie-moltzow.de'
+    email: 'mailto:info@kastanie-moltzow.de',
+    telefon: 'tel:+4939933736022',
+    route: 'https://www.google.com/maps/dir/?api=1&destination=Warener%20Stra%C3%9Fe%203%2C%2017194%20Moltzow'
 };
 const imagePositions = ['links', 'rechts', 'zentriert'];
 const showInstagramCommentPreview = true;
@@ -55,7 +57,93 @@ function createInstagramFeedSection(section, index) {
     return { element, sectionId };
 }
 
+let openingHoursRefreshers = [];
+let openingHoursTimer;
+
+function refreshOpeningHours() {
+    openingHoursRefreshers.forEach(refresh => refresh());
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshOpeningHours();
+});
+
+function createOpeningHoursSection(section, index) {
+    const sectionId = index === 0 ? 'start' : createSlug(section.menutitel || 'oeffnungszeiten', index);
+    const element = document.createElement('section');
+    element.id = sectionId;
+    element.className = `content-section opening-hours-section theme-${section.theme || 'moss'}`;
+    const inner = document.createElement('div');
+    inner.className = 'section-inner';
+    const copy = document.createElement('div');
+    copy.className = 'hours-copy';
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = section.menutitel || 'Öffnungszeiten';
+    const heading = document.createElement('h2');
+    heading.textContent = section.titel || 'Öffnungszeiten';
+    const status = document.createElement('p');
+    status.className = 'hours-status';
+    const detail = document.createElement('p');
+    detail.className = 'hours-detail';
+    const note = document.createElement('p');
+    note.className = 'hours-note';
+    copy.append(eyebrow, heading, status, detail, note);
+    const week = document.createElement('dl');
+    week.className = 'hours-week';
+    week.setAttribute('aria-label', 'Öffnungszeiten der nächsten sieben Tage');
+    inner.append(copy, week);
+    element.appendChild(inner);
+    const refresh = () => {
+        const state = OpeningHours.snapshot(section.openingHours);
+        if (!state) {
+            status.textContent = 'Öffnungszeiten derzeit nicht verfügbar';
+            detail.textContent = '';
+            note.textContent = '';
+            week.replaceChildren();
+            return;
+        }
+        status.textContent = state.status;
+        status.dataset.open = String(state.open);
+        detail.textContent = state.detail;
+        note.textContent = state.today.note;
+        week.replaceChildren(...state.week.map((day, dayIndex) => {
+            const row = document.createElement('div');
+            row.className = `hours-day${dayIndex === 0 ? ' is-today' : ''}`;
+            const label = document.createElement('dt');
+            const name = document.createElement('span');
+            name.textContent = dayIndex === 0 ? 'Heute' : OpeningHours.days[day.weekday];
+            const date = document.createElement('time');
+            date.dateTime = day.date;
+            date.textContent = new Intl.DateTimeFormat('de-DE', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })
+                .format(new Date(day.date + 'T12:00:00Z'));
+            label.append(name, date);
+            const hours = document.createElement('dd');
+            if (day.closed || day.privateEvent) {
+                hours.textContent = OpeningHours.formatPeriods(day);
+            } else {
+                day.periods.forEach(period => {
+                    const timeSlot = document.createElement('div');
+                    timeSlot.textContent = OpeningHours.formatPeriods({ ...day, periods: [period] });
+                    hours.appendChild(timeSlot);
+                });
+            }
+            if (day.note) {
+                const exceptionNote = document.createElement('small');
+                exceptionNote.textContent = day.note;
+                hours.appendChild(exceptionNote);
+            }
+            row.append(label, hours);
+            return row;
+        }));
+    };
+    refresh();
+    openingHoursRefreshers.push(refresh);
+    return { element, sectionId };
+}
+
 function createSection(section, index) {
+    if (section.type === 'opening-hours') return createOpeningHoursSection(section, index);
     if (section.type === 'instagram-feed') return createInstagramFeedSection(section, index);
 
     const sectionId = index === 0 ? 'start' : createSlug(section.menutitel, index);
@@ -354,6 +442,8 @@ function setupNavigationHighlighting() {
 }
 
 function renderWebsite(data) {
+    clearInterval(openingHoursTimer);
+    openingHoursRefreshers = [];
     const sections = Array.isArray(data.webseite) ? data.webseite : [];
     content.replaceChildren();
     navigationItems.replaceChildren();
@@ -367,7 +457,7 @@ function renderWebsite(data) {
         const { element, sectionId } = createSection(section, index);
         content.appendChild(element);
 
-        if (!section.menutitel) return;
+        if (!section.menutitel || section.showInMenu === false) return;
 
         const link = document.createElement('a');
         link.href = `#${sectionId}`;
@@ -375,6 +465,7 @@ function renderWebsite(data) {
         navigationItems.appendChild(link);
     });
 
+    if (openingHoursRefreshers.length) openingHoursTimer = setInterval(refreshOpeningHours, 60000);
     if (sections.some(section => section.type === 'instagram-feed')) loadInstagramFeed();
     setupNavigationHighlighting();
 }

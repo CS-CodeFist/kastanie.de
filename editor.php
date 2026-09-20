@@ -15,7 +15,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>Kastanie Moltzow – Editor</title>
-	<link rel="stylesheet" href="editor/editor.css?20260907m" />
+	<link rel="stylesheet" href="editor/editor.css?20260920-title-preview" />
 </head>
 
 <body>
@@ -110,6 +110,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				</div>
 				<div style="display: flex; justify-content: space-between;">
 					<button id="saveApartmentsBtn">💾 Apartments speichern</button>
+					<button id="apartmentsOptionsBtn" type="button">⚙️ Optionen</button>
 				</div>
 			</div>
 		</div> <!-- Ende apartments-tab -->
@@ -122,6 +123,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 			<div class="option-button-group webseiten-section-type-buttons">
 				<button type="button" data-section-type="standard">Standardsektion</button>
 				<button type="button" data-section-type="instagram-feed">Instagram Feed</button>
+				<button type="button" data-section-type="opening-hours">Öffnungszeiten</button>
 			</div>
 			<div class="overlay-footer">
 				<button type="button" id="closeWebseitenSectionOverlayBtn">Abbrechen</button>
@@ -333,16 +335,17 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	
 	<!-- EDITOR MODULES (Reihenfolge ist wichtig!) -->
 	<script src="editor/editor_core.js?v=20250728b"></script>
-	<script src="editor/editor_tabs.js?v=20260904c"></script>
+	<script src="editor/editor_tabs.js?v=20260919-page-seasons"></script>
 	<script src="editor/editor_spk.js?v=20260904e"></script>
-	<script src="editor/editor_webseite.js?v=20260907k"></script>
-	<script src="editor/editor_apartments.js?v=20260907k"></script>
+	<script src="webseite/opening-hours.js?v=20260920-rest-day"></script>
+	<script src="editor/editor_webseite.js?v=20260920-rest-day"></script>
+	<script src="editor/editor_apartments.js?v=20260920-subtitle-column"></script>
 	<script src="editor/editor_images.js?v=20260904f"></script>
-	<script src="editor/editor_templates.js?v=20260904d"></script>
-	<script src="editor/editor_seasons.js?v=20260904a"></script>
+	<script src="editor/editor_templates.js?v=20260918a"></script>
+	<script src="editor/editor_seasons.js?v=20260919-apartments-options"></script>
 	
 	<!-- EDITOR MAIN (Koordiniert alle Module) -->
-	<script src="editor/main.js?v=20260904a"></script>
+	<script src="editor/main.js?v=20260919-page-seasons"></script>
 </body>
 
 </html>
