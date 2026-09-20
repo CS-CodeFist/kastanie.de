@@ -96,8 +96,15 @@
     color: var(--primary-dark);
 }
 
-.webseiten-section .section-header .toggle-section {
+.webseiten-section .section-header .drag-icon {
     order: 1;
+    margin-left: auto;
+    margin-right: 0;
+    align-self: center;
+}
+
+.webseiten-section .section-header .toggle-section {
+    order: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -112,6 +119,10 @@
     display: inline-block;
     width: 1em;
     transition: rotate 0.2s ease;
+}
+
+.webseiten-section .section-header .drag-icon~.toggle-section {
+    margin-left: 0.5em;
 }
 
 .section-details.collapsed {
@@ -170,10 +181,6 @@
 .opening-hours-editor .section-header {
     display: flex;
     align-items: center;
-}
-
-.opening-hours-editor .drag-icon {
-    order: 2;
 }
 
 .hours-day-editor {
@@ -1091,7 +1098,7 @@ label {
 
 .image-map-choice,
 .image-map-choice:hover {
-    background: var(--white) url("../webseite/map-positron.webp") center / cover no-repeat;
+    background: var(--white) url("../bilder/map-light-kastanie.webp?v=20260920-menu") center / cover no-repeat;
     box-shadow: inset 0 -2.5rem 0 rgba(255, 255, 255, 0.94);
     color: var(--primary-dark);
 }

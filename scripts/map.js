@@ -1,5 +1,7 @@
 (() => {
     const assetBase = new URL('../vendor/', document.currentScript.src);
+    const darkStyleURL = new URL('map-dark.json?v=20260920-brown-land', document.currentScript.src).href;
+    const lightStyleURL = new URL('map-light.json?v=20260920-menu', document.currentScript.src).href;
     const markerURL = new URL('../bilder/kastanie-logo.png', document.currentScript.src).href;
     const location = [53.631393, 12.569870];
     const activeMaps = new Set();
@@ -61,12 +63,8 @@
         previewArea.append(preview, attribution);
         const prompt = document.createElement('div');
         prompt.className = 'map-consent';
-        const title = document.createElement('strong');
-        title.textContent = 'Kastanie Moltzow';
-        const address = document.createElement('p');
-        address.textContent = 'Warener Strasse 3, 17194 Moltzow';
         const notice = document.createElement('p');
-        notice.textContent = 'Beim Laden stimmen Sie der Uebermittlung Ihrer IP-Adresse und Verbindungsdaten an OpenFreeMap zu.';
+        notice.textContent = 'Beim Laden stimmen Sie der Übermittlung Ihrer IP-Adresse und Verbindungsdaten an OpenFreeMap zu.';
         const privacy = document.createElement('a');
         privacy.href = 'datenschutz.php#openstreetmap';
         privacy.textContent = 'Datenschutz';
@@ -79,7 +77,7 @@
         const actions = document.createElement('div');
         actions.className = 'map-consent-actions';
         actions.append(load);
-        prompt.append(title, address, notice, privacy, status, actions);
+        prompt.append(notice, privacy, status, actions);
         const canvas = document.createElement('div');
         canvas.className = 'section-map-canvas';
         canvas.setAttribute('aria-label', 'Karte: Kastanie Moltzow, Warener Strasse 3');
@@ -146,9 +144,9 @@
                 }).setView(location, 10);
                 leaflet.control.zoom({ zoomInTitle: 'Vergroessern', zoomOutTitle: 'Verkleinern' }).addTo(map);
                 map.attributionControl.setPrefix(false);
-                const styleForTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'positron';
+                const styleForTheme = () => document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
                 let currentStyle = styleForTheme();
-                const styleURL = style => `https://tiles.openfreemap.org/styles/${style}`;
+                const styleURL = style => style === 'dark' ? darkStyleURL : lightStyleURL;
                 const startTimer = () => {
                     clearTimeout(tileTimer);
                     tileTimer = setTimeout(() => {

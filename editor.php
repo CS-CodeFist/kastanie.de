@@ -15,7 +15,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>Kastanie Moltzow – Editor</title>
-	<link rel="stylesheet" href="editor/editor.css?20260920-map-preview" />
+	<link rel="stylesheet" href="editor/editor.css?20260920-menu" />
 </head>
 
 <body>
@@ -337,10 +337,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<script src="editor/editor_core.js?v=20250728b"></script>
 	<script src="editor/editor_tabs.js?v=20260919-page-seasons"></script>
 	<script src="editor/editor_spk.js?v=20260904e"></script>
-	<script src="webseite/opening-hours.js?v=20260920-rest-day"></script>
-	<script src="editor/editor_webseite.js?v=20260920-map-preview"></script>
-	<script src="editor/editor_apartments.js?v=20260920-map-preview"></script>
-	<script src="editor/editor_images.js?v=20260920-karte-label"></script>
+	<script src="scripts/opening-hours.js?v=20260920-shared-scripts"></script>
+	<script src="editor/editor_webseite.js?v=20260920-section-controls"></script>
+	<script src="editor/editor_apartments.js?v=20260920-section-controls"></script>
+	<script src="editor/editor_images.js?v=20260920-shared-map"></script>
 	<script src="editor/editor_templates.js?v=20260918a"></script>
 	<script src="editor/editor_seasons.js?v=20260919-apartments-options"></script>
 	

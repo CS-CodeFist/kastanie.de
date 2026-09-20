@@ -294,7 +294,7 @@ h2 {
 }
 
 .hero .section-image {
-    background-image: linear-gradient(135deg, rgba(113, 134, 75, 0.5), rgba(36, 61, 42, 0.3)), url("../bilder/Kastanie.svg");
+    background-image: linear-gradient(135deg, rgba(113, 134, 75, 0.5), rgba(36, 61, 42, 0.3)), url("bilder/Kastanie.svg");
     background-repeat: no-repeat;
     background-size: cover, min(64%, 540px);
 }
@@ -340,11 +340,11 @@ h2 {
 .map-preview {
     position: absolute;
     inset: 0;
-    background: url("map-positron.webp") center / cover no-repeat;
+    background: url("bilder/map-light-kastanie.webp?v=20260920-menu") center / cover no-repeat;
 }
 
 [data-theme="dark"] .map-preview {
-    background-image: url("map-dark.webp");
+    background-image: url("bilder/map-dark-kastanie.webp?v=20260920-brown-land");
 }
 
 .map-preview-attribution {
@@ -370,6 +370,15 @@ h2 {
 
 .map-consent [role="status"] {
     min-height: 1.45em;
+}
+
+.map-consent [role="status"]:empty {
+    min-height: 0;
+    margin: 0;
+}
+
+.map-consent a {
+    color: inherit;
 }
 
 .section-map-placeholder .section-button {
@@ -479,12 +488,12 @@ h2 {
     white-space: normal;
 }
 
-[data-theme="dark"] .section-map-placeholder :is(.leaflet-control-attribution, .map-preview-attribution) {
+.section-image.section-map-placeholder :is(.leaflet-control-attribution, .map-preview-attribution) {
     background: var(--cream);
     color: var(--ink);
 }
 
-[data-theme="dark"] .section-map-placeholder :is(.leaflet-control-attribution, .map-preview-attribution) a {
+.section-image.section-map-placeholder :is(.leaflet-control-attribution, .map-preview-attribution) a {
     color: inherit;
 }
 
@@ -877,13 +886,13 @@ h2 {
 }
 
 .instagram-engagement-icon.is-heart {
-    -webkit-mask-image: url("../bilder/heart-icon.svg");
-    mask-image: url("../bilder/heart-icon.svg");
+    -webkit-mask-image: url("bilder/heart-icon.svg");
+    mask-image: url("bilder/heart-icon.svg");
 }
 
 .instagram-engagement-icon.is-comment {
-    -webkit-mask-image: url("../bilder/comment-icon.svg");
-    mask-image: url("../bilder/comment-icon.svg");
+    -webkit-mask-image: url("bilder/comment-icon.svg");
+    mask-image: url("bilder/comment-icon.svg");
 }
 
 .instagram-feed-status {

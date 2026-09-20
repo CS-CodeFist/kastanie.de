@@ -141,7 +141,7 @@ function renderWebseitenSection(section, index) {
     
     // Drag-Icon nur anzeigen wenn nicht erste oder letzte Sektion
     const dragIconHtml = isFirstOrLast ? '' : 
-        '<button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>';
+        '<button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>';
     
     // Lösch-Button nur anzeigen wenn nicht erste oder letzte Sektion
     const deleteButtonHtml = isFirstOrLast ? '' : 
@@ -192,7 +192,7 @@ function renderInstagramFeedSection(section, index) {
     return `
         <div class="webseiten-section instagram-section-editor" data-index="${index}">
             <div class="section-header" style="display: flex; align-items: center;">
-                <button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>
+                <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
                 <input type="text" value="${section.menutitel || ''}" placeholder="Menütitel" data-field="menutitel" />
                 <button type="button" class="toggle-section" aria-expanded="false" aria-label="Details anzeigen"><span class="toggle-icon" aria-hidden="true">▶</span></button>
             </div>
@@ -630,7 +630,7 @@ function closeWebseitenSectionOverlay() {
 // Neue Sektion hinzufügen
 function addWebseitenSection(sectionType) {
     if (sectionType === 'opening-hours' && typeof OpeningHours === 'undefined') {
-        throw new Error('Die Öffnungszeiten-Funktion wurde nicht geladen. Bitte webseite/opening-hours.js auf dem Server prüfen und den Editor neu laden.');
+        throw new Error('Die Öffnungszeiten-Funktion wurde nicht geladen. Bitte scripts/opening-hours.js auf dem Server prüfen und den Editor neu laden.');
     }
     const newSection = sectionType === 'opening-hours'
         ? {

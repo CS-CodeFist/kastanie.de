@@ -76,7 +76,7 @@ const ApartmentsEditor = (() => {
         return `
             <div class="webseiten-section" data-index="${index}">
                 <div class="section-header" style="display: flex; align-items: center;">
-                    <button type="button" class="drag-icon" style="margin-left: 0.5em; margin-right: 0; order: 2; align-self: center;">☰</button>
+                    <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
                     <input type="text" value="${section.menutitel || ''}" placeholder="Menütitel" data-field="menutitel">
                     <button type="button" class="toggle-section" aria-expanded="false" aria-label="Details anzeigen"><span class="toggle-icon" aria-hidden="true">▶</span></button>
                 </div>
