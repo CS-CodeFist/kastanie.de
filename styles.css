@@ -2,7 +2,7 @@
     color-scheme: light;
     --forest: #7ea12c;
     --moss: #607d22;
-    --cream: #dfcb97;
+    --cream: #E1DBD1;
     --paper: #fffaf0;
     --ink: #291d11;
     --clay: #291d11;
@@ -12,8 +12,8 @@
     --section-moss-background: #607d22;
     --section-moss-text: #fffaf0;
     --section-clay-background: #291d11;
-    --section-clay-text: #dfcb97;
-    --section-cream-background: #dfcb97;
+    --section-clay-text: #E1DBD1;
+    --section-cream-background: #E1DBD1;
     --section-cream-text: #291d11;
 }
 
@@ -23,7 +23,7 @@
     --moss: #6d8c2b;
     --cream: #2d2922;
     --paper: #1a1a1a;
-    --ink: #dfcb97;
+    --ink: #E1DBD1;
     --clay: #e8d4a6;
     --line: rgba(232, 212, 166, 0.25);
     --section-forest-background: #53671e;
@@ -33,7 +33,7 @@
     --section-clay-background: #1e1b17;
     --section-clay-text: #e8d4a6;
     --section-cream-background: #2d2922;
-    --section-cream-text: #dfcb97;
+    --section-cream-text: #E1DBD1;
 }
 
 * {
@@ -52,6 +52,23 @@ body {
     font-family: "Noto Sans", sans-serif;
     font-weight: 300;
     line-height: 1.5;
+    text-wrap-style: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-wrap-style: balance;
+}
+
+a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 0.18em;
 }
 
 .site-header {
@@ -338,8 +355,8 @@ h2,
     box-sizing: border-box;
     width: calc(100% - 2rem);
     max-width: 30rem;
-    margin: 1rem 0 2.75rem;
-    padding: 1rem;
+    margin: 1rem 0 1.25rem;
+    padding: 0.5rem 0.75rem;
     background: var(--cream);
     background: color-mix(in srgb, var(--cream) 88%, transparent);
     border-radius: 4px;
@@ -357,7 +374,7 @@ h2,
 .map-preview {
     position: absolute;
     inset: 0;
-    background: url("bilder/map-light-kastanie.webp?v=20260920-menu") center / cover no-repeat;
+    background: url("bilder/map-light-kastanie.webp?v=20260921-coffee-land") center / cover no-repeat;
 }
 
 [data-theme="dark"] .map-preview {
@@ -1197,18 +1214,8 @@ h2,
 }
 
 .legal-page a {
-    color: var(--forest);
     font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
     text-decoration-thickness: 2px;
-    text-underline-offset: 0.18em;
-}
-
-.legal-page a:hover,
-.legal-page a:focus-visible {
-    color: var(--moss);
-    text-decoration-color: currentColor;
 }
 
 @media (max-width: 760px) {

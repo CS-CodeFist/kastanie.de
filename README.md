@@ -184,7 +184,7 @@ Die Bildbibliotheken sind getrennt:
 | Apartments | `bilder_apartments/` | Apartments-Sektionen |
 | Speisekarte | `bilder_menu/` | Menues, Gerichte und Infotext |
 
-Der Upload akzeptiert JPEG, PNG, GIF und WebP. Der Server korrigiert bei JPEG moegliche EXIF-Ausrichtung, skaliert die laengste Kante auf maximal 1600 Pixel, schneidet zentriert quadratisch zu und speichert als WebP mit 80 Prozent Qualitaet. Nicht mehr benoetigte Bilder werden in den Archiv-Unterordner der jeweiligen Bibliothek verschoben.
+Der Upload akzeptiert JPEG, PNG, GIF und WebP. Der Server korrigiert bei JPEG moegliche EXIF-Ausrichtung, skaliert die laengste Kante auf maximal 1600 Pixel und speichert als WebP mit 80 Prozent Qualitaet. Webseite und Apartments behalten dabei das Seitenverhaeltnis des Originals; nur Speisekartenbilder werden zentriert quadratisch zugeschnitten. Bestehende Bilder bleiben unveraendert; bereits zugeschnittene Bilder muessen bei Bedarf aus dem Original neu hochgeladen und im Editor neu ausgewaehlt werden. Die Bildflaechen auf der Website koennen durch `object-fit: cover` weiterhin einen Ausschnitt zeigen. Nicht mehr benoetigte Bilder werden in den Archiv-Unterordner der jeweiligen Bibliothek verschoben.
 
 ## Archive und Vorlagen
 

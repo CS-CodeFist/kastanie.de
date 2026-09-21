@@ -231,7 +231,14 @@ final class WebsiteRenderer
         echo '<section id="' . self::escape($section['_id']) . '" class="content-section position-' . $position . $this->theme($section) . ($hasImage ? '' : ' no-image') . '"><div class="section-inner"><div class="section-copy">';
         echo '<' . $heading . '>' . self::escape(($section['titel'] ?? '') ?: (($section['menutitel'] ?? '') ?: 'Kastanie Moltzow')) . '</' . $heading . '>';
         foreach (['untertitel' => 'section-subtitle', 'text' => 'section-text'] as $key => $class) {
-            if (!empty($section[$key])) echo '<p class="' . $class . '">' . self::escape($section[$key]) . '</p>';
+            if (empty($section[$key])) continue;
+            $text = self::escape($section[$key]);
+            if ($key === 'text') {
+                $text = preg_replace_callback('/^((?:Telefon|Telefax):[ \t]*)(\+?[0-9][0-9() \t]*[0-9])(?=\r?$)/m', function ($match) {
+                    return $match[1] . str_replace([' ', "\t"], '&#160;', $match[2]);
+                }, $text);
+            }
+            echo '<p class="' . $class . '">' . $text . '</p>';
         }
         $href = self::LINKS[$section['buttonLink'] ?? ''] ?? null;
         if (!empty($section['buttonLabel']) && $href) {
@@ -251,7 +258,7 @@ final class WebsiteRenderer
 
     private function map()
     {
-        echo '<div class="section-image section-map-placeholder" data-location-map data-latitude="' . self::LOCATION[0] . '" data-longitude="' . self::LOCATION[1] . '"><div class="map-preview-area"><div class="map-preview" role="img" aria-label="Kartenansicht der Umgebung von Kastanie Moltzow"></div><div class="map-preview-attribution"><a href="https://openfreemap.org/">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></div></div><div class="map-consent"><p>Beim Laden stimmen Sie der Übermittlung Ihrer IP-Adresse und Verbindungsdaten an OpenFreeMap zu.</p><a href="datenschutz.php#openstreetmap">Datenschutz</a><p role="status"></p><div class="map-consent-actions"><button type="button" class="section-button primary" disabled>Karte laden</button></div><noscript>Zum Laden der interaktiven Karte ist JavaScript erforderlich.</noscript></div><div class="section-map-canvas" aria-label="Karte: Kastanie Moltzow, Warener Strasse 3" hidden></div><button type="button" class="map-close" title="Karte schliessen und Freigabe widerrufen" aria-label="Karte schliessen und Freigabe widerrufen" hidden>&times;</button></div>';
+        echo '<div class="section-image section-map-placeholder" data-location-map data-latitude="' . self::LOCATION[0] . '" data-longitude="' . self::LOCATION[1] . '"><div class="map-preview-area"><div class="map-preview" role="img" aria-label="Kartenansicht der Umgebung von Kastanie Moltzow"></div><div class="map-preview-attribution"><a href="https://openfreemap.org/">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></div></div><div class="map-consent"><div class="map-consent-actions"><button type="button" class="section-button primary" disabled>Karte laden</button></div><p>Sie stimmen der Übermittlung Ihrer Verbindungsdaten an OpenFreeMap zu. (<a href="datenschutz.php#openstreetmap">Datenschutz</a>)</p><p role="status"></p><noscript>Zum Laden der interaktiven Karte ist JavaScript erforderlich.</noscript></div><div class="section-map-canvas" aria-label="Karte: Kastanie Moltzow, Warener Strasse 3" hidden></div><button type="button" class="map-close" title="Karte schliessen und Freigabe widerrufen" aria-label="Karte schliessen und Freigabe widerrufen" hidden>&times;</button></div>';
     }
 
     private function hours($section, $heading)

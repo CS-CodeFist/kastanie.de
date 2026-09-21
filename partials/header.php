@@ -21,13 +21,14 @@ if (preg_match('/\A(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:]+\])(?::[0-9]{
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
     <?php if (isset($baseHref)): ?>
     <base href="<?= htmlspecialchars($baseHref, ENT_QUOTES, 'UTF-8') ?>">
     <?php endif; ?>
     <meta name="description" content="<?= htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8') ?>">
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
     <link rel="canonical" href="<?= htmlspecialchars($pageUrl, ENT_QUOTES, 'UTF-8') ?>">
-    <meta name="theme-color" content="#dfcb97">
+    <meta name="theme-color" content="#E1DBD1">
     <meta name="application-name" content="Kastanie Moltzow">
     <meta name="apple-mobile-web-app-title" content="Kastanie">
     <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
@@ -64,10 +65,10 @@ if (preg_match('/\A(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:]+\])(?::[0-9]{
             if (savedMode === 'dark' || savedMode === 'light') initialMode = savedMode;
         } catch (error) {}
         document.documentElement.dataset.theme = initialMode;
-        document.querySelector('meta[name="theme-color"]').content = initialMode === 'dark' ? '#2d2922' : '#dfcb97';
+        document.querySelector('meta[name="theme-color"]').content = initialMode === 'dark' ? '#2d2922' : '#E1DBD1';
     </script>
     <link href="vendor/fonts/fonts.css?v=20260921-local" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260920-theme-toggle">
+    <link rel="stylesheet" href="styles.css?v=20260921-coffee-land">
     <?php if (isset($seasonPage)): ?>
     <link rel="stylesheet" href="seasons/seasons.css?v=20260919-hidden-test">
     <?php endif; ?>

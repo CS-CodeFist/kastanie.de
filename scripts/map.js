@@ -1,7 +1,7 @@
 (() => {
     const assetBase = new URL('../vendor/', document.currentScript.src);
     const darkStyleURL = new URL('map-dark.json?v=20260920-brown-land', document.currentScript.src).href;
-    const lightStyleURL = new URL('map-light.json?v=20260920-menu', document.currentScript.src).href;
+    const lightStyleURL = new URL('map-light.json?v=20260921-coffee-land', document.currentScript.src).href;
     const markerURL = new URL('../bilder/kastanie-logo.png', document.currentScript.src).href;
     let libraryPromise;
 

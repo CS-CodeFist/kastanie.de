@@ -108,6 +108,23 @@ body {
     font-style: normal;
     font-variation-settings: "wdth" 100;
     background-color: var(--body-background);
+    text-wrap-style: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-wrap-style: balance;
+}
+
+a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-underline-offset: 0.18em;
 }
 
 /* === Loader === */

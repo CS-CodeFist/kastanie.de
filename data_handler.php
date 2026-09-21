@@ -170,28 +170,31 @@ switch ($action) {
         
         imagecopyresampled($resized, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-        $side = intval(min($newWidth, $newHeight));
-        $srcX = intval(($newWidth - $side) / 2);
-        $srcY = intval(($newHeight - $side) / 2);
-        $square = imagecreatetruecolor($side, $side);
-        
-        // Transparenz für das quadratische Bild aktivieren
-        imagealphablending($square, false);
-        imagesavealpha($square, true);
-        
-        // Transparenten Hintergrund setzen
-        $transparent = imagecolorallocatealpha($square, 0, 0, 0, 127);
-        imagefill($square, 0, 0, $transparent);
-        
-        imagecopyresampled($square, $resized, 0, 0, $srcX, $srcY, $side, $side, $side, $side);
+        if ($library === 'menu') {
+            $side = intval(min($newWidth, $newHeight));
+            $srcX = intval(($newWidth - $side) / 2);
+            $srcY = intval(($newHeight - $side) / 2);
+            $square = imagecreatetruecolor($side, $side);
 
-        if (!imagewebp($square, $target, 80)) {
+            // Transparenz für das quadratische Bild aktivieren
+            imagealphablending($square, false);
+            imagesavealpha($square, true);
+
+            // Transparenten Hintergrund setzen
+            $transparent = imagecolorallocatealpha($square, 0, 0, 0, 127);
+            imagefill($square, 0, 0, $transparent);
+
+            imagecopyresampled($square, $resized, 0, 0, $srcX, $srcY, $side, $side, $side, $side);
+            imagedestroy($resized);
+            $resized = $square;
+        }
+
+        if (!imagewebp($resized, $target, 80)) {
             respondWithError('Bild konnte nicht gespeichert werden.');
         }
 
         imagedestroy($srcImage);
         imagedestroy($resized);
-        imagedestroy($square);
 
         echo json_encode(['success' => true, 'filename' => $filename]);
         break;
