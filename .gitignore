@@ -1,3 +1,5 @@
 credentials.local.php
 site_credentials.local.php
 instagram_credentials.local.php
+/bilder/cache/*
+!/bilder/cache/.htaccess

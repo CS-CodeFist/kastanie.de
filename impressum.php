@@ -9,8 +9,8 @@ require __DIR__ . '/partials/header.php';
             <p class="eyebrow">Rechtliche Hinweise</p>
             <h1>Impressum</h1>
             <section>
-                <h2>Angaben gemaess Paragraph 5 TMG</h2>
-                <p>Kastanie<br>Bistro Cafe Apartment<br>Warener Strasse 3<br>17194 Moltzow</p>
+                <h2>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h2>
+                <p>Betreiber: Sebastian Giese<br>Kastanie<br>Bistro Cafe Apartment<br>Warener Straße 3<br>17194 Moltzow</p>
             </section>
             <section>
                 <h2>Kontakt</h2>
@@ -18,13 +18,20 @@ require __DIR__ . '/partials/header.php';
                 Telefax: +49 (0) 39933 736 022<br>
                 E-Mail: <a href="mailto:info@bistro-kastanie.de">info@bistro-kastanie.de</a></p>
             </section>
-            <section>
-                <h2>Umsatzsteuer-ID</h2>
-                <p>Umsatzsteuer-Identifikationsnummer gemaess Paragraph 27a Umsatzsteuergesetz: 075/224/06680</p>
-            </section>
+            <?php
+            /*
+             * Vor Veröffentlichung prüfen und gegebenenfalls ergänzen:
+             * - Bei erlaubnispflichtigem Betrieb: zuständige Aufsichtsbehörde
+             *   laut Erlaubnis mit Name, Anschrift und Website (§ 5 Abs. 1 Nr. 3 DDG).
+             * - Rechtsform und gegebenenfalls Registergericht, Registerart und
+             *   Registernummer bestätigen; bei juristischen Personen Vertretungsberechtigte nennen.
+             * - Falls erteilt: USt-IdNr. nach § 27a UStG oder Wirtschafts-Identifikationsnummer
+             *   nach § 139c AO ergänzen. Keine normale Steuernummer veröffentlichen.
+             */
+            ?>
             <section>
                 <h2>Verbraucherstreitbeilegung</h2>
-                <p>Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+                <p>Hinweis gemäß § 36 Verbraucherstreitbeilegungsgesetz (VSBG): Wir sind weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
             </section>
         </article>
     </main>

@@ -66,9 +66,7 @@ if (preg_match('/\A(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:]+\])(?::[0-9]{
         document.documentElement.dataset.theme = initialMode;
         document.querySelector('meta[name="theme-color"]').content = initialMode === 'dark' ? '#2d2922' : '#dfcb97';
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Handlee&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap" rel="stylesheet">
+    <link href="vendor/fonts/fonts.css?v=20260921-local" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=20260920-theme-toggle">
     <?php if (isset($seasonPage)): ?>
     <link rel="stylesheet" href="seasons/seasons.css?v=20260919-hidden-test">

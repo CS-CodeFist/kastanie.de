@@ -28,6 +28,14 @@ Base64-Bilder bleiben fuer Editor und Archive unveraendert im JSON. Der PHP-Rend
 
 Die oeffentliche Apartments-Adresse bleibt `/apartments/`. `.htaccess` leitet auch bisherige HTML-Links und direkte Aufrufe von `apartments.php` dorthin weiter. Bei der Umstellung `apartments.php` und den gemeinsamen Header zuerst hochladen, danach `.htaccess` aktualisieren und die alte `apartments.html` auf dem Server entfernen.
 
+## Lokale Schriftarten und Bibliotheken
+
+Oeffentliche Seiten laden Handlee und Noto Sans ueber `vendor/fonts/fonts.css`. Handlee ist regulaer, Noto Sans als variable Schrift mit Gewichten 100-900 in normaler und kursiver Form vorhanden. Die 17 WOFF2-Dateien enthalten die von Google Fonts bereitgestellten Sprachbereiche; `unicode-range` und `font-display: swap` bleiben erhalten. Quelle ist die Google-Fonts-CSS-API fuer diese Familien, Download am 21.09.2026; die Originaldateinamen enthalten die Font-Version. Beide SIL-OFL-Lizenzen liegen im selben Verzeichnis. Es gibt keine externe Font-Einbindung oder Google-Preconnects mehr.
+
+Handlebars 4.7.8 liegt unter `vendor/handlebars/handlebars-4.7.8.min.js`, SortableJS 1.15.0 unter `vendor/sortablejs/Sortable-1.15.0.min.js`. Die fertigen Originaldateien und MIT-Lizenzen stammen aus den gleichnamigen npm-Paketen, heruntergeladen ueber jsDelivr. Speisekarte und Editor verwenden ausschliesslich die lokalen Dateien; die Bibliotheksversionen wurden nicht geaendert. Updates erfolgen manuell samt Lizenzdateien und anschliessender Funktionspruefung, ohne Build.
+
+**Deployment:** Zuerst die vollstaendigen neuen Ordner `vendor/fonts/`, `vendor/handlebars/` und `vendor/sortablejs/` inklusive Lizenzen hochladen, danach `partials/header.php`, `speisekarte.html`, `editor.php` und `datenschutz.php`. Vorhandene `vendor/leaflet/`- und `vendor/maplibre/`-Dateien behalten. Instagram-Medien werden weiterhin extern geladen; OpenFreeMap-Kartendaten weiterhin erst nach Freigabe. Diese Umstellung macht daher nicht die gesamte Website frei von externen Anfragen.
+
 ## Metadaten und Icons
 
 Der gemeinsame PHP-Header erzeugt `og:image` und `twitter:image` aus dem aktuellen HTTP-/HTTPS-Protokoll, dem validierten Host und dem Installationsverzeichnis (`SCRIPT_NAME`). Damit ist das Vorschaubild auch auf Testdomains und in Unterordnern erreichbar. Canonical, `og:url` und Restaurant-Identitaet bleiben auf der Hauptdomain. Nicht vertrauenswuerdige Forwarded-Header werden nicht ausgewertet; bei HTTPS-Terminierung an einem Reverse Proxy muss der Server HTTPS korrekt an PHP melden. Die eigenstaendige HTML-Speisekarte behaelt ihre festen Bild-URLs. Messenger koennen bereits erzeugte Linkvorschauen zwischenspeichern.

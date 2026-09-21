@@ -13,7 +13,7 @@ final class WebsiteRenderer
     private const LINKS = [
         'speisekarte' => 'speisekarte',
         'apartments' => 'apartments',
-        'email' => 'mailto:info@kastanie-moltzow.de',
+        'email' => 'mailto:info@bistro-kastanie.de',
         'telefon' => 'tel:+4939933736022',
         'route' => 'https://www.google.com/maps/dir/?api=1&destination=Warener%20Stra%C3%9Fe%203%2C%2017194%20Moltzow'
     ];

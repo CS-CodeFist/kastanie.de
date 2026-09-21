@@ -330,8 +330,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	</script>
 
 	<!-- SCRIPTS -->
-	<script src="https://cdn.jsdelivr.net/npm/handlebars@4.7.8/dist/handlebars.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+	<script src="vendor/handlebars/handlebars-4.7.8.min.js"></script>
+	<script src="vendor/sortablejs/Sortable-1.15.0.min.js"></script>
 	
 	<!-- EDITOR MODULES (Reihenfolge ist wichtig!) -->
 	<script src="editor/editor_core.js?v=20250728b"></script>
