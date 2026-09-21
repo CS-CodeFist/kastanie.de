@@ -3,8 +3,6 @@
     const darkStyleURL = new URL('map-dark.json?v=20260920-brown-land', document.currentScript.src).href;
     const lightStyleURL = new URL('map-light.json?v=20260920-menu', document.currentScript.src).href;
     const markerURL = new URL('../bilder/kastanie-logo.png', document.currentScript.src).href;
-    const location = [53.631393, 12.569870];
-    const activeMaps = new Set();
     let libraryPromise;
 
     function loadLibrary() {
@@ -48,48 +46,18 @@
         return libraryPromise;
     }
 
-    function create() {
-        const host = document.createElement('div');
-        host.className = 'section-image section-map-placeholder';
-        const preview = document.createElement('div');
-        preview.className = 'map-preview';
-        preview.setAttribute('role', 'img');
-        preview.setAttribute('aria-label', 'Kartenansicht der Umgebung von Kastanie Moltzow');
-        const attribution = document.createElement('div');
-        attribution.className = 'map-preview-attribution';
-        attribution.innerHTML = '<a href="https://openfreemap.org/">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-        const previewArea = document.createElement('div');
-        previewArea.className = 'map-preview-area';
-        previewArea.append(preview, attribution);
-        const prompt = document.createElement('div');
-        prompt.className = 'map-consent';
-        const notice = document.createElement('p');
-        notice.textContent = 'Beim Laden stimmen Sie der Übermittlung Ihrer IP-Adresse und Verbindungsdaten an OpenFreeMap zu.';
-        const privacy = document.createElement('a');
-        privacy.href = 'datenschutz.php#openstreetmap';
-        privacy.textContent = 'Datenschutz';
-        const status = document.createElement('p');
-        status.setAttribute('role', 'status');
-        const load = document.createElement('button');
-        load.type = 'button';
-        load.className = 'section-button primary';
-        load.textContent = 'Karte laden';
-        const actions = document.createElement('div');
-        actions.className = 'map-consent-actions';
-        actions.append(load);
-        prompt.append(notice, privacy, status, actions);
-        const canvas = document.createElement('div');
-        canvas.className = 'section-map-canvas';
-        canvas.setAttribute('aria-label', 'Karte: Kastanie Moltzow, Warener Strasse 3');
-        canvas.hidden = true;
-        const close = document.createElement('button');
-        close.type = 'button';
-        close.className = 'map-close';
-        close.textContent = '\u00d7';
-        close.title = 'Karte schliessen und Freigabe widerrufen';
-        close.setAttribute('aria-label', close.title);
-        close.hidden = true;
-        host.append(previewArea, prompt, canvas, close);
+    const initialized = new WeakSet();
+
+    function enhance(host) {
+        if (initialized.has(host)) return host;
+        initialized.add(host);
+        const location = [Number(host.dataset.latitude), Number(host.dataset.longitude)];
+        const prompt = host.querySelector('.map-consent');
+        const status = prompt.querySelector('[role="status"]');
+        const load = prompt.querySelector('button');
+        const canvas = host.querySelector('.section-map-canvas');
+        const close = host.querySelector('.map-close');
+        load.disabled = false;
         let map;
         let resizeObserver;
         let themeObserver;
@@ -107,7 +75,6 @@
                 canvas.replaceChildren();
             }
             map = null;
-            activeMaps.delete(reset);
             canvas.hidden = true;
             close.hidden = true;
             prompt.hidden = false;
@@ -121,7 +88,6 @@
         close.addEventListener('click', () => reset('', true));
         load.addEventListener('click', async () => {
             const currentAttempt = ++attempt;
-            activeMaps.add(reset);
             load.disabled = true;
             close.hidden = false;
             status.textContent = 'Karte wird geladen ...';
@@ -203,7 +169,6 @@
     }
 
     window.LocationMap = {
-        create,
-        disposeAll: () => [...activeMaps].forEach(reset => reset())
+        enhance
     };
 })();

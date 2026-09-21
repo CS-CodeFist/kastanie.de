@@ -1,64 +1,13 @@
 const content = document.getElementById('content');
 const navigation = document.getElementById('navigation');
 const navigationItems = navigation?.querySelector('.navigation-items');
-const contentSource = document.body.dataset.contentSource || 'webseite/data.json';
-const sectionButtonLinks = {
-    speisekarte: 'speisekarte',
-    apartments: 'apartments',
-    email: 'mailto:info@kastanie-moltzow.de',
-    telefon: 'tel:+4939933736022',
-    route: 'https://www.google.com/maps/dir/?api=1&destination=Warener%20Stra%C3%9Fe%203%2C%2017194%20Moltzow'
-};
-const imagePositions = ['links', 'rechts', 'zentriert'];
 const showInstagramCommentPreview = true;
 const instagramCommentPreview = [
     { username: 'kastanie.gast', text: 'Das sieht wunderbar aus.' },
     { username: 'moltzow.entdeckt', text: 'Wir kommen bald wieder vorbei.' }
 ];
 
-function normalizeImagePosition(position) {
-    return imagePositions.includes(position) ? position : 'zentriert';
-}
-
-function createSlug(value, index) {
-    const normalized = String(value || `sektion-${index + 1}`)
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-
-    return normalized || `sektion-${index + 1}`;
-}
-
-function createInstagramFeedSection(section, index) {
-    const sectionId = createSlug(section.menutitel || section.titel || 'instagram', index);
-    const element = document.createElement('section');
-    element.id = sectionId;
-    element.className = 'instagram-section instagram-feed-section';
-    if (section.theme && section.theme !== 'standard') element.classList.add(`theme-${section.theme}`);
-
-    const inner = document.createElement('div');
-    inner.className = 'section-inner';
-
-    if (section.titel) {
-        const heading = document.createElement('h2');
-        heading.textContent = section.titel;
-        inner.appendChild(heading);
-    }
-
-    const feed = document.createElement('div');
-    feed.className = 'instagram-feed';
-    feed.setAttribute('aria-live', 'polite');
-    feed.innerHTML = '<div class="instagram-feed-loader" role="status"><span class="instagram-feed-spinner" aria-hidden="true"></span><span>Instagram-Beitraege werden geladen ...</span></div>';
-    inner.appendChild(feed);
-    element.appendChild(inner);
-
-    return { element, sectionId };
-}
-
 let openingHoursRefreshers = [];
-let openingHoursTimer;
 
 function refreshOpeningHours() {
     openingHoursRefreshers.forEach(refresh => refresh());
@@ -68,34 +17,14 @@ document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshOpeningHours();
 });
 
-function createOpeningHoursSection(section, index) {
-    const sectionId = index === 0 ? 'start' : createSlug(section.menutitel || 'oeffnungszeiten', index);
-    const element = document.createElement('section');
-    element.id = sectionId;
-    element.className = `content-section opening-hours-section theme-${section.theme || 'moss'}`;
-    const inner = document.createElement('div');
-    inner.className = 'section-inner';
-    const copy = document.createElement('div');
-    copy.className = 'hours-copy';
-    const eyebrow = document.createElement('p');
-    eyebrow.className = 'eyebrow';
-    eyebrow.textContent = section.menutitel || 'Öffnungszeiten';
-    const heading = document.createElement('h2');
-    heading.textContent = section.titel || 'Öffnungszeiten';
-    const status = document.createElement('p');
-    status.className = 'hours-status';
-    const detail = document.createElement('p');
-    detail.className = 'hours-detail';
-    const note = document.createElement('p');
-    note.className = 'hours-note';
-    copy.append(eyebrow, heading, status, detail, note);
-    const week = document.createElement('dl');
-    week.className = 'hours-week';
-    week.setAttribute('aria-label', 'Öffnungszeiten der nächsten sieben Tage');
-    inner.append(copy, week);
-    element.appendChild(inner);
+function setupOpeningHours(element) {
+    const config = JSON.parse(element.dataset.openingHours);
+    const status = element.querySelector('.hours-status');
+    const detail = element.querySelector('.hours-detail');
+    const note = element.querySelector('.hours-note');
+    const week = element.querySelector('.hours-week');
     const refresh = () => {
-        const state = OpeningHours.snapshot(section.openingHours);
+        const state = OpeningHours.snapshot(config);
         if (!state) {
             status.textContent = 'Öffnungszeiten derzeit nicht verfügbar';
             detail.textContent = '';
@@ -139,70 +68,6 @@ function createOpeningHoursSection(section, index) {
     };
     refresh();
     openingHoursRefreshers.push(refresh);
-    return { element, sectionId };
-}
-
-function createSection(section, index) {
-    if (section.type === 'opening-hours') return createOpeningHoursSection(section, index);
-    if (section.type === 'instagram-feed') return createInstagramFeedSection(section, index);
-
-    const sectionId = index === 0 ? 'start' : createSlug(section.menutitel, index);
-    const element = document.createElement('section');
-    const position = normalizeImagePosition(section.position);
-    const isMap = ['openstreetmap', 'apple-map'].includes(section.mediaType);
-    const hasImage = isMap || Boolean(section.image);
-
-    element.id = sectionId;
-    const positionClass = position;
-    element.className = `content-section position-${positionClass}`;
-    if (section.theme && section.theme !== 'standard') element.classList.add(`theme-${section.theme}`);
-    if (!hasImage) element.classList.add('no-image');
-
-    const inner = document.createElement('div');
-    inner.className = 'section-inner';
-
-    const copy = document.createElement('div');
-    copy.className = 'section-copy';
-
-    const heading = document.createElement('h2');
-    heading.textContent = section.titel || section.menutitel || 'Kastanie Moltzow';
-    copy.appendChild(heading);
-
-    if (section.untertitel) {
-        const subtitle = document.createElement('p');
-        subtitle.className = 'section-subtitle';
-        subtitle.textContent = section.untertitel;
-        copy.appendChild(subtitle);
-    }
-
-    if (section.text) {
-        const text = document.createElement('p');
-        text.className = 'section-text';
-        text.textContent = section.text;
-        copy.appendChild(text);
-    }
-
-    const buttonHref = sectionButtonLinks[section.buttonLink];
-    if (section.buttonLabel && buttonHref) {
-        const button = document.createElement('a');
-        button.className = `section-button ${section.buttonTheme === 'secondary' ? 'secondary' : 'primary'}`;
-        button.href = buttonHref;
-        button.textContent = section.buttonLabel;
-        copy.appendChild(button);
-    }
-
-    const image = isMap ? LocationMap.create() : document.createElement('div');
-    if (!isMap) {
-        image.className = 'section-image';
-        if (hasImage) {
-            image.style.backgroundImage = `url("${section.image.replace(/"/g, '\\"')}")`;
-        }
-    }
-
-    inner.appendChild(copy);
-    if (hasImage) inner.appendChild(image);
-    element.appendChild(inner);
-    return { element, sectionId };
 }
 
 function formatInstagramDate(timestamp) {
@@ -342,6 +207,9 @@ function renderInstagramPosts(feed, posts) {
 async function loadInstagramFeed() {
     const feeds = [...document.querySelectorAll('.instagram-feed')];
     if (feeds.length === 0) return;
+    feeds.forEach(feed => {
+        feed.innerHTML = '<div class="instagram-feed-loader" role="status"><span class="instagram-feed-spinner" aria-hidden="true"></span><span>Instagram-Beitraege werden geladen ...</span></div>';
+    });
 
     try {
         const response = await fetch('instagram_feed.php?limit=3');
@@ -360,7 +228,7 @@ async function loadInstagramFeed() {
 }
 
 function setupNavigationHighlighting() {
-    const links = [...navigationItems.querySelectorAll('a[href^="#"]')];
+    const links = [...navigationItems.querySelectorAll('a[data-section-link]')];
     const sections = [...content.querySelectorAll('section')].filter((section) =>
         links.some((link) => link.hash.slice(1) === section.id)
     );
@@ -444,45 +312,8 @@ function setupNavigationHighlighting() {
     setActiveByScroll();
 }
 
-function renderWebsite(data) {
-    LocationMap.disposeAll();
-    clearInterval(openingHoursTimer);
-    openingHoursRefreshers = [];
-    const sections = Array.isArray(data.webseite) ? data.webseite : [];
-    content.replaceChildren();
-    navigationItems.replaceChildren();
-
-    if (sections.length === 0) {
-        content.innerHTML = '<div class="load-error">Es sind noch keine Inhalte angelegt.</div>';
-        return;
-    }
-
-    sections.forEach((section, index) => {
-        const { element, sectionId } = createSection(section, index);
-        content.appendChild(element);
-
-        if (!section.menutitel || section.showInMenu === false) return;
-
-        const link = document.createElement('a');
-        link.href = `#${sectionId}`;
-        link.textContent = section.menutitel;
-        navigationItems.appendChild(link);
-    });
-
-    if (openingHoursRefreshers.length) openingHoursTimer = setInterval(refreshOpeningHours, 60000);
-    if (sections.some(section => section.type === 'instagram-feed')) loadInstagramFeed();
-    setupNavigationHighlighting();
-}
-
-async function loadWebsite() {
-    try {
-        const response = await fetch(`${contentSource}?timestamp=${Date.now()}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        renderWebsite(await response.json());
-    } catch (error) {
-        console.error('Webseiten-Inhalte konnten nicht geladen werden:', error);
-        content.innerHTML = '<div class="load-error">Die Inhalte konnten gerade nicht geladen werden.</div>';
-    }
-}
-
-loadWebsite();
+document.querySelectorAll('[data-opening-hours]').forEach(setupOpeningHours);
+document.querySelectorAll('[data-location-map]').forEach(host => LocationMap.enhance(host));
+if (openingHoursRefreshers.length) setInterval(refreshOpeningHours, 60000);
+loadInstagramFeed();
+if (navigationItems) setupNavigationHighlighting();
