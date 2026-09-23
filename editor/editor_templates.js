@@ -1,8 +1,11 @@
 // ===== EDITOR TEMPLATES - Template und Archiv-Management =====
 
+let templateLoadRequest = 0;
+let archiveListRequest = 0;
+
 // ===== TEMPLATE-LADEN =====
 // Lädt Templates und Archiv-Dropdown
-async function loadTemplates() {
+async function loadTemplates(selectedTemplate = document.getElementById("vorlagen").value || "__current") {
 	const select = document.getElementById("vorlagen");
 	const archivSelect = document.getElementById("archivSelect");
 	let templates = [];
@@ -28,6 +31,7 @@ async function loadTemplates() {
 	dividerOption.disabled = true;
 	select.appendChild(dividerOption);
 
+	const finishLoading = EditorTabs.beginLoading('speisekarte');
 	try {
 		const res = await fetch("data_handler.php", {
 			method: "POST",
@@ -42,6 +46,8 @@ async function loadTemplates() {
 		if (!Array.isArray(templates)) throw new Error("Ungültige Vorlagenliste");
 	} catch (error) {
 		console.error("Vorlagen konnten nicht geladen werden:", error);
+	} finally {
+		finishLoading();
 	}
 
 	// Templates hinzufügen
@@ -53,13 +59,14 @@ async function loadTemplates() {
 		select.insertAdjacentHTML('beforeend', templateOption);
 	});
 
-	select.addEventListener("change", async () => {
+	select.value = templates.includes(selectedTemplate) ? selectedTemplate : "__current";
+	select.onchange = async () => {
 		const selected = select.value;
 		if (!selected) return;
 		await loadSelectedTemplate(selected);
-	});
+	};
 
-	archivSelect.addEventListener("change", async function() {
+	archivSelect.onchange = async function() {
 		const file = this.value;
 		if (!file) return;
 
@@ -74,13 +81,18 @@ async function loadTemplates() {
 			return;
 		}
 
+		const requestId = ++templateLoadRequest;
+		const finishLoading = EditorTabs.beginLoading('speisekarte');
 		try {
 			const res = await fetch(`templates/archiv/${encodeURIComponent(file)}?t=${Date.now()}`);
 			if (!res.ok) throw new Error("❌ Archiv konnte nicht geladen werden.");
 
 			const json = await res.json();
+			if (requestId !== templateLoadRequest) return;
+			const selectedTemplate = document.getElementById("vorlagen").value;
+			if (selectedTemplate && selectedTemplate !== "__current") json.filename = selectedTemplate + ".json";
 			window.data = json;
-			EditorSPK.markMenuSaved();
+			EditorSPK.markMenuDirty();
 
 			if (typeof render === "function") {
 				render(); // WICHTIG: sicherstellen, dass render() sichtbar ist
@@ -89,12 +101,27 @@ async function loadTemplates() {
 			}
 		} catch (err) {
 			console.error("❌ Fehler beim Laden des Archiv-JSON:", err);
+		} finally {
+			finishLoading();
 		}
-	});
+	};
 
 }
 
+function templateSelectionForFilename(filename) {
+	if (typeof filename !== "string" || !filename.endsWith(".json") || filename === "data.json") return "__current";
+	const name = filename.slice(0, -5);
+	const option = Array.from(document.getElementById("vorlagen").options).find(option =>
+		!option.disabled && option.value !== "__current" && option.value.toLowerCase() === name.toLowerCase()
+	);
+	return option?.value || "__current";
+}
+
 async function loadSelectedTemplate(selected) {
+	const finishLoading = EditorTabs.beginLoading('speisekarte');
+	try {
+	const requestId = ++templateLoadRequest;
+	archiveListRequest++;
 	const archivSelect = document.getElementById("archivSelect");
 	archivSelect.innerHTML = '<option value="">– Archiv –</option>';
 	archivSelect.disabled = true;
@@ -109,14 +136,24 @@ async function loadSelectedTemplate(selected) {
 		throw new Error(isCurrentMenu ? "Aktuelle Menükarte konnte nicht geladen werden." : "Vorlage konnte nicht geladen werden.");
 	}
 
-	window.data = await res.json();
-	EditorSPK.markMenuSaved();
+	const json = await res.json();
+	if (requestId !== templateLoadRequest) return;
+	if (!isCurrentMenu) json.filename = selected + ".json";
+	window.data = json;
+	const selectedTemplate = isCurrentMenu ? templateSelectionForFilename(json.filename) : selected;
+	document.getElementById("vorlagen").value = selectedTemplate;
+	if (isCurrentMenu) EditorSPK.markMenuSaved();
+	else EditorSPK.markMenuDirty();
 	render();
-	await loadArchives(isCurrentMenu ? "data" : selected);
+	await loadArchives(selectedTemplate === "__current" ? "data" : selectedTemplate);
+	} finally {
+		finishLoading();
+	}
 }
 
 // Archivdateien für eine Vorlage laden
 async function loadArchives(templateName, includeAll = false) {
+	const requestId = ++archiveListRequest;
 	const archivSelect = document.getElementById("archivSelect");
 	archivSelect.innerHTML = "";
 
@@ -140,6 +177,7 @@ async function loadArchives(templateName, includeAll = false) {
 
 	archivSelect.disabled = true;
 
+	const finishLoading = EditorTabs.beginLoading('speisekarte');
 	try {
 		const res = await fetch("data_handler.php", {
 			method: "POST",
@@ -149,13 +187,15 @@ async function loadArchives(templateName, includeAll = false) {
 			body: `action=list_archives&template=${encodeURIComponent(templateName)}&all=${includeAll ? "1" : "0"}`
 		});
 
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
 		const response = await res.json();
+		if (requestId !== archiveListRequest) return;
 		const list = Array.isArray(response) ? response : response.archives;
 		const hasMore = !Array.isArray(response) && response.hasMore;
 		if (!Array.isArray(list) || list.length === 0) return;
 
 		list.forEach(filename => {
-			const match = filename.match(/_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/);
+			const match = filename.match(/_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})(?:_(\d+))?\.json$/);
 			let formattedDate;
 			if (match) {
 				const [, y, m, d, h, min] = match;
@@ -182,6 +222,8 @@ async function loadArchives(templateName, includeAll = false) {
 		archivSelect.disabled = false;
 	} catch (err) {
 		console.error("❌ Fehler beim Laden des Archivs:", err);
+	} finally {
+		finishLoading();
 	}
 }
 
@@ -219,6 +261,9 @@ function openSaveOverlay(existingTemplates = []) {
 	});
 
 	// Auswahl zurücksetzen
+	const selectedTemplate = document.getElementById("vorlagen").value;
+	const selectedFilename = selectedTemplate === "__current" ? "data.json" : selectedTemplate + ".json";
+	if (Array.from(select.options).some(option => option.value === selectedFilename)) select.value = selectedFilename;
 	document.getElementById("templateName").value = "";
 }
 
@@ -229,7 +274,12 @@ function closeSaveOverlay() {
 // Save-Auswahl auswerten
 async function confirmSaveJson() {
 	const select = document.getElementById("saveTargetSelect");
-	const filename = select.value;
+	let filename = select.value;
+	if (filename === "data.json") {
+		const sourceTemplate = templateSelectionForFilename(window.data.filename);
+		if (sourceTemplate !== "__current") filename = sourceTemplate + ".json";
+	}
+	const create = select.selectedOptions[0]?.dataset.newTemplate === "true";
 	const saveButton = document.getElementById("confirmSaveBtn");
 
 	if (!filename) {
@@ -249,6 +299,7 @@ async function confirmSaveJson() {
 			body: JSON.stringify({
 				action: "save_file",
 				filename,
+				create,
 				content: window.data
 			})
 		});
@@ -258,12 +309,18 @@ async function confirmSaveJson() {
 			throw new Error(result?.error || (response.ok ? "Ungültige Serverantwort" : `HTTP ${response.status}`));
 		}
 
+		const savedFilename = result.filename || filename;
+		const savedTemplate = savedFilename === "data.json" ? "__current" : savedFilename.replace(/\.json$/, "");
+		window.data = { ...window.data, filename: savedFilename };
+		if (select.selectedOptions[0]) delete select.selectedOptions[0].dataset.newTemplate;
 		EditorSPK.markMenuSaved();
-		if (filename === "data.json") {
+		await loadTemplates(savedTemplate);
+		await loadArchives(savedTemplate === "__current" ? "data" : savedTemplate);
+		if (savedFilename === "data.json") {
 			alert("✅ Aktueller Speiseplan wurde aktualisiert.");
 		} else {
-			const name = filename.replace(/\.json$/, "");
-			alert("✅ Vorlage gespeichert als \"" + name + "\"");
+			const name = savedFilename.replace(/\.json$/, "");
+			alert("✅ Vorlage \"" + name + "\" gespeichert und live geschaltet.");
 		}
 		closeSaveOverlay();
 	} catch (error) {
@@ -321,6 +378,11 @@ function initializeTemplateEventListeners() {
 			return;
 		}
 
+		if (!/^[\p{L}\p{N}][\p{L}\p{N} _().-]*$/u.test(nameRaw) || nameRaw.endsWith('.') || new TextEncoder().encode(nameRaw + '.json').length > 160) {
+			alert("Bitte einen Namen aus Buchstaben, Zahlen, Leerzeichen, Bindestrichen, Unterstrichen, Punkten oder Klammern verwenden, beginnend mit einem Buchstaben oder einer Zahl und ohne Punkt am Ende (maximal 155 UTF-8-Bytes).");
+			return;
+		}
+
 		const nameLower = nameRaw.toLowerCase();
 		const fullValue = nameLower + ".json";
 
@@ -332,13 +394,10 @@ function initializeTemplateEventListeners() {
 			}
 		}
 
-		// Neue Option mit Template einfügen
-		const newOptionHTML = EditorCore.renderTemplate("template-template-option", {
-			value: fullValue,
-			text: nameRaw
-		});
-		select.insertAdjacentHTML('beforeend', newOptionHTML);
-		select.value = fullValue;
+		const newOption = new Option(nameRaw, nameRaw + ".json");
+		newOption.dataset.newTemplate = "true";
+		select.add(newOption);
+		select.value = newOption.value;
 
 		input.value = "";
 	});

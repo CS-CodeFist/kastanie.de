@@ -33,7 +33,7 @@ final class WebsiteRenderer
             return;
         }
         foreach ($data['webseite'] as $section) {
-            if (!is_array($section)) continue;
+            if (!is_array($section) || ($section['active'] ?? true) === false) continue;
             $index = count($this->sections);
             $type = $section['type'] ?? '';
             $label = $section['menutitel'] ?? '';

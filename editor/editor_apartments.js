@@ -74,7 +74,7 @@ const ApartmentsEditor = (() => {
         ).join('');
 
         return `
-            <div class="webseiten-section" data-index="${index}">
+            <div class="webseiten-section${section.active === false ? ' is-inactive' : ''}" data-index="${index}">
                 <div class="section-header" style="display: flex; align-items: center;">
                     <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
                     <input type="text" value="${section.menutitel || ''}" placeholder="Menütitel" data-field="menutitel">
@@ -101,7 +101,10 @@ const ApartmentsEditor = (() => {
                             <label>Button-Link<select data-field="buttonLink">${buttonLinkSelect}</select></label>
                             ${renderButtonThemePicker(section.buttonTheme || 'primary')}
                         </div>
-                    <div class="button-right"><button type="button" class="delete-section">🗑️ Sektion löschen</button></div>
+                    <div class="button-right">
+                        <button type="button" class="toggle-section-visibility">${section.active === false ? 'Sektion einblenden' : 'Sektion ausblenden'}</button>
+                        <button type="button" class="delete-section">🗑️ Sektion löschen</button>
+                    </div>
                 </div>
             </div>`;
     }
@@ -114,6 +117,7 @@ const ApartmentsEditor = (() => {
     }
 
     async function loadData() {
+        const finishLoading = EditorTabs.beginLoading('apartments');
         try {
             const response = await fetch('apartments/data.json');
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -122,6 +126,8 @@ const ApartmentsEditor = (() => {
         } catch (error) {
             console.error('Apartments-Daten konnten nicht geladen werden:', error);
             apartmentsData = { webseite: [] };
+        } finally {
+            finishLoading();
         }
         normalizeSections();
         render();
@@ -131,6 +137,14 @@ const ApartmentsEditor = (() => {
         const index = Number(input.closest('.webseiten-section').dataset.index);
         const value = input.dataset.field === 'showInMenu' ? input.value === 'true' : input.value;
         if (apartmentsData.webseite[index]) apartmentsData.webseite[index][input.dataset.field] = value;
+    }
+
+    function toggleVisibility(button) {
+        const section = button.closest('.webseiten-section');
+        const item = apartmentsData.webseite[Number(section.dataset.index)];
+        item.active = item.active === false;
+        section.classList.toggle('is-inactive', !item.active);
+        button.textContent = item.active ? 'Sektion ausblenden' : 'Sektion einblenden';
     }
 
     function updateTheme(button) {
@@ -222,6 +236,7 @@ const ApartmentsEditor = (() => {
     function setupSortable() {
         const container = document.getElementById('apartments-editor');
         if (!container || !window.Sortable) return;
+        Sortable.get(container)?.destroy();
         new Sortable(container, {
             handle: '.drag-icon',
             animation: 150,
@@ -239,6 +254,7 @@ const ApartmentsEditor = (() => {
         if (!select) return;
         select.innerHTML = '<option value="__current">Aktueller Stand</option><option value="" disabled>─────────</option>';
         select.disabled = true;
+        const finishLoading = EditorTabs.beginLoading('apartments');
         try {
             const response = await fetch('data_handler.php', {
                 method: 'POST',
@@ -257,6 +273,8 @@ const ApartmentsEditor = (() => {
             }
         } catch (error) {
             console.error('Apartments-Archive konnten nicht geladen werden:', error);
+        } finally {
+            finishLoading();
         }
     }
 
@@ -264,6 +282,7 @@ const ApartmentsEditor = (() => {
         const select = document.getElementById('apartmentsArchivSelect');
         if (!select?.value) return;
         if (select.value === '__current') return loadData();
+        const finishLoading = EditorTabs.beginLoading('apartments');
         try {
             const response = await fetch('data_handler.php', {
                 method: 'POST',
@@ -277,6 +296,8 @@ const ApartmentsEditor = (() => {
             alert(`Archiv "${select.value}" erfolgreich geladen`);
         } catch (error) {
             alert(`Archiv konnte nicht geladen werden: ${error.message}`);
+        } finally {
+            finishLoading();
         }
     }
 
@@ -328,6 +349,7 @@ const ApartmentsEditor = (() => {
             else if (event.target.closest('[data-section-position]')) updatePosition(event.target.closest('[data-section-position]'));
             else if (event.target.closest('.toggle-section')) toggleSection(event.target.closest('.toggle-section'));
             else if (event.target.matches('.image-thumb')) selectImage(event.target);
+            else if (event.target.matches('.toggle-section-visibility')) toggleVisibility(event.target);
             else if (event.target.matches('.delete-section')) deleteSection(event.target);
         });
         document.getElementById('addApartmentsSectionBtn')?.addEventListener('click', addSection);

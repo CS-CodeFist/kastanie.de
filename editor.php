@@ -15,7 +15,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>Kastanie Moltzow – Editor</title>
-	<link rel="stylesheet" href="editor/editor.css?20260920-menu" />
+	<link rel="stylesheet" href="editor/editor.css?v=20260923-tab-loaders" />
 </head>
 
 <body>
@@ -35,6 +35,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 		
 		<!-- Webseite Tab Content -->
 		<div id="webseite-tab" class="tab-content active">
+			<div class="tab-loader" role="status" hidden><div class="spinner" aria-hidden="true"></div><span>Webseite wird geladen...</span></div>
 			
 			<div id="webseiten-vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content:space-between;">
 				<div>
@@ -61,6 +62,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 		
 		<!-- Speisekarte Tab Content -->
 		<div id="speisekarte-tab" class="tab-content">
+			<div class="tab-loader" role="status" hidden><div class="spinner" aria-hidden="true"></div><span>Speisekarte wird geladen...</span></div>
 
 			<div id="vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content:space-between;">
 				<div>
@@ -93,6 +95,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 		<!-- Apartments Tab Content -->
 		<div id="apartments-tab" class="tab-content">
+			<div class="tab-loader" role="status" hidden><div class="spinner" aria-hidden="true"></div><span>Apartments werden geladen...</span></div>
 			<div id="apartments-vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content: space-between;">
 				<div>
 					<label for="apartmentsArchivSelect">Archiv:</label>
@@ -335,13 +338,13 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	
 	<!-- EDITOR MODULES (Reihenfolge ist wichtig!) -->
 	<script src="editor/editor_core.js?v=20250728b"></script>
-	<script src="editor/editor_tabs.js?v=20260919-page-seasons"></script>
-	<script src="editor/editor_spk.js?v=20260904e"></script>
+	<script src="editor/editor_tabs.js?v=20260923-tab-loaders"></script>
+	<script src="editor/editor_spk.js?v=20260923-sortable-noop"></script>
 	<script src="scripts/opening-hours.js?v=20260920-shared-scripts"></script>
-	<script src="editor/editor_webseite.js?v=20260920-section-controls"></script>
-	<script src="editor/editor_apartments.js?v=20260920-section-controls"></script>
+	<script src="editor/editor_webseite.js?v=20260923-tab-loaders"></script>
+	<script src="editor/editor_apartments.js?v=20260923-tab-loaders"></script>
 	<script src="editor/editor_images.js?v=20260920-shared-map"></script>
-	<script src="editor/editor_templates.js?v=20260918a"></script>
+	<script src="editor/editor_templates.js?v=20260923-tab-loaders"></script>
 	<script src="editor/editor_seasons.js?v=20260919-apartments-options"></script>
 	
 	<!-- EDITOR MAIN (Koordiniert alle Module) -->

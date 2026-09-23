@@ -16,6 +16,12 @@ function respondWithError($message, $code = 500, $details = null) {
     exit;
 }
 
+function menuTemplateNameKey($name) {
+    return function_exists('mb_strtolower')
+        ? mb_strtolower($name, 'UTF-8')
+        : strtolower(strtr($name, ['Ä' => 'ä', 'Ö' => 'ö', 'Ü' => 'ü', 'ẞ' => 'ß']));
+}
+
 $input = ($_SERVER['CONTENT_TYPE'] ?? '') === 'application/json'
   ? json_decode(file_get_contents("php://input"), true)
   : $_POST;
@@ -218,55 +224,112 @@ switch ($action) {
         break;
 
     case 'save_file':
-        $filename = basename($input['filename'] ?? '');
+        $filename = $input['filename'] ?? '';
         $content = $input['content'] ?? null;
+        $create = ($input['create'] ?? false) === true;
 
-        if (!$filename || !$content) {
+        if (!is_string($filename) || !preg_match('/\A[\p{L}\p{N}][\p{L}\p{N} _().-]*\.json\z/u', $filename)
+            || strlen($filename) > 160 || !is_array($content) || !isset($content['content']) || !is_array($content['content'])) {
             respondWithError('Ungültiger Dateiname oder Inhalt', 400);
         }
 
+        $templateName = substr($filename, 0, -5);
+        if ($templateName !== trim($templateName) || substr($templateName, -1) === '.') {
+            respondWithError('Der Vorlagenname darf nicht mit Leerzeichen oder Punkt enden.', 400);
+        }
+        if (menuTemplateNameKey($templateName) === 'data' && ($create || $filename !== 'data.json')) {
+            respondWithError('Der Name "data" ist für die aktuelle Menükarte reserviert.', 409);
+        }
+
+        $templateDir = __DIR__ . '/templates/';
         $archiveDir = __DIR__ . '/templates/archiv/';
-        if (!is_dir($archiveDir)) mkdir($archiveDir, 0755, true);
+        if (!is_dir($archiveDir) && !mkdir($archiveDir, 0755, true) && !is_dir($archiveDir)) {
+            respondWithError('Archivverzeichnis konnte nicht erstellt werden.');
+        }
+
+        $saveLock = fopen($templateDir . '.save.lock', 'c');
+        if ($saveLock === false || !flock($saveLock, LOCK_EX)) {
+            respondWithError('Speisekarte konnte nicht zum Speichern gesperrt werden.');
+        }
 
         if ($filename === 'data.json') {
             $targetFile = __DIR__ . '/speisekarte/data.json';
-            $archivName = 'data_' . date('Y-m-d_H-i-s') . '.json';
         } else {
-            $templateDir = __DIR__ . '/templates/';
-            if (!is_dir($templateDir)) mkdir($templateDir, 0755, true);
-
+            $existingName = null;
+            foreach (glob($templateDir . '*.json') ?: [] as $file) {
+                if (menuTemplateNameKey(basename($file)) === menuTemplateNameKey($filename)) {
+                    if ($create) respondWithError('Eine Vorlage mit diesem Namen existiert bereits.', 409);
+                    if ($existingName !== null) respondWithError('Mehrere Vorlagen unterscheiden sich nur in der Schreibweise. Bitte Namen bereinigen.', 409);
+                    $existingName = basename($file);
+                }
+            }
+            if (!$create && $existingName === null) {
+                respondWithError('Vorlage nicht gefunden. Bitte als neue Vorlage anlegen.', 404);
+            }
+            $filename = $existingName ?? $filename;
+            $templateName = substr($filename, 0, -5);
             $targetFile = $templateDir . $filename;
-            $archivName = pathinfo($filename, PATHINFO_FILENAME) . '_' . date('Y-m-d_H-i-s') . '.json';
         }
 
+        $content = ['filename' => $filename] + $content;
         $json = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         if ($json === false) {
             respondWithError('Daten konnten nicht als JSON gespeichert werden.', 400);
         }
 
-        $tempFile = tempnam(dirname($targetFile), '.save-');
-        if ($tempFile === false || file_put_contents($tempFile, $json, LOCK_EX) === false) {
-            if ($tempFile !== false) unlink($tempFile);
-            respondWithError('Neue Datei konnte nicht geschrieben werden.');
+        $targets = [$templateName => $targetFile];
+        $targets['data'] = __DIR__ . '/speisekarte/data.json';
+        $prepared = [];
+        $committed = [];
+        try {
+            foreach ($targets as $name => $target) {
+                if (!is_dir(dirname($target)) || !is_writable(dirname($target)) || (file_exists($target) && !is_file($target))) {
+                    throw new RuntimeException('Speicherziel nicht beschreibbar: ' . $name);
+                }
+                $tempFile = tempnam(dirname($target), '.save-');
+                if ($tempFile === false) throw new RuntimeException('Neue Datei konnte nicht vorbereitet werden: ' . $name);
+                $prepared[$name] = ['target' => $target, 'temp' => $tempFile, 'archive' => null];
+                if (file_put_contents($tempFile, $json, LOCK_EX) !== strlen($json) || !chmod($tempFile, 0644)) {
+                    throw new RuntimeException('Neue Datei konnte nicht lesbar geschrieben werden: ' . $name);
+                }
+                if (file_exists($target)) {
+                    $timestamp = new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin'));
+                    $archivePrefix = $archiveDir . $name . '_' . $timestamp->format('Y-m-d_H-i-s');
+                    $sequence = (int) $timestamp->format('u');
+                    do {
+                        $archiveFile = $archivePrefix . '_' . sprintf('%06d', $sequence++) . '.json';
+                    } while (file_exists($archiveFile));
+                    if (!copy($target, $archiveFile)) {
+                        if (is_file($archiveFile)) unlink($archiveFile);
+                        throw new RuntimeException('Bestehende Datei konnte nicht archiviert werden: ' . $name);
+                    }
+                    $prepared[$name]['archive'] = $archiveFile;
+                    if (!chmod($archiveFile, 0644)) throw new RuntimeException('Archiv konnte nicht lesbar gesetzt werden: ' . $name);
+                }
+            }
+            foreach ($prepared as $name => $file) {
+                if (!rename($file['temp'], $file['target'])) throw new RuntimeException('Neue Datei konnte nicht übernommen werden: ' . $name);
+                $committed[] = $name;
+            }
+        } catch (Throwable $error) {
+            $rollbackFailed = false;
+            foreach (array_reverse($committed) as $name) {
+                $file = $prepared[$name];
+                if ($file['archive'] !== null) {
+                    if (!copy($file['archive'], $file['temp']) || !chmod($file['temp'], 0644) || !rename($file['temp'], $file['target'])) $rollbackFailed = true;
+                } elseif (!unlink($file['target'])) {
+                    $rollbackFailed = true;
+                }
+            }
+            foreach ($prepared as $file) {
+                if (is_file($file['temp'])) unlink($file['temp']);
+            }
+            respondWithError($error->getMessage() . ($rollbackFailed ? ' Rücksetzung unvollständig; bitte die gesicherten Archive prüfen.' : ' Speisekarte wurde nicht live geschaltet.'));
         }
 
-        $archiveFile = $archiveDir . $archivName;
-        if (file_exists($targetFile) && !rename($targetFile, $archiveFile)) {
-            unlink($tempFile);
-            respondWithError('Bestehende Datei konnte nicht archiviert werden.');
-        }
-        if (file_exists($archiveFile)) chmod($archiveFile, 0644);
-
-        if (!rename($tempFile, $targetFile)) {
-            if (file_exists($archiveFile)) rename($archiveFile, $targetFile);
-            unlink($tempFile);
-            respondWithError('Neue Datei konnte nicht übernommen werden.');
-        }
-        if (!chmod($targetFile, 0644)) {
-            respondWithError('Speisekarte wurde gespeichert, konnte aber nicht lesbar gesetzt werden. Bitte Dateirechte prüfen.');
-        }
-
-        echo json_encode(['success' => true]);
+        flock($saveLock, LOCK_UN);
+        fclose($saveLock);
+        echo json_encode(['success' => true, 'filename' => $filename, 'published' => true]);
         break;
 
     case 'list_templates':
@@ -296,14 +359,16 @@ switch ($action) {
             break;
         }
     
-        $pattern = $archiveDir . $template . '_*.json';
-        $files = glob($pattern);
+        $pattern = '/^' . preg_quote($template, '/') . '_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(?:_\d+)?\.json$/D';
+        $files = array_values(array_filter(glob($archiveDir . '*.json') ?: [], function ($file) use ($pattern) {
+            return preg_match($pattern, basename($file)) === 1;
+        }));
     
         // Sortieren nach Datum im Dateinamen (Format: template_YYYY-MM-DD_HH-MM-SS.json)
         usort($files, function ($a, $b) {
             $aBase = basename($a);
             $bBase = basename($b);
-            $pattern = '/_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})\.json$/';
+            $pattern = '/_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2}-\d{2})(?:_(\d+))?\.json$/';
     
             preg_match($pattern, $aBase, $matchA);
             preg_match($pattern, $bBase, $matchB);
@@ -311,7 +376,7 @@ switch ($action) {
             $timeA = isset($matchA[1], $matchA[2]) ? strtotime($matchA[1] . ' ' . str_replace('-', ':', $matchA[2])) : 0;
             $timeB = isset($matchB[1], $matchB[2]) ? strtotime($matchB[1] . ' ' . str_replace('-', ':', $matchB[2])) : 0;
     
-            return $timeB - $timeA; // Absteigend sortieren
+            return ($timeB <=> $timeA) ?: ((int) ($matchB[3] ?? 0) <=> (int) ($matchA[3] ?? 0));
         });
     
         $names = array_map('basename', $files);

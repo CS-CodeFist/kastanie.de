@@ -19,13 +19,15 @@
             "text": "Die Kastanie in Moltzow ist seit vielen Jahren ein beliebter Ort zum Einkehren und Verweilen. Wir haben es uns zur Aufgabe gemacht, diese Tradition fortzuführen und Ihnen ein besonderes gastronomisches Angebot zu präsentieren. Unsere Spezialität sind Burger und Kartoffelrösti mit verschiedenen Toppings wie z.B. Gyros. Für unsere Burger verwenden wir Bio-Rindfleisch aus der Umgebung. Außerdem bieten wir belegte Brote und Snacks an. Wenn Sie einen länger Aufenthalt planen, können Sie eines unserer voll möblierten Apartments in der oberen Etage mieten.",
             "position": "zentriert",
             "theme": "moss",
-            "showInMenu": true
+            "showInMenu": true,
+            "active": false
         },
         {
             "type": "instagram-feed",
             "menutitel": "Instagram Feed",
             "theme": "clay",
-            "showInMenu": false
+            "showInMenu": false,
+            "active": false
         },
         {
             "menutitel": "Wir bieten",

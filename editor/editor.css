@@ -71,7 +71,13 @@
     position: relative;
 }
 
+.webseiten-section.is-inactive {
+    border-left-color: #b8b8b8;
+}
+
 .webseiten-section .section-header {
+    flex-wrap: wrap;
+    gap: 0.25em 0.5em;
     position: sticky;
     top: 0;
     background-color: var(--white);
@@ -89,11 +95,18 @@
 }
 
 .webseiten-section .section-header input[type="text"] {
+    flex: 1 1 8rem;
+    width: 0;
+    min-width: 0;
     font-size: 1.4em;
     font-weight: bold;
     border: none;
     background: transparent;
     color: var(--primary-dark);
+}
+
+.webseiten-section.is-inactive .section-header input[data-field="menutitel"] {
+    color: #b8b8b8;
 }
 
 .webseiten-section .section-header .drag-icon {
@@ -547,9 +560,22 @@
     background: #c82333;
 }
 
+.webseiten-section .toggle-section-visibility {
+    background: var(--white);
+    color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.webseiten-section.is-inactive .toggle-section-visibility {
+    background: var(--primary-dark);
+    color: var(--white);
+}
+
 .webseiten-section .button-right {
     position: static;
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
     justify-content: flex-end;
     margin-top: 0.5em;
 }
@@ -580,6 +606,27 @@ h1 {
 }
 
 /* === Loader === */
+.tab-content.is-loading {
+    position: relative;
+    min-height: 240px;
+}
+
+.tab-loader:not([hidden]) {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 64px 16px;
+    background: var(--bg);
+    color: var(--primary-dark);
+}
+
+.tab-content.is-loading> :not(.tab-loader) {
+    visibility: hidden;
+}
+
 #loader {
     position: fixed;
     inset: 0;
@@ -1215,6 +1262,12 @@ select:focus {
 @media (max-width: 600px) {
     body {
         padding: 1em;
+    }
+
+    .webseiten-section .section-header input[type="text"] {
+        box-sizing: border-box;
+        flex-basis: 100%;
+        width: 100%;
     }
 
     .webseiten-section .section-options-row {

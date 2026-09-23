@@ -2,9 +2,30 @@
 const EditorTabs = {
 	currentTab: 'webseite',
 	speisekarteLoaded: false,
-	speisekarteLoadPromise: null,
+	loadPromises: {},
+	loadingCounts: {},
 	webseitenLoaded: false,
 	apartmentsLoaded: false,
+
+	beginLoading(tabName) {
+		const panel = document.getElementById(`${tabName}-tab`);
+		this.loadingCounts[tabName] = (this.loadingCounts[tabName] || 0) + 1;
+		panel.classList.add('is-loading');
+		panel.setAttribute('aria-busy', 'true');
+		panel.querySelector('.tab-loader').hidden = false;
+		Array.from(panel.children).forEach(child => {
+			if (!child.classList.contains('tab-loader')) child.inert = true;
+		});
+		return () => {
+			if (--this.loadingCounts[tabName] > 0) return;
+			panel.classList.remove('is-loading');
+			panel.setAttribute('aria-busy', 'false');
+			panel.querySelector('.tab-loader').hidden = true;
+			Array.from(panel.children).forEach(child => {
+				if (!child.classList.contains('tab-loader')) child.inert = false;
+			});
+		};
+	},
 
 	init() {
 		this.setupTabNavigation();
@@ -42,35 +63,25 @@ const EditorTabs = {
 
 		this.currentTab = tabName;
 
-		// Tab-spezifische Initialisierung
-		if (tabName === 'speisekarte' && !this.speisekarteLoaded) {
-			if (!this.speisekarteLoadPromise) {
-				this.speisekarteLoadPromise = this.loadSpeisekarte();
-			}
-			await this.speisekarteLoadPromise;
-		} else if (tabName === 'webseite' && !this.webseitenLoaded) {
-			console.log('Webseiten-Editor wird geladen...');
-			try {
-				// Webseiten-Editor initialisieren
-				if (window.WebseitenEditor) {
-					await WebseitenEditor.init();
-					console.log('✅ Webseiten-Editor geladen');
+		const loadedKey = tabName === 'webseite' ? 'webseitenLoaded' : `${tabName}Loaded`;
+		if (this[loadedKey]) return;
+		if (!this.loadPromises[tabName]) {
+			this.loadPromises[tabName] = (async () => {
+				const finishLoading = this.beginLoading(tabName);
+				try {
+					if (tabName === 'speisekarte') await this.loadSpeisekarte();
+					else if (tabName === 'webseite') await WebseitenEditor.init();
+					else if (tabName === 'apartments') await ApartmentsEditor.init();
+					this[loadedKey] = true;
+				} catch (error) {
+					console.error(`Fehler beim Laden des Tabs ${tabName}:`, error);
+				} finally {
+					finishLoading();
 				}
-				
-				this.webseitenLoaded = true;
-			} catch (error) {
-				console.error('❌ Fehler beim Laden des Webseiten-Editors:', error);
-			}
-		} else if (tabName === 'apartments' && !this.apartmentsLoaded) {
-			try {
-				if (window.ApartmentsEditor) {
-					await ApartmentsEditor.init();
-				}
-				this.apartmentsLoaded = true;
-			} catch (error) {
-				console.error('❌ Fehler beim Laden des Apartments-Editors:', error);
-			}
+			})();
 		}
+		await this.loadPromises[tabName];
+		delete this.loadPromises[tabName];
 	},
 
 	async loadSpeisekarte() {
@@ -96,8 +107,7 @@ const EditorTabs = {
 			this.speisekarteLoaded = true;
 			console.log('✅ Speisekarte-Tab vollständig geladen');
 		} catch (error) {
-			this.speisekarteLoadPromise = null;
-			console.error('❌ Fehler beim Laden der Speisekarte:', error);
+			throw error;
 		}
 	}
 };

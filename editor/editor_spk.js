@@ -121,6 +121,10 @@ function render() {
 			!div.classList.contains("collapsed")
 		);
 
+	editor.querySelectorAll(".gerichte-wrapper").forEach(wrapper => {
+		Sortable.get(wrapper)?.destroy();
+	});
+
 	// Editor komplett leeren
 	editor.innerHTML = "";
 
@@ -177,10 +181,11 @@ function render() {
 		animation: 150,
 		handle: ".menu-header .drag-icon",
 		forceFallback: true,
+		preventOnFilter: false,
 		
 		// Verhindere das Verschieben von Logo und Infotext
-		filter: function(evt) {
-			const menuIndex = Array.from(editor.children).indexOf(evt.item);
+		filter: function(evt, item) {
+			const menuIndex = Array.from(editor.children).indexOf(item);
 			const menu = window.data.content[menuIndex];
 			const isLogo = menu && menu.menutitel && menu.menutitel.toLowerCase() === "logo";
 			const isInfotext = menu && menu.menutitel && menu.menutitel.toLowerCase() === "infotext";
@@ -209,6 +214,7 @@ function render() {
 		},
 		
 		onEnd(evt) {
+			if (evt.oldIndex === evt.newIndex) return;
 			const movedMenu = window.data.content.splice(evt.oldIndex, 1)[0];
 			window.data.content.splice(evt.newIndex, 0, movedMenu);
 			markMenuDirty();
@@ -292,6 +298,7 @@ function setupMenuEventListeners(menuElement, menu, menuIndex, normalMenuIndex, 
 				animation: 150,
 				handle: ".gericht-header .drag-icon",
 				onEnd: function(evt) {
+					if (evt.oldIndex === evt.newIndex) return;
 					const moved = menu.gerichte.splice(evt.oldIndex, 1)[0];
 					menu.gerichte.splice(evt.newIndex, 0, moved);
 					markMenuDirty();

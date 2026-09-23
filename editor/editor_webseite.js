@@ -15,18 +15,18 @@ function showWebseitenSaveDialog(message) {
 }
 
 // Webseiten-Editor initialisieren
-function initWebseitenEditor() {
+async function initWebseitenEditor() {
     if (webseitenLoaded) return;
     
     console.log('Initialisiere Webseiten-Editor...');
-    loadWebseitenData();
     setupWebseitenEvents();
-    loadWebseitenArchives();
+    await Promise.all([loadWebseitenData(), loadWebseitenArchives()]);
     webseitenLoaded = true;
 }
 
 // Webseiten-Daten laden
 async function loadWebseitenData() {
+    const finishLoading = EditorTabs.beginLoading('webseite');
     try {
         const response = await fetch('webseite/data.json', { cache: 'no-store' });
         if (response.ok) {
@@ -54,6 +54,8 @@ async function loadWebseitenData() {
         }
     } catch (error) {
         console.error('Fehler beim Laden der Webseiten-Daten:', error);
+    } finally {
+        finishLoading();
     }
 }
 
@@ -136,21 +138,10 @@ function renderWebseitenSection(section, index) {
         `<option value="${value}" ${section.buttonLink === value ? 'selected' : ''}>${label}</option>`
     ).join('');
     
-    const totalSections = webseitenData.webseite.length;
-    const isFirstOrLast = index === 0 || index === (totalSections - 1);
-    
-    // Drag-Icon nur anzeigen wenn nicht erste oder letzte Sektion
-    const dragIconHtml = isFirstOrLast ? '' : 
-        '<button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>';
-    
-    // Lösch-Button nur anzeigen wenn nicht erste oder letzte Sektion
-    const deleteButtonHtml = isFirstOrLast ? '' : 
-        '<button type="button" class="delete-section">🗑️ Sektion löschen</button>';
-    
     return `
-        <div class="webseiten-section" data-index="${index}">
+        <div class="webseiten-section${section.active === false ? ' is-inactive' : ''}" data-index="${index}">
             <div class="section-header" style="display: flex; align-items: center;">
-                ${dragIconHtml}
+                <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
                 <input type="text" value="${section.menutitel || ''}" placeholder="Menütitel" data-field="menutitel" />
                 <button type="button" class="toggle-section" aria-expanded="false" aria-label="Details anzeigen"><span class="toggle-icon" aria-hidden="true">▶</span></button>
             </div>
@@ -181,16 +172,21 @@ function renderWebseitenSection(section, index) {
                         ${renderButtonThemePicker(section.buttonTheme || 'primary')}
                     </div>
                 <div class="button-right">
-                    ${deleteButtonHtml}
+                    ${renderSectionVisibilityButton(section)}
+                    <button type="button" class="delete-section">🗑️ Sektion löschen</button>
                 </div>
             </div>
         </div>
     `;
 }
 
+function renderSectionVisibilityButton(section) {
+    return `<button type="button" class="toggle-section-visibility">${section.active === false ? 'Sektion einblenden' : 'Sektion ausblenden'}</button>`;
+}
+
 function renderInstagramFeedSection(section, index) {
     return `
-        <div class="webseiten-section instagram-section-editor" data-index="${index}">
+        <div class="webseiten-section instagram-section-editor${section.active === false ? ' is-inactive' : ''}" data-index="${index}">
             <div class="section-header" style="display: flex; align-items: center;">
                 <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
                 <input type="text" value="${section.menutitel || ''}" placeholder="Menütitel" data-field="menutitel" />
@@ -204,6 +200,7 @@ function renderInstagramFeedSection(section, index) {
                     Der Feed zeigt automatisch die aktuellen Beiträge von kastaniemoltzow.
                 </div>
                 <div class="button-right">
+                    ${renderSectionVisibilityButton(section)}
                     <button type="button" class="delete-section">🗑️ Sektion löschen</button>
                 </div>
             </div>
@@ -263,7 +260,7 @@ function renderOpeningHoursDay(day, index, exception = false) {
 function renderOpeningHoursEditor(section, index) {
     const config = section.openingHours || (section.openingHours = OpeningHours.defaults());
     const escape = openingHoursEscape;
-    return `<div class="webseiten-section opening-hours-editor" data-index="${index}">
+    return `<div class="webseiten-section opening-hours-editor${section.active === false ? ' is-inactive' : ''}" data-index="${index}">
         <div class="section-header">
             <button type="button" class="drag-icon" aria-label="Sektion verschieben">☰</button>
             <input type="text" value="${escape(section.menutitel)}" placeholder="Menütitel" data-field="menutitel">
@@ -280,7 +277,7 @@ function renderOpeningHoursEditor(section, index) {
             <h3>Ausnahmen</h3>
             <div class="hours-exceptions">${config.exceptions.map((day, dayIndex) => renderOpeningHoursDay(day, dayIndex, true)).join('')}</div>
             <button type="button" data-hours-add>Ausnahme hinzufügen</button>
-            <div class="button-right"><button type="button" class="delete-section">Sektion löschen</button></div>
+            <div class="button-right">${renderSectionVisibilityButton(section)}<button type="button" class="delete-section">Sektion löschen</button></div>
         </div>
     </div>`;
 }
@@ -477,6 +474,8 @@ function setupWebseitenEvents() {
             toggleWebseitenSection(e.target.closest('.toggle-section'));
         } else if (e.target.matches('.image-thumb')) {
             handleWebseitenImageClick(e.target);
+        } else if (e.target.matches('.toggle-section-visibility')) {
+            toggleWebseitenVisibility(e.target);
         } else if (e.target.matches('.delete-section')) {
             deleteWebseitenSection(e.target);
         }
@@ -535,6 +534,14 @@ function updateWebseitenPosition(button) {
         option.classList.toggle('selected', selected);
         option.setAttribute('aria-pressed', selected);
     });
+}
+
+function toggleWebseitenVisibility(button) {
+    const section = button.closest('.webseiten-section');
+    const item = webseitenData.webseite[Number(section.dataset.index)];
+    item.active = item.active === false;
+    section.classList.toggle('is-inactive', !item.active);
+    button.textContent = item.active ? 'Sektion ausblenden' : 'Sektion einblenden';
 }
 
 function toggleWebseitenSection(button) {
@@ -680,32 +687,11 @@ function setupWebseitenSortable() {
     const editorContainer = document.getElementById('webseite-editor');
     if (!editorContainer || !window.Sortable) return;
     
+    Sortable.get(editorContainer)?.destroy();
     new Sortable(editorContainer, {
         handle: '.drag-icon',
         animation: 150,
         forceFallback: true,
-        
-        // Verhindere das Verschieben der ersten und letzten Sektion
-        filter: function(evt) {
-            const sectionIndex = Array.from(editorContainer.children).indexOf(evt.item);
-            const totalSections = webseitenData.webseite.length;
-            
-            // Erste (Index 0) und letzte Sektion können nicht verschoben werden
-            return sectionIndex === 0 || sectionIndex === (totalSections - 1);
-        },
-        
-        // Verhindere das Droppen vor der ersten oder nach der letzten Sektion
-        onMove: function(evt) {
-            const toIndex = Array.from(editorContainer.children).indexOf(evt.related);
-            const totalSections = webseitenData.webseite.length;
-            
-            // Verhindere Droppen an Position 0 oder an die letzte Position
-            if (toIndex <= 0 || toIndex >= (totalSections - 1)) {
-                return false;
-            }
-            
-            return true;
-        },
         
         onEnd: function(evt) {
             // Array neu sortieren
@@ -739,6 +725,7 @@ async function loadWebseitenArchives() {
     
     archivSelect.disabled = true;
     
+    const finishLoading = EditorTabs.beginLoading('webseite');
     try {
         const response = await fetch('data_handler.php', {
             method: 'POST',
@@ -770,6 +757,8 @@ async function loadWebseitenArchives() {
         archivSelect.disabled = false;
     } catch (error) {
         console.error('Fehler beim Laden der Webseiten-Archive:', error);
+    } finally {
+        finishLoading();
     }
 }
 
@@ -784,6 +773,7 @@ async function loadWebseitenArchive() {
         return;
     }
     
+    const finishLoading = EditorTabs.beginLoading('webseite');
     try {
         const response = await fetch('data_handler.php', {
             method: 'POST',
@@ -805,6 +795,8 @@ async function loadWebseitenArchive() {
     } catch (error) {
         console.error('Fehler beim Laden des Archivs:', error);
         showWebseitenSaveDialog('Fehler beim Laden des Archivs: ' + error.message);
+    } finally {
+        finishLoading();
     }
 }
 
