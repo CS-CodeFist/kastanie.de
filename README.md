@@ -8,6 +8,7 @@ Webauftritt, digitale Speisekarte und browserbasiertes CMS fuer Kastanie Moltzow
 | --- | --- | --- |
 | `index.php` | Webseite mit dynamischen Inhaltssektionen | `webseite/data.json` |
 | `apartments.php` | Apartments mit eigener Navigation | `apartments/data.json` |
+| `veranstaltungen.php` | Veranstaltungen mit eigener Navigation | `veranstaltungen/data.json` |
 | `speisekarte.html` | Digitale Speisekarte | `speisekarte/data.json` |
 | `impressum.php` | Impressum | Statischer Inhalt |
 | `datenschutz.php` | Datenschutzerklaerung | Statischer Inhalt |
@@ -81,13 +82,20 @@ return [
 
 Ohne `admin_username` und `admin_password` ist keine Editor-Anmeldung moeglich. Die Datei darf nicht ueber das Deployment, ein Backup oder ein Repository weitergegeben werden.
 
-Der Editor enthaelt drei Tabs:
+Der Editor enthaelt vier Tabs:
 
 - **Webseite:** Inhaltssektionen, Bilder, Textposition, Section-Themes, Call-to-Action-Buttons, Instagram-Feed und Oeffnungszeiten.
 - **Speisekarte:** Menues, Gerichte, Preise, Beilagen, Zusatzstoffe, Vorlagen und saisonale Dekorationen.
 - **Apartments:** Separate Inhaltssektionen, Bilder, Textposition, Themes und Archive.
+- **Veranstaltungen:** Dieselben Sektionsfunktionen wie Apartments, mit eigenen Daten, Bildern, Archiven und Optionen.
 
 Die Tab-Logik liegt in `editor/editor_tabs.js`. Der Editor laedt die Inhalte eines Tabs erst bei dessen erster Aktivierung.
+
+Apartments und Veranstaltungen verwenden getrennte Instanzen von `createSectionPageEditor` in `editor/editor_apartments.js`. Veranstaltungsinhalte liegen in `veranstaltungen/data.json`, Archive in `veranstaltungen/archiv/`, Bilder in `bilder_veranstaltungen/` und Saison-Optionen in `veranstaltungen/season-config.json`. Die Verzeichnisse fuer Archive und Bilder werden bei Bedarf angelegt; PHP benoetigt entsprechende Schreibrechte. Die oeffentliche Seite `/veranstaltungen/` rendert die gespeicherten Inhalte mit `WebsiteRenderer('veranstaltungen')`, gemeinsamem Header und Footer. Ausgeblendete Sektionen entfallen auch in der Navigation. Direkte Aufrufe von `veranstaltungen.php` werden weitergeleitet. Im Editor steht `veranstaltungen` als Button-Linkziel zur Verfuegung. Fuer das Deployment auch `veranstaltungen.php`, `.htaccess`, `partials/website.php` und `sitemaps.php` aktualisieren; vorhandene Inhaltsdaten behalten.
+
+Regressionstest fuer beide Bereiche ohne Build und ohne Aenderungen an echten Daten: `node tools/test_section_pages.js /pfad/zum/php`.
+
+Veranstaltungssektionen benoetigen `date` (`YYYY-MM-DD`), `start` und `end` (`HH:mm`). Das Ende muss am selben Tag nach dem Beginn liegen. Mehrere Termine pro Tag sind erlaubt; direkt anschliessende Zeitfenster ebenfalls. Ueberschneidungen werden einschliesslich ausgeblendeter Sektionen im Editor und vor jedem Speichern auf dem Server abgewiesen. Die gespeicherte Reihenfolge bleibt erhalten; der Button "Nach Datum sortieren" neben dem Archiv sortiert den Editor auf Wunsch. Drag-and-drop gibt es nur noch bei Apartments. Die oeffentliche Veranstaltungsseite sortiert Inhalt und Navigation immer nach Datum/Startzeit und zeigt Datum und Zeitfenster an. Undatierte Altbestaende bleiben sichtbar am Ende, muessen aber vor dem naechsten Speichern vervollstaendigt werden. Die gemeinsame PHP-Pruefung liegt in `partials/event_schedule.php`; diese Datei zusammen mit dem Renderer und `data_handler.php` ausliefern.
 
 ### Oeffnungszeiten
 
@@ -95,11 +103,23 @@ Im Webseiten-Tab unter **Sektion hinzufuegen > Oeffnungszeiten** wird eine Sekti
 
 Ausnahmen gelten vom Startdatum bis einschliesslich Enddatum und ersetzen die normalen Wochenzeiten. Sie koennen Schliesszeiten oder abweichende Oeffnungszeiten samt Anlass enthalten. Ueberlappende Ausnahmen und unvollstaendige Zeitfenster blockieren das Speichern im Editor.
 
+Die oeffentliche Ausgabe liest zusaetzlich aktive, vollstaendig datierte Termine aus `veranstaltungen/data.json`. Veranstaltungszeiten haben am betreffenden Tag Vorrang vor ueberschneidenden Zeitfenstern und Schliessungen. Ueberschneidungsfreie Zeitfenster der geltenden manuellen Ausnahme (ansonsten der Wochenzeiten) bleiben erhalten, auch wenn sie direkt an ein Event angrenzen. Mehrtaegige manuelle Ausnahmen gelten an den uebrigen Tagen weiter. Alle Zeiten werden chronologisch angezeigt; direkt anschliessende Event-Zeitfenster werden zusammengefasst. Titel (ersatzweise Menutitel) erscheinen als Anlass wie bei manuellen Ausnahmen. Ausgeblendete, undatierte oder ungueltige Termine werden ignoriert. Oeffnungsstatus, Sieben-Tage-Anzeige und strukturierte Daten verwenden dieselben wirksamen Zeiten, auch bei mehr als zwei Veranstaltungen pro Tag. Die Zusammenfuehrung erfolgt nur beim Seitenaufruf; gespeicherte Oeffnungszeiten, Archive und Veranstaltungsdaten bleiben unveraendert. Fehlende Veranstaltungsdaten lassen die regulaeren Oeffnungszeiten unveraendert.
+
 Wochen- und Ausnahmetage bieten die Statusauswahl **Geoeffnet**, **Geschlossen**, **Ruhetag** und **Geschlossene Gesellschaft**. Eine geschlossene Gesellschaft gilt ganztags, wird oeffentlich entsprechend bezeichnet und nicht als Oeffnungszeit gewertet. Gespeichert wird dafuer `closed: true` zusammen mit `privateEvent: true`. Ein Ruhetag wird mit `closed: true` und `restDay: true` gespeichert und bei der naechsten Oeffnung ebenfalls uebersprungen. `restDay` und `privateEvent` schliessen sich gegenseitig aus; bestehende Daten ohne diese Felder bleiben gueltig. Beim Statuswechsel bleiben eingetragene Zeiten erhalten.
 
 Die Sektion speichert `type: "opening-hours"` und `openingHours: { week: [...], exceptions: [...] }` in `webseite/data.json`. `week` beginnt mit Montag; jeder Tag hat `closed` und `periods` mit `start`/`end` im Format `HH:MM`. Ausnahmen ergaenzen `from`/`to` (`YYYY-MM-DD`) und `note`.
 
 `scripts/opening-hours.js` liefert die gemeinsame Validierung und Statusberechnung in der Zeitzone `Europe/Berlin` fuer die oeffentlichen Seiten und den Editor. PHP liefert Status und kommende sieben Tage bereits anhand der Serverzeit aus. JavaScript aktualisiert die Anzeige anhand der Besucherzeit minuetlich sowie nach Rueckkehr zum Tab und kennzeichnet die letzten 30 Minuten vor Schliessung. Beide Berechnungen verwenden `Europe/Berlin`; ohne JavaScript bleibt der Stand des Seitenaufrufs sichtbar. Feiertage werden nicht automatisch ermittelt, sondern als Ausnahmen gepflegt. iCal ist nicht Bestandteil dieser Sektion.
+
+### Booking-Belegungskalender
+
+Apartment-Sektionen mit `mediaType: "calendar"` laden Belegungstage ueber `apartment_calendar.php`. Alle solchen Sektionen verwenden denselben Booking-Kalender der Wohneinheit "Apartment mit 1 Schlafzimmer". Die bisherigen Beispieldaten in `apartments/data.json` werden nicht mehr angezeigt. Es werden ausschliesslich belegte/geschlossene Naechte markiert; nicht markierte Tage sind keine verbindliche Verfuegbarkeitszusage. Der Abreisetag gehoert nicht zum belegten Intervall. Die Anzeige umfasst den aktuellen Monat und maximal zwei Jahre ab heute.
+
+Der private Export-Link steht in `booking_calendar.local.php`, das ein Array mit dem Schluessel `url` zurueckgibt. Alternativ kann `BOOKING_CALENDAR_URL` auf dem Server gesetzt werden. Den Link weder in Inhalts-JSON noch ins Frontend oder Git aufnehmen. Die lokale Konfigurationsdatei ist absichtlich gitignored und muss beim Deployment separat uebertragen werden. Der Link gilt nur fuer die konfigurierte Wohneinheit; weitere Wohneinheiten benoetigen eigene Feeds und eine getrennte Zuordnung.
+
+PHP benoetigt mindestens Version 8.2 sowie cURL, mbstring und XML-Unterstuetzung. Die iCal-Verarbeitung verwendet `sabre/vobject` aus `composer.json`/`composer.lock`. Auf dem Server `composer install --no-dev --no-interaction --no-scripts --no-plugins` ausfuehren oder die lokal installierten Verzeichnisse `vendor/composer`, `vendor/sabre` und `vendor/autoload.php` mit uebertragen. Bestehende Frontend-Bibliotheken unter `vendor/` beibehalten.
+
+Erfolgreiche Antworten werden fuer 15 Minuten unter `apartments/calendar-cache/` gespeichert; PHP braucht dort Schreibrechte. Erneuert wird beim naechsten Seitenaufruf nach Ablauf, nicht per Cronjob. Die `.htaccess` sperrt direkte HTTP-Zugriffe auf Cache und Konfiguration. Bei einem anderen Webserver entsprechende Zugriffssperren einrichten. Der Browser erhaelt nur Belegungstage und den Datenstand, niemals den Export-Link oder Buchungsdetails. Bei Abruf- oder Verarbeitungsfehlern erscheint "Belegungsdaten derzeit nicht verfuegbar" statt alter Beispieldaten. Der Abruf ist einseitig von Booking zur Website; Anfragen auf der Website erzeugen keine Booking-Sperren.
 
 ## Inhaltsdaten
 

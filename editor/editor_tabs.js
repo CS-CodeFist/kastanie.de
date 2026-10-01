@@ -6,6 +6,7 @@ const EditorTabs = {
 	loadingCounts: {},
 	webseitenLoaded: false,
 	apartmentsLoaded: false,
+	veranstaltungenLoaded: false,
 
 	beginLoading(tabName) {
 		const panel = document.getElementById(`${tabName}-tab`);
@@ -72,6 +73,7 @@ const EditorTabs = {
 					if (tabName === 'speisekarte') await this.loadSpeisekarte();
 					else if (tabName === 'webseite') await WebseitenEditor.init();
 					else if (tabName === 'apartments') await ApartmentsEditor.init();
+					else if (tabName === 'veranstaltungen') await VeranstaltungenEditor.init();
 					this[loadedKey] = true;
 				} catch (error) {
 					console.error(`Fehler beim Laden des Tabs ${tabName}:`, error);

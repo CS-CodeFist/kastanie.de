@@ -68,7 +68,7 @@ if (preg_match('/\A(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:]+\])(?::[0-9]{
         document.querySelector('meta[name="theme-color"]').content = initialMode === 'dark' ? '#2d2922' : '#E1DBD1';
     </script>
     <link href="vendor/fonts/fonts.css?v=20260921-local" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260921-coffee-land">
+    <link rel="stylesheet" href="styles.css?v=20260925-button-select">
     <?php if (isset($seasonPage)): ?>
     <link rel="stylesheet" href="seasons/seasons.css?v=20260919-hidden-test">
     <?php endif; ?>

@@ -1,6 +1,8 @@
 RewriteEngine On
 DirectoryIndex index.php index.html
 
+RewriteRule ^(?:booking_calendar\.local\.php|apartments/calendar-cache(?:/|$)) - [F,L]
+
 RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.php(?:[?\s]) [NC]
 RewriteRule ^index\.php$ /%1 [R=301,L,NE]
 
@@ -10,7 +12,11 @@ RewriteRule ^(apartments|speisekarte)\.html$ /%1$1 [R=301,L,NE]
 RewriteCond %{THE_REQUEST} \s/+(.*/)?apartments\.php(?:[?\s]) [NC]
 RewriteRule ^apartments\.php$ /%1apartments/ [R=301,L,NE]
 
+RewriteCond %{THE_REQUEST} \s/+(.*/)?veranstaltungen\.php(?:[?\s]) [NC]
+RewriteRule ^veranstaltungen\.php$ /%1veranstaltungen/ [R=301,L,NE]
+
 RewriteRule ^apartments/?$ apartments.php [L]
+RewriteRule ^veranstaltungen/?$ veranstaltungen.php [L]
 RewriteRule ^speisekarte/?$ speisekarte.html [L]
 
 RewriteRule ^sitemaps\.xml$ sitemaps.php [L]

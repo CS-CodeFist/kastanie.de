@@ -28,6 +28,14 @@
     --gericht-text-color: #000000;
 }
 
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 /* Dark Mode Werte - nur hier definiert! */
 :root {
     --dark-primary-green: #9bc53d;

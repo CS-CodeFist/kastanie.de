@@ -1,5 +1,7 @@
 credentials.local.php
 site_credentials.local.php
 instagram_credentials.local.php
+booking_calendar.local.php
+/apartments/calendar-cache/
 /bilder/cache/*
 !/bilder/cache/.htaccess

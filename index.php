@@ -10,7 +10,7 @@ require __DIR__ . '/partials/header.php';
         <?php $website->render(); ?>
     </main>
 
-    <script src="scripts/opening-hours.js?v=20260920-shared-scripts"></script>
+    <script src="scripts/opening-hours.js?v=20260923-event-exceptions"></script>
     <script src="scripts/map.js?v=20260921-coffee-land"></script>
-    <script src="scripts/website.js?v=20260920-server-render"></script>
+    <script src="scripts/website.js?v=20260923-section-anchor"></script>
 <?php require __DIR__ . '/partials/footer.php'; ?>

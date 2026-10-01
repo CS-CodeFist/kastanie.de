@@ -40,6 +40,15 @@
     box-sizing: border-box;
 }
 
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.section-button {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 html {
     scroll-behavior: smooth;
     background-color: var(--cream);
@@ -169,6 +178,29 @@ a {
     transition: background 0.3s, color 0.3s;
 }
 
+#navigation a.event-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+#navigation .event-nav-link time {
+    font-size: 1.15rem;
+}
+
+.event-nav-title {
+    max-width: 15rem;
+    font-size: 0.8rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 #navigation a:focus-visible {
     outline: 2px solid var(--forest);
     outline-offset: -4px;
@@ -268,6 +300,10 @@ h2,
     font-weight: 500;
 }
 
+.event-date {
+    margin-bottom: 0.75rem;
+}
+
 .section-text {
     max-width: 35rem;
     margin: 1rem 0 0;
@@ -275,10 +311,20 @@ h2,
     white-space: pre-line;
 }
 
+.section-minimal-text {
+    max-width: 35rem;
+    margin: 0.75rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
 .section-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     min-height: 46px;
     margin-top: 1.8rem;
     padding: 0.65rem 1.15rem;
@@ -325,6 +371,135 @@ h2,
     height: 100%;
     object-fit: cover;
     object-position: center;
+}
+
+.section-calendar {
+    display: grid;
+    place-items: center;
+    min-height: 380px;
+    padding: clamp(1rem, 4vw, 3rem);
+    background: transparent;
+    user-select: none;
+}
+
+.calendar-panel {
+    width: min(100%, 30rem);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 0px solid var(--line);
+    border-radius: 4px;
+    background: var(--cream);
+    color: var(--ink);
+}
+
+.calendar-panel.has-matching-section-background {
+    background: var(--paper);
+}
+
+.calendar-heading {
+    display: grid;
+    grid-template-columns: 46px 1fr 46px;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.calendar-heading h3 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.calendar-heading button.section-button {
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    padding: 0;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.calendar-weekdays,
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.3rem;
+    text-align: center;
+}
+
+.calendar-weekdays {
+    margin-bottom: 0.35rem;
+    color: var(--clay);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.calendar-day {
+    display: grid;
+    min-width: 0;
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.calendar-day.is-available {
+    border-color: var(--forest);
+    background: color-mix(in srgb, var(--forest) 18%, var(--paper));
+}
+
+.calendar-day.is-unavailable {
+    background: color-mix(in srgb, var(--clay) 12%, var(--paper));
+    text-decoration: line-through;
+}
+
+.calendar-day.is-today {
+    outline: 2px solid var(--moss);
+    outline-offset: 1px;
+}
+
+.calendar-day.is-outside-month {
+    visibility: hidden;
+}
+
+.calendar-status {
+    min-height: 1.5em;
+    margin: 0.9rem 0 0;
+    color: var(--clay);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem 1rem;
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+}
+
+.calendar-legend-item::before {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-right: 0.35rem;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    content: '';
+    vertical-align: -0.05rem;
+}
+
+.calendar-legend-item.is-available::before {
+    border-color: var(--forest);
+    background: color-mix(in srgb, var(--forest) 18%, var(--paper));
+}
+
+.calendar-legend-item.is-unavailable::before {
+    background: color-mix(in srgb, var(--clay) 12%, var(--paper));
 }
 
 .hero .section-image {
@@ -1258,6 +1433,11 @@ h2,
 
     .hero .section-image {
         min-height: 260px;
+    }
+
+    .section-calendar {
+        min-height: 0;
+        padding: 1.25rem;
     }
 
     .content-section.position-rechts .section-image {

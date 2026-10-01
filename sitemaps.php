@@ -11,6 +11,7 @@ $baseUrl = $origin . $basePath;
 $pages = [
     '/' => '/webseite/data.json',
     '/apartments' => '/apartments/data.json',
+    '/veranstaltungen/' => '/veranstaltungen/data.json',
     '/speisekarte' => '/speisekarte/data.json',
     '/impressum.php' => '/impressum.php',
     '/datenschutz.php' => '/datenschutz.php'

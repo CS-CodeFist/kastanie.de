@@ -15,7 +15,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
 	<title>Kastanie Moltzow – Editor</title>
-	<link rel="stylesheet" href="editor/editor.css?v=20260923-tab-loaders" />
+	<link rel="stylesheet" href="editor/editor.css?v=20260925-button-select" />
 </head>
 
 <body>
@@ -30,6 +30,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 			<button class="tab-button active" data-tab="webseite">🌐 Webseite</button>
 			<button class="tab-button" data-tab="speisekarte">🍽️ Speisekarte</button>
 			<button class="tab-button" data-tab="apartments">🏠 Apartments</button>
+			<button class="tab-button" data-tab="veranstaltungen">&#128197; Veranstaltungen</button>
 			<button id="logoutBtn">🚪 Logout</button>
 		</div>
 		
@@ -117,6 +118,32 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 				</div>
 			</div>
 		</div> <!-- Ende apartments-tab -->
+
+		<div id="veranstaltungen-tab" class="tab-content">
+			<div class="tab-loader" role="status" hidden><div class="spinner" aria-hidden="true"></div><span>Veranstaltungen werden geladen...</span></div>
+			<div id="veranstaltungen-vorlagen-wrapper" style="margin-bottom: 1em; display: flex; justify-content: space-between;">
+				<div>
+					<label for="veranstaltungenArchivSelect">Archiv:</label>
+					<select id="veranstaltungenArchivSelect" disabled>
+						<option value="">– Archiv –</option>
+					</select>
+				</div>
+				<button id="sortVeranstaltungenBtn" type="button">&#8593; Nach Datum sortieren</button>
+			</div>
+
+			<p id="veranstaltungenScheduleError" role="status" hidden></p>
+			<div id="veranstaltungen-editor"></div>
+
+			<div id="veranstaltungenButtonWrapper" class="option-button-group">
+				<div style="display: flex; justify-content: space-between;">
+					<button id="addVeranstaltungenSectionBtn">➕ Sektion hinzufügen</button>
+				</div>
+				<div style="display: flex; justify-content: space-between;">
+					<button id="saveVeranstaltungenBtn">💾 Veranstaltungen speichern</button>
+					<button id="veranstaltungenOptionsBtn" type="button">⚙️ Optionen</button>
+				</div>
+			</div>
+		</div>
 	</div> <!-- Ende tab-container -->
 
 	<!-- Overlay für neue Webseiten-Sektion -->
@@ -338,14 +365,14 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 	
 	<!-- EDITOR MODULES (Reihenfolge ist wichtig!) -->
 	<script src="editor/editor_core.js?v=20250728b"></script>
-	<script src="editor/editor_tabs.js?v=20260923-tab-loaders"></script>
+	<script src="editor/editor_tabs.js?v=20260923-veranstaltungen"></script>
 	<script src="editor/editor_spk.js?v=20260923-sortable-noop"></script>
-	<script src="scripts/opening-hours.js?v=20260920-shared-scripts"></script>
-	<script src="editor/editor_webseite.js?v=20260923-tab-loaders"></script>
-	<script src="editor/editor_apartments.js?v=20260923-tab-loaders"></script>
-	<script src="editor/editor_images.js?v=20260920-shared-map"></script>
+	<script src="scripts/opening-hours.js?v=20260923-event-exceptions"></script>
+	<script src="editor/editor_webseite.js?v=20260923-minimal-text"></script>
+	<script src="editor/editor_apartments.js?v=20260923-minimal-text"></script>
+	<script src="editor/editor_images.js?v=20260923-veranstaltungen"></script>
 	<script src="editor/editor_templates.js?v=20260923-tab-loaders"></script>
-	<script src="editor/editor_seasons.js?v=20260919-apartments-options"></script>
+	<script src="editor/editor_seasons.js?v=20260923-veranstaltungen"></script>
 	
 	<!-- EDITOR MAIN (Koordiniert alle Module) -->
 	<script src="editor/main.js?v=20260919-page-seasons"></script>

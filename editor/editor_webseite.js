@@ -130,6 +130,7 @@ function renderWebseitenSection(section, index) {
         ['', 'Kein Link'],
         ['speisekarte', 'Speisekarte'],
         ['apartments', 'Apartments'],
+        ['veranstaltungen', 'Veranstaltungen'],
         ['email', 'E-Mail'],
         ['telefon', 'Telefon'],
         ['route', 'Route mit Google Maps']
@@ -170,6 +171,7 @@ function renderWebseitenSection(section, index) {
                             </select>
                         </label>
                         ${renderButtonThemePicker(section.buttonTheme || 'primary')}
+                        <label>Minimaltext<textarea rows="3" data-field="minimalText" placeholder="Optionaler Hinweis unter dem Button">${openingHoursEscape(section.minimalText || '')}</textarea></label>
                     </div>
                 <div class="button-right">
                     ${renderSectionVisibilityButton(section)}
@@ -214,7 +216,7 @@ function openingHoursEscape(value) {
 
 let openingHoursControlId = 0;
 
-function renderOpeningHoursTime(value, field, periodIndex, closed) {
+function renderOpeningHoursTime(value, field, periodIndex, closed, fieldGroup = 'hours') {
     const parts = (value || '').split(':');
     const controls = ['hour', 'minute'].map((part, partIndex) => {
         const values = Array.from({ length: part === 'hour' ? 24 : 4 }, (_, index) =>
@@ -223,7 +225,7 @@ function renderOpeningHoursTime(value, field, periodIndex, closed) {
         if (selected && !values.includes(selected)) values.push(selected);
         const name = `hours-part-${++openingHoursControlId}`;
         return `<div class="hours-list" role="group" aria-label="${field === 'start' ? 'Von' : 'Bis'}: ${part === 'hour' ? 'Stunde' : 'Minute'}">
-            ${['', ...values].map(option => `<label class="hours-choice"><input type="radio" name="${name}" value="${openingHoursEscape(option)}" data-hours-field="${field}" data-period="${periodIndex}" data-time-part="${part}" ${option === selected ? 'checked' : ''} ${closed ? 'disabled' : ''}><span>${openingHoursEscape(option) || '--'}</span></label>`).join('')}
+            ${['', ...values].map(option => `<label class="hours-choice"><input type="radio" name="${name}" value="${openingHoursEscape(option)}" data-${fieldGroup}-field="${field}" data-period="${periodIndex}" data-time-part="${part}" ${option === selected ? 'checked' : ''} ${closed ? 'disabled' : ''}><span>${openingHoursEscape(option) || '--'}</span></label>`).join('')}
         </div>`;
     });
     return `<div class="hours-time">${controls.join('')}</div>`;
@@ -309,10 +311,10 @@ function scrollOpeningHoursOption(option, behavior = 'smooth') {
     }
 }
 
-function setOpeningHoursTimeControls(container, field, value, revealSelection = false) {
+function setOpeningHoursTimeControls(container, field, value, revealSelection = false, fieldGroup = 'hours') {
     const parts = (value || '').split(':');
     ['hour', 'minute'].forEach((part, index) => {
-        const option = container.querySelector(`input[data-hours-field="${field}"][data-time-part="${part}"][value="${parts[index] || ''}"]`);
+        const option = container.querySelector(`input[data-${fieldGroup}-field="${field}"][data-time-part="${part}"][value="${parts[index] || ''}"]`);
         if (option && (!option.checked || revealSelection)) {
             option.checked = true;
             scrollOpeningHoursOption(option);

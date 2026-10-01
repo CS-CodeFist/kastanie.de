@@ -46,11 +46,12 @@ switch ($action) {
 
     case 'load_images':
         $library = $input['library'] ?? 'menu';
-        if (!in_array($library, ['menu', 'webseite', 'apartments'], true)) $library = 'menu';
+        if (!in_array($library, ['menu', 'webseite', 'apartments', 'veranstaltungen'], true)) $library = 'menu';
         $imageDir = __DIR__ . [
             'menu' => '/bilder_menu/',
             'webseite' => '/bilder_webseite/',
-            'apartments' => '/bilder_apartments/'
+            'apartments' => '/bilder_apartments/',
+            'veranstaltungen' => '/bilder_veranstaltungen/'
         ][$library];
         $images = [];
 
@@ -72,11 +73,12 @@ switch ($action) {
         }
 
         $library = $_POST['library'] ?? 'menu';
-        if (!in_array($library, ['menu', 'webseite', 'apartments'], true)) $library = 'menu';
+        if (!in_array($library, ['menu', 'webseite', 'apartments', 'veranstaltungen'], true)) $library = 'menu';
         $uploadDir = __DIR__ . [
             'menu' => '/bilder_menu/',
             'webseite' => '/bilder_webseite/',
-            'apartments' => '/bilder_apartments/'
+            'apartments' => '/bilder_apartments/',
+            'veranstaltungen' => '/bilder_veranstaltungen/'
         ][$library];
         if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
         if (!is_writable($uploadDir)) respondWithError('Upload-Verzeichnis nicht beschreibbar.');
@@ -209,11 +211,12 @@ switch ($action) {
     case 'archive_image':
         $filename = basename($_POST['filename'] ?? '');
         $library = $_POST['library'] ?? 'menu';
-        if (!in_array($library, ['menu', 'webseite', 'apartments'], true)) $library = 'menu';
+        if (!in_array($library, ['menu', 'webseite', 'apartments', 'veranstaltungen'], true)) $library = 'menu';
         $imageDir = __DIR__ . [
             'menu' => '/bilder_menu/',
             'webseite' => '/bilder_webseite/',
-            'apartments' => '/bilder_apartments/'
+            'apartments' => '/bilder_apartments/',
+            'veranstaltungen' => '/bilder_veranstaltungen/'
         ][$library];
         $source = $imageDir . $filename;
         $target = $imageDir . 'archiv/' . $filename;
@@ -445,7 +448,9 @@ switch ($action) {
         break;
 
     case 'list_apartments_archives':
-        $archiveDir = __DIR__ . '/apartments/archiv/';
+    case 'list_veranstaltungen_archives':
+        $page = $action === 'list_apartments_archives' ? 'apartments' : 'veranstaltungen';
+        $archiveDir = __DIR__ . '/' . $page . '/archiv/';
         $files = is_dir($archiveDir) ? glob($archiveDir . 'data_*.json') : [];
         usort($files, function($a, $b) {
             return filemtime($b) <=> filemtime($a);
@@ -454,8 +459,10 @@ switch ($action) {
         break;
 
     case 'load_apartments_archive':
+    case 'load_veranstaltungen_archive':
+        $page = $action === 'load_apartments_archive' ? 'apartments' : 'veranstaltungen';
         $archiveFile = basename($input['archive'] ?? '');
-        $filePath = __DIR__ . '/apartments/archiv/' . $archiveFile;
+        $filePath = __DIR__ . '/' . $page . '/archiv/' . $archiveFile;
         if (!$archiveFile || !file_exists($filePath)) {
             respondWithError('Archiv-Datei nicht gefunden', 404);
         }
@@ -469,7 +476,7 @@ switch ($action) {
     case 'load_layout_config':
     case 'save_layout_config':
         $page = $input['page'] ?? 'speisekarte';
-        if (!in_array($page, ['webseite', 'speisekarte', 'apartments'], true)) {
+        if (!in_array($page, ['webseite', 'speisekarte', 'apartments', 'veranstaltungen'], true)) {
             respondWithError('Ungültige Seite für Saison-Optionen', 400);
         }
         $configFile = __DIR__ . '/' . $page . '/season-config.json';
@@ -483,7 +490,7 @@ switch ($action) {
             if (!is_array($configData)) {
                 respondWithError('Ungültige Saison-Konfiguration');
             }
-            if (!$hasPageConfig && $page === 'apartments') {
+            if (!$hasPageConfig && in_array($page, ['apartments', 'veranstaltungen'], true)) {
                 foreach ($configData as &$layout) {
                     $layout['aktiv'] = false;
                 }
@@ -610,33 +617,42 @@ switch ($action) {
         break;
 
     case 'save_apartments':
+    case 'save_veranstaltungen':
+        $page = $action === 'save_apartments' ? 'apartments' : 'veranstaltungen';
+        $pageLabel = $page === 'apartments' ? 'Apartments' : 'Veranstaltungen';
         $data = $input['data'] ?? null;
         if (!is_array($data)) {
-            respondWithError('Keine Apartments-Daten übertragen', 400);
+            respondWithError('Keine ' . $pageLabel . '-Daten übertragen', 400);
         }
 
-        $apartmentsDir = __DIR__ . '/apartments/';
+        if ($page === 'veranstaltungen') {
+            require_once __DIR__ . '/partials/event_schedule.php';
+            $scheduleError = EventSchedule::validate($data['webseite'] ?? null);
+            if ($scheduleError !== null) respondWithError($scheduleError, 400);
+        }
+
+        $apartmentsDir = __DIR__ . '/' . $page . '/';
         $archiveDir = $apartmentsDir . 'archiv/';
         if (!is_dir($apartmentsDir) && !mkdir($apartmentsDir, 0755, true) && !is_dir($apartmentsDir)) {
-            respondWithError('Apartments-Verzeichnis konnte nicht erstellt werden. Bitte Schreibrechte prüfen.');
+            respondWithError($pageLabel . '-Verzeichnis konnte nicht erstellt werden. Bitte Schreibrechte prüfen.');
         }
         if (!is_dir($archiveDir) && !mkdir($archiveDir, 0755, true) && !is_dir($archiveDir)) {
-            respondWithError('Apartments-Archiv konnte nicht erstellt werden. Bitte Schreibrechte prüfen.');
+            respondWithError($pageLabel . '-Archiv konnte nicht erstellt werden. Bitte Schreibrechte prüfen.');
         }
         if (!is_writable($apartmentsDir) || !is_writable($archiveDir)) {
-            respondWithError('Apartments-Verzeichnis ist nicht beschreibbar. Bitte Schreibrechte prüfen.');
+            respondWithError($pageLabel . '-Verzeichnis ist nicht beschreibbar. Bitte Schreibrechte prüfen.');
         }
 
         $targetFile = $apartmentsDir . 'data.json';
         if (file_exists($targetFile) && !copy($targetFile, $archiveDir . 'data_' . date('Y-m-d_H-i-s') . '.json')) {
-            respondWithError('Apartments-Daten konnten nicht archiviert werden. Bitte Schreibrechte prüfen.');
+            respondWithError($pageLabel . '-Daten konnten nicht archiviert werden. Bitte Schreibrechte prüfen.');
         }
 
         $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         if ($jsonData === false || file_put_contents($targetFile, $jsonData, LOCK_EX) === false) {
-            respondWithError('Fehler beim Speichern der Apartments-Daten');
+            respondWithError('Fehler beim Speichern der ' . $pageLabel . '-Daten');
         }
-        echo json_encode(['success' => true, 'message' => 'Apartments-Daten erfolgreich gespeichert']);
+        echo json_encode(['success' => true, 'message' => $pageLabel . '-Daten erfolgreich gespeichert']);
         break;
 
     default:

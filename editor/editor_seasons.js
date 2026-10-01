@@ -109,7 +109,7 @@ function updateSeasonButtons() {
 function openOptionsOverlay() {
 	if (seasonSaving) return;
 	const page = EditorTabs.currentTab;
-	const labels = { webseite: 'Webseite', speisekarte: 'Speisekarte', apartments: 'Apartments' };
+	const labels = { webseite: 'Webseite', speisekarte: 'Speisekarte', apartments: 'Apartments', veranstaltungen: 'Veranstaltungen' };
 	seasonPage = null;
 	document.querySelector('#optionsOverlay h2').textContent = 'Optionen: ' + labels[page];
 	document.getElementById('layoutSelect').replaceChildren(new Option('Lade Layouts...', '__none__'));
@@ -179,7 +179,7 @@ function initializeSeasonEventListeners() {
 	if (seasonListenersInitialized) return;
 	seasonListenersInitialized = true;
 	// Options Button
-	document.querySelectorAll("#optionsBtn, #apartmentsOptionsBtn").forEach(button => {
+	document.querySelectorAll("#optionsBtn, #apartmentsOptionsBtn, #veranstaltungenOptionsBtn").forEach(button => {
 		button.addEventListener("click", openOptionsOverlay);
 	});
 	

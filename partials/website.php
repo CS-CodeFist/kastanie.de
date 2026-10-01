@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/event_schedule.php';
+
 final class WebsiteRenderer
 {
     private $root;
@@ -8,11 +10,13 @@ final class WebsiteRenderer
     private $usedIds = [];
     private $firstImage = true;
     private $navigationPrefix = '';
+    private $isEvents = false;
     private const LOCATION = [53.631393, 12.569870];
     private const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
     private const LINKS = [
         'speisekarte' => 'speisekarte',
         'apartments' => 'apartments',
+        'veranstaltungen' => 'veranstaltungen/',
         'email' => 'mailto:info@bistro-kastanie.de',
         'telefon' => 'tel:+4939933736022',
         'route' => 'https://www.google.com/maps/dir/?api=1&destination=Warener%20Stra%C3%9Fe%203%2C%2017194%20Moltzow'
@@ -21,10 +25,11 @@ final class WebsiteRenderer
     public function __construct($source)
     {
         $this->root = dirname(__DIR__);
-        if (!in_array($source, ['webseite', 'apartments'], true)) {
+        if (!in_array($source, ['webseite', 'apartments', 'veranstaltungen'], true)) {
             throw new InvalidArgumentException('Unknown content source');
         }
-        $this->navigationPrefix = $source === 'apartments' ? 'apartments/' : '';
+        $this->navigationPrefix = $source === 'webseite' ? '' : $source . '/';
+        $this->isEvents = $source === 'veranstaltungen';
         $json = @file_get_contents($this->root . '/' . $source . '/data.json');
         $data = $json === false ? null : json_decode($json, true);
         if (!is_array($data) || !isset($data['webseite']) || !is_array($data['webseite'])) {
@@ -32,10 +37,27 @@ final class WebsiteRenderer
             error_log('Website content unavailable: ' . $source);
             return;
         }
+        if ($this->isEvents) usort($data['webseite'], [EventSchedule::class, 'compare']);
+        $now = new DateTimeImmutable('now', new DateTimeZone('Europe/Berlin'));
         foreach ($data['webseite'] as $section) {
             if (!is_array($section) || ($section['active'] ?? true) === false) continue;
+            if ($this->isEvents && EventSchedule::validSlot($section)) {
+                $start = new DateTimeImmutable($section['date'] . 'T' . $section['start'], $now->getTimezone());
+                $end = new DateTimeImmutable($section['date'] . 'T' . $section['end'], $now->getTimezone());
+                if ($end <= $now) continue;
+                $section['_eventLabel'] = $start <= $now ? 'Jetzt gerade' : ($section['date'] === $now->format('Y-m-d') ? 'Heute' : $start->format('d.m.Y'));
+                if ($section['date'] === $now->modify('tomorrow')->format('Y-m-d')) {
+                    $section['_eventLabel'] = 'Morgen';
+                }
+                $section['_eventRefresh'] = min($now->modify('tomorrow')->getTimestamp(), ($start > $now ? $start : $end)->getTimestamp());
+            }
             $index = count($this->sections);
             $type = $section['type'] ?? '';
+            if ($type === 'opening-hours') {
+                $eventJson = @file_get_contents($this->root . '/veranstaltungen/data.json');
+                $eventData = $eventJson === false ? null : json_decode($eventJson, true);
+                $section['openingHours'] = EventSchedule::openingHours($section['openingHours'] ?? null, $eventData['webseite'] ?? null);
+            }
             $label = $section['menutitel'] ?? '';
             if ($type === 'instagram-feed') $label = $label ?: ($section['titel'] ?? 'instagram');
             if ($type === 'opening-hours') $label = $label ?: 'oeffnungszeiten';
@@ -102,7 +124,7 @@ final class WebsiteRenderer
                 if (!$date || $date->format('Y-m-d') !== $value) return [];
             }
             if ($exception['from'] > $exception['to']) return [];
-            $periods = $this->schemaPeriods($exception);
+            $periods = $this->schemaPeriods($exception, PHP_INT_MAX);
             if ($periods === null) return [];
             foreach ($ranges as $range) {
                 if ($exception['from'] <= $range['to'] && $exception['to'] >= $range['from']) return [];
@@ -118,7 +140,7 @@ final class WebsiteRenderer
         return $result;
     }
 
-    private function schemaPeriods($day)
+    private function schemaPeriods($day, $maxPeriods = 2)
     {
         if (!is_array($day) || !isset($day['closed']) || !is_bool($day['closed'])) return null;
         foreach (['privateEvent', 'restDay'] as $flag) {
@@ -137,7 +159,7 @@ final class WebsiteRenderer
             $previousEnd = $period['end'];
             $periods[] = $period;
         }
-        return count($periods) >= 1 && count($periods) <= 2 ? $periods : null;
+        return count($periods) >= 1 && count($periods) <= $maxPeriods ? $periods : null;
     }
 
     private static function escape($value)
@@ -164,14 +186,21 @@ final class WebsiteRenderer
     {
         foreach ($this->sections as $section) {
             if (empty($section['menutitel']) || ($section['showInMenu'] ?? true) === false) continue;
-            echo '<a data-section-link href="' . $this->navigationPrefix . '#' . self::escape($section['_id']) . '">' . self::escape($section['menutitel']) . '</a>';
+            $isDatedEvent = $this->isEvents && EventSchedule::validSlot($section);
+            echo '<a data-section-link' . ($isDatedEvent ? ' class="event-nav-link"' : '') . ' href="' . $this->navigationPrefix . '#' . self::escape($section['_id']) . '">';
+            if ($isDatedEvent) {
+                echo '<time datetime="' . self::escape($section['date']) . '">' . self::escape($section['_eventLabel']) . '</time><span class="event-nav-title">' . self::escape($section['menutitel']) . '</span>';
+            } else {
+                echo self::escape($section['menutitel']);
+            }
+            echo '</a>';
         }
     }
 
     public function render()
     {
         if (!$this->sections) {
-            echo '<div class="load-error">' . ($this->error ? 'Die Inhalte konnten gerade nicht geladen werden.' : 'Es sind noch keine Inhalte angelegt.') . '</div>';
+            echo '<div class="load-error">' . ($this->error ? 'Die Inhalte konnten gerade nicht geladen werden.' : ($this->isEvents ? 'Aktuell sind keine Veranstaltungen geplant.' : 'Es sind noch keine Inhalte angelegt.')) . '</div>';
             return;
         }
         foreach ($this->sections as $index => $section) {
@@ -192,7 +221,7 @@ final class WebsiteRenderer
     {
         if (!is_string($source) || $source === '') return null;
         if (strpos($source, 'data:') !== 0) {
-            if (!preg_match('~^(?:https?://|(?:\./)?(?:bilder|bilder_webseite|bilder_apartments)/)~i', $source)) return null;
+            if (!preg_match('~^(?:https?://|(?:\./)?(?:bilder|bilder_webseite|bilder_apartments|bilder_veranstaltungen)/)~i', $source)) return null;
             return ['url' => $source, 'width' => null, 'height' => null];
         }
         if (strlen($source) > 32 * 1024 * 1024 || !preg_match('~^data:image/(?:jpeg|png|gif|webp);base64,(.+)$~s', $source, $match)) return null;
@@ -224,11 +253,24 @@ final class WebsiteRenderer
     private function section($section, $heading)
     {
         $isMap = in_array($section['mediaType'] ?? '', ['openstreetmap', 'apple-map'], true);
-        $image = $isMap ? null : $this->image($section['image'] ?? '');
-        $hasImage = $isMap || $image !== null;
+        $isCalendar = $this->navigationPrefix === 'apartments/' && ($section['mediaType'] ?? '') === 'calendar';
+        $image = $isMap || $isCalendar ? null : $this->image($section['image'] ?? '');
+        $hasImage = $isMap || $isCalendar || $image !== null;
         $position = $section['position'] ?? 'zentriert';
         if (!in_array($position, ['links', 'rechts', 'zentriert'], true)) $position = 'zentriert';
-        echo '<section id="' . self::escape($section['_id']) . '" class="content-section position-' . $position . $this->theme($section) . ($hasImage ? '' : ' no-image') . '"><div class="section-inner"><div class="section-copy">';
+        $eventRefresh = isset($section['_eventRefresh']) ? ' data-event-refresh="' . $section['_eventRefresh'] . '"' : '';
+        echo '<section id="' . self::escape($section['_id']) . '"' . $eventRefresh . ' class="content-section position-' . $position . $this->theme($section) . ($hasImage ? '' : ' no-image') . '"><div class="section-inner"><div class="section-copy">';
+        if ($this->isEvents && EventSchedule::validSlot($section)) {
+            $date = DateTimeImmutable::createFromFormat('!Y-m-d', $section['date'], new DateTimeZone('Europe/Berlin'));
+            $months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+            $label = self::DAYS[(int) $date->format('N') - 1] . ' ' . $date->format('j') . '. ' . $months[(int) $date->format('n') - 1] . ' - ' . $section['start'] . ' Uhr';
+            if (in_array($section['_eventLabel'], ['Heute', 'Morgen'], true)) {
+                $label = $section['_eventLabel'] . ' - ' . $section['start'] . ' Uhr';
+            } elseif ($section['_eventLabel'] === 'Jetzt gerade') {
+                $label = 'Jetzt gerade';
+            }
+            echo '<p class="section-subtitle event-date"><time datetime="' . self::escape($section['date'] . 'T' . $section['start']) . '">' . self::escape($label) . '</time></p>';
+        }
         echo '<' . $heading . '>' . self::escape(($section['titel'] ?? '') ?: (($section['menutitel'] ?? '') ?: 'Kastanie Moltzow')) . '</' . $heading . '>';
         foreach (['untertitel' => 'section-subtitle', 'text' => 'section-text'] as $key => $class) {
             if (empty($section[$key])) continue;
@@ -244,9 +286,19 @@ final class WebsiteRenderer
         if (!empty($section['buttonLabel']) && $href) {
             echo '<a class="section-button ' . (($section['buttonTheme'] ?? '') === 'secondary' ? 'secondary' : 'primary') . '" href="' . self::escape($href) . '">' . self::escape($section['buttonLabel']) . '</a>';
         }
+        if (trim((string) ($section['minimalText'] ?? '')) !== '') {
+            echo '<p class="section-minimal-text">' . self::escape($section['minimalText']) . '</p>';
+        }
         echo '</div>';
         if ($isMap) {
             $this->map();
+        } elseif ($isCalendar) {
+            $availableDates = [];
+            $unavailableDates = [];
+            $isDemo = false;
+            $availableJson = self::escape(json_encode(array_values($availableDates), JSON_INVALID_UTF8_SUBSTITUTE));
+            $unavailableJson = self::escape(json_encode(array_values($unavailableDates), JSON_INVALID_UTF8_SUBSTITUTE));
+            echo '<div class="section-image section-calendar" data-apartment-calendar data-calendar-demo="' . ($isDemo ? 'true' : 'false') . '" data-available-dates="' . $availableJson . '" data-unavailable-dates="' . $unavailableJson . '"><div class="calendar-panel"><div class="calendar-heading"><button type="button" class="section-button primary" data-calendar-previous aria-label="Vorheriger Monat">&#8249;</button><h3 data-calendar-month aria-live="polite"></h3><button type="button" class="section-button primary" data-calendar-next aria-label="Nächster Monat">&#8250;</button></div><div class="calendar-weekdays" aria-hidden="true"><span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span></div><div class="calendar-days" data-calendar-days role="grid"></div><p class="calendar-status" data-calendar-status role="status"></p><div class="calendar-legend"><span class="calendar-legend-item is-available">Verfügbar</span><span class="calendar-legend-item is-unavailable">Belegt</span></div></div></div>';
         } elseif ($image) {
             $dimensions = $image['width'] ? ' width="' . $image['width'] . '" height="' . $image['height'] . '"' : '';
             $loading = $this->firstImage ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"';

@@ -14,7 +14,7 @@
         date.setUTCDate(date.getUTCDate() + offset);
         return date.toISOString().slice(0, 10);
     };
-    function validate(config) {
+    function validate(config, maxExceptionPeriods = 2) {
         if (!config || !Array.isArray(config.week) || config.week.length !== 7 || !Array.isArray(config.exceptions)) {
             return 'Bitte die Wochenzeiten vollständig anlegen.';
         }
@@ -36,7 +36,7 @@
                 return `${label}: Bitte gültige Zeitfenster angeben.`;
             }
             const periods = day.periods.filter(period => period.start || period.end);
-            if (!periods.length || periods.length > 2) return `${label}: Bitte ein oder zwei Zeitfenster angeben.`;
+            if (!periods.length || periods.length > (index < 7 ? 2 : maxExceptionPeriods)) return `${label}: Bitte ein oder zwei Zeitfenster angeben.`;
             let previousEnd = -1;
             for (const period of periods) {
                 if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(period.start) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(period.end)) {
@@ -64,7 +64,7 @@
     }
     const formatPeriods = day => day.privateEvent ? 'Geschlossene Gesellschaft' : day.restDay ? 'Ruhetag' : day.closed ? 'Geschlossen' : day.periods.map(period => `${period.start}–${period.end}`).join(' / ') + ' Uhr';
     function snapshot(config, now = new Date()) {
-        if (validate(config)) return null;
+        if (validate(config, Infinity)) return null;
         const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
             timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', hourCycle: 'h23'

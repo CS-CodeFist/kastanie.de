@@ -70,6 +70,107 @@ function setupOpeningHours(element) {
     openingHoursRefreshers.push(refresh);
 }
 
+function setupApartmentCalendar(element) {
+    const monthHeading = element.querySelector('[data-calendar-month]');
+    const daysGrid = element.querySelector('[data-calendar-days]');
+    const status = element.querySelector('[data-calendar-status]');
+    const section = element.closest('.content-section');
+    const updateCalendarContrast = () => {
+        const calendarPanel = element.querySelector('.calendar-panel');
+        calendarPanel.classList.remove('has-matching-section-background');
+        const calendarBackground = getComputedStyle(calendarPanel).backgroundColor;
+        const sectionBackground = section ? getComputedStyle(section).backgroundColor : '';
+        calendarPanel.classList.toggle('has-matching-section-background', calendarBackground === sectionBackground);
+    };
+    const unavailable = new Set();
+    let statusMessage = 'Belegungsdaten werden geladen ...';
+    let rangeEnd = '';
+    const previousButton = element.querySelector('[data-calendar-previous]');
+    const nextButton = element.querySelector('[data-calendar-next]');
+    element.querySelector('.calendar-legend-item.is-available').hidden = true;
+    element.querySelector('.calendar-legend-item.is-unavailable').textContent = 'Belegt / geschlossen';
+    const nowParts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit'
+    }).formatToParts(new Date()).map(part => [part.type, part.value]));
+    const todayParts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date()).map(part => [part.type, part.value]));
+    const today = `${todayParts.year}-${todayParts.month}-${todayParts.day}`;
+    let month = new Date(Date.UTC(Number(nowParts.year), Number(nowParts.month) - 1, 1));
+    const firstMonth = month.getTime();
+
+    function render() {
+        const year = month.getUTCFullYear();
+        const monthIndex = month.getUTCMonth();
+        monthHeading.textContent = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(month);
+        const firstWeekday = (new Date(Date.UTC(year, monthIndex, 1)).getUTCDay() + 6) % 7;
+        const dayCount = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+        const cells = [];
+
+        for (let index = 0; index < firstWeekday; index++) {
+            const empty = document.createElement('span');
+            empty.className = 'calendar-day is-outside-month';
+            empty.setAttribute('aria-hidden', 'true');
+            cells.push(empty);
+        }
+        for (let day = 1; day <= dayCount; day++) {
+            const date = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const cell = document.createElement('time');
+            cell.className = 'calendar-day';
+            cell.dateTime = date;
+            cell.textContent = String(day);
+            cell.setAttribute('role', 'gridcell');
+            if (unavailable.has(date)) cell.classList.add('is-unavailable');
+            cell.setAttribute('aria-label', `${day}. ${monthHeading.textContent}: ${unavailable.has(date) ? 'Belegt oder geschlossen' : 'Keine Angabe'}`);
+            if (date === today) cell.classList.add('is-today');
+            cells.push(cell);
+        }
+        daysGrid.replaceChildren(...cells);
+        status.textContent = statusMessage;
+        previousButton.disabled = month.getTime() <= firstMonth;
+        const nextMonth = new Date(Date.UTC(year, monthIndex + 1, 1)).toISOString().slice(0, 10);
+        nextButton.disabled = !rangeEnd || nextMonth >= rangeEnd;
+    }
+
+    previousButton.addEventListener('click', () => {
+        month = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() - 1, 1));
+        render();
+    });
+    nextButton.addEventListener('click', () => {
+        month = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1));
+        render();
+    });
+    new MutationObserver(updateCalendarContrast).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+    });
+    updateCalendarContrast();
+    render();
+    fetch(new URL('apartment_calendar.php', document.baseURI), { cache: 'no-store' })
+        .then(async response => {
+            if (!response.ok) throw new Error('Calendar unavailable');
+            const data = await response.json();
+            if (!Array.isArray(data.unavailable) || !Number.isFinite(data.updatedAt)
+                || !/^\d{4}-\d{2}-\d{2}$/.test(data.rangeEnd)) {
+                throw new Error('Invalid calendar data');
+            }
+            data.unavailable.forEach(date => unavailable.add(date));
+            rangeEnd = data.rangeEnd;
+            const updated = new Intl.DateTimeFormat('de-DE', {
+                timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit',
+                year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }).format(new Date(data.updatedAt * 1000));
+            statusMessage = `Stand: ${updated}`;
+            render();
+        })
+        .catch(() => {
+            unavailable.clear();
+            rangeEnd = '';
+            statusMessage = 'Belegungsdaten derzeit nicht verfügbar.';
+            render();
+        });
+}
+
 function formatInstagramDate(timestamp) {
     if (!timestamp) return '';
 
@@ -286,7 +387,7 @@ function setupNavigationHighlighting() {
             event.preventDefault();
             scrollEnabled = false;
             setActiveLink(targetSection.id);
-            history.pushState(null, '', link.hash);
+            history.pushState(null, '', link.href);
 
             const headerHeight = document.querySelector('.site-header')?.offsetHeight || 0;
             window.scrollTo({ top: Math.max(0, targetSection.offsetTop - headerHeight), behavior: 'smooth' });
@@ -312,7 +413,23 @@ function setupNavigationHighlighting() {
     setActiveByScroll();
 }
 
+const eventRefreshTimes = [...document.querySelectorAll('[data-event-refresh]')]
+    .map(section => Number(section.dataset.eventRefresh) * 1000)
+    .filter(Number.isFinite);
+if (eventRefreshTimes.length) {
+    const nextRefresh = Math.min(...eventRefreshTimes);
+    const refreshEvents = () => {
+        if (Date.now() >= nextRefresh) window.location.reload();
+    };
+    setInterval(refreshEvents, 1000);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) refreshEvents();
+    });
+    refreshEvents();
+}
+
 document.querySelectorAll('[data-opening-hours]').forEach(setupOpeningHours);
+document.querySelectorAll('[data-apartment-calendar]').forEach(setupApartmentCalendar);
 document.querySelectorAll('[data-location-map]').forEach(host => LocationMap.enhance(host));
 if (openingHoursRefreshers.length) setInterval(refreshOpeningHours, 60000);
 loadInstagramFeed();

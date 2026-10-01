@@ -5,7 +5,8 @@ let currentImageTarget = null;
 const cachedImageLibraries = {
 	menu: null,
 	webseite: null,
-	apartments: null
+	apartments: null,
+	veranstaltungen: null
 };
 let activeImageLibrary = "menu";
 let deleteMode = false;
@@ -62,7 +63,7 @@ function renderImageGrid(images) {
 	const grid = document.getElementById("imageLibraryGrid");
 	grid.innerHTML = "";
 
-	if (activeImageLibrary === 'webseite' || activeImageLibrary === 'apartments') {
+	if (['webseite', 'apartments', 'veranstaltungen'].includes(activeImageLibrary)) {
 		const mapChoice = document.createElement('button');
 		mapChoice.type = 'button';
 		mapChoice.className = 'image-map-choice';
@@ -76,6 +77,21 @@ function renderImageGrid(images) {
 			}
 		};
 		grid.appendChild(mapChoice);
+
+		if (activeImageLibrary === 'apartments') {
+			const calendarChoice = document.createElement('button');
+			calendarChoice.type = 'button';
+			calendarChoice.className = 'image-map-choice calendar-choice';
+			calendarChoice.textContent = 'Kalender';
+			calendarChoice.disabled = deleteMode;
+			calendarChoice.onclick = () => {
+				if (typeof currentImageTarget === 'function') {
+					currentImageTarget('', 'calendar');
+					closeImageOverlay();
+				}
+			};
+			grid.appendChild(calendarChoice);
+		}
 	}
 
 	images.forEach(img => {
